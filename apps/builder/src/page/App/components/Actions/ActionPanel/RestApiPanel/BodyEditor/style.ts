@@ -1,5 +1,9 @@
 import { css } from "@emotion/react"
-import { globalColor, illaPrefix } from "@illa-design/react"
+import { getColor } from "@illa-design/react"
+import {
+  recordKeyStyle,
+  recordValueStyle,
+} from "@/components/RecordEditor/style"
 
 export const bodyEditorContainerStyle = css`
   display: flex;
@@ -16,7 +20,7 @@ export const bodyLabelStyle = css`
   align-items: center;
   font-size: 14px;
   font-weight: 500;
-  color: ${globalColor(`--${illaPrefix}-grayBlue-02`)};
+  color: ${getColor("grayBlue", "02")};
 `
 
 export const bodyChooserStyle = css`
@@ -35,4 +39,16 @@ export const bodySelectorStyle = css`
 
 export const codeEditorStyle = css`
   margin: 8px 0;
+`
+
+export const restRecordKeyStyle = css`
+  ${recordKeyStyle};
+  margin-right: -1px;
+`
+
+export const restRecordValueStyle = css`
+  ${recordValueStyle};
+  & .cm-scroller {
+    overflow-x: hidden;
+  }
 `

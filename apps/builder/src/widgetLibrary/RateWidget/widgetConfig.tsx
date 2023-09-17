@@ -9,9 +9,10 @@ export const RATE_WIDGET_CONFIG: WidgetConfig = {
   icon: <RateWidgetIcon />,
   keywords: ["Rate", "评分"],
   sessionType: "PRESENTATION",
-  w: 12,
+  w: 6,
   h: 5,
   resizeDirection: RESIZE_DIRECTION.HORIZONTAL,
+  version: 0,
   defaults: {
     value: "{{4}}",
     allowHalf: true,

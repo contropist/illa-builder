@@ -6,9 +6,8 @@ import {
   Button,
   ButtonGroup,
   FileDefaultIcon,
-  PaginationPreIcon,
+  PreviousIcon,
 } from "@illa-design/react"
-import { HuggingFaceConfigElementProps } from "@/page/App/components/Actions/HuggingFaceConfigElement/interface"
 import {
   container,
   docContainerStyle,
@@ -20,16 +19,16 @@ import {
   tipsStyle,
 } from "@/page/App/components/Actions/HuggingFaceConfigElement/style"
 import { onActionConfigElementSubmit } from "@/page/App/components/Actions/api"
+import { ConfigElementProps } from "@/page/App/components/Actions/interface"
 import { ControlledElement } from "@/page/App/components/ControlledElement"
 import { TextLink } from "@/page/User/components/TextLink"
 import { HuggingFaceResource } from "@/redux/resource/huggingFaceResource"
 import { Resource } from "@/redux/resource/resourceState"
 import { RootState } from "@/store"
+import { validate } from "@/utils/form"
 
-export const HuggingFaceConfigElement: FC<HuggingFaceConfigElementProps> = (
-  props,
-) => {
-  const { onBack, onFinished, resourceId } = props
+export const HuggingFaceConfigElement: FC<ConfigElementProps> = (props) => {
+  const { onBack, onFinished, resourceID } = props
   const { t } = useTranslation()
 
   const { control, handleSubmit, formState } = useForm({
@@ -38,28 +37,18 @@ export const HuggingFaceConfigElement: FC<HuggingFaceConfigElementProps> = (
   })
   const resource = useSelector((state: RootState) => {
     return state.resource.find(
-      (r) => r.resourceId === resourceId,
+      (r) => r.resourceID === resourceID,
     ) as Resource<HuggingFaceResource>
   })
   const [saving, setSaving] = useState(false)
 
   const handleURLClick = (link: string) => window.open(link, "_blank")
-  const getTransComponent = (key: string, link: string) => {
-    const handleLinKClick = () => handleURLClick(link)
-    return (
-      <Trans
-        i18nKey={key}
-        t={t}
-        components={[<TextLink key={key} onClick={handleLinKClick} />]}
-      />
-    )
-  }
 
   return (
     <form
       onSubmit={onActionConfigElementSubmit(
         handleSubmit,
-        resourceId,
+        resourceID,
         "huggingface",
         onFinished,
         setSaving,
@@ -101,7 +90,7 @@ export const HuggingFaceConfigElement: FC<HuggingFaceConfigElementProps> = (
           defaultValue={resource?.resourceName ?? ""}
           rules={[
             {
-              required: true,
+              validate,
             },
           ]}
           placeholders={[t("editor.action.resource.db.placeholder.name")]}
@@ -118,17 +107,27 @@ export const HuggingFaceConfigElement: FC<HuggingFaceConfigElementProps> = (
           controlledType="password"
           control={control}
           isRequired
-          tips={getTransComponent(
-            "editor.action.resource.db.tip.bear_token",
-            "https://huggingface.co/settings/tokens",
-          )}
+          tips={
+            <Trans
+              i18nKey="editor.action.resource.db.tip.bear_token"
+              t={t}
+              components={[
+                <TextLink
+                  key={"editor.action.resource.db.tip.bear_token"}
+                  onClick={() => {
+                    handleURLClick("https://huggingface.co/settings/tokens")
+                  }}
+                />,
+              ]}
+            />
+          }
           labelStyle={labelStyle}
           tipsStyle={tipsStyle}
         />
       </div>
       <div css={footerStyle}>
         <Button
-          leftIcon={<PaginationPreIcon />}
+          leftIcon={<PreviousIcon />}
           variant="text"
           colorScheme="gray"
           type="button"

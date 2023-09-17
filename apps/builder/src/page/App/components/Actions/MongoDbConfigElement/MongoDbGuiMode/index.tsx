@@ -1,48 +1,38 @@
-import { FC, useState } from "react"
-import { Controller } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { isCloudVersion } from "@illa-public/utils"
+import { FC, useCallback, useState } from "react"
+import { Trans, useTranslation } from "react-i18next"
 import { useSelector } from "react-redux"
-import {
-  Input,
-  InputNumber,
-  Password,
-  RadioGroup,
-  getColor,
-} from "@illa-design/react"
+import { Alert, getColor } from "@illa-design/react"
 import { MongoDbConfigModeProps } from "@/page/App/components/Actions/MongoDbConfigElement/interface"
 import {
   applyConfigItemLabelText,
-  hostInputContainer,
-} from "@/page/App/components/Actions/MongoDbConfigElement/style"
-import {
   configItem,
   configItemTip,
   connectTypeStyle,
   labelContainer,
 } from "@/page/App/components/Actions/styles"
+import { ControlledElement } from "@/page/App/components/ControlledElement"
+import { TextLink } from "@/page/User/components/TextLink"
 import {
-  MongoDbConnectionFormat,
   MongoDbGuiConfigContent,
   MongoDbGuiConfigContentInitial,
   MongoDbResource,
 } from "@/redux/resource/mongodbResource"
 import { Resource, ResourceContent } from "@/redux/resource/resourceState"
 import { RootState } from "@/store"
-import { isCloudVersion } from "@/utils/typeHelper"
+import { isContainLocalPath } from "@/utils/form"
 
 export const MongoDbGuiMode: FC<MongoDbConfigModeProps> = (props) => {
-  const { control, resourceId } = props
+  const { control, resourceID, watch } = props
 
   const { t } = useTranslation()
-
-  let findResource: Resource<ResourceContent> | undefined = useSelector(
+  const findResource: Resource<ResourceContent> | undefined = useSelector(
     (state: RootState) => {
-      return state.resource.find((r) => r.resourceId === resourceId)
+      return state.resource.find((r) => r.resourceID === resourceID)
     },
   )
 
   let content: MongoDbGuiConfigContent
-
   if (findResource === undefined) {
     content = MongoDbGuiConfigContentInitial
   } else {
@@ -55,205 +45,155 @@ export const MongoDbGuiMode: FC<MongoDbConfigModeProps> = (props) => {
         : MongoDbGuiConfigContentInitial
   }
 
-  const [connectionFormat, setConnectionFormat] =
-    useState<MongoDbConnectionFormat>(content.connectionFormat ?? "standard")
+  const [showAlert, setShowAlert] = useState<boolean>(false)
+
+  const connectionFormat = watch(
+    "connectionFormat",
+    content.connectionFormat ?? "standard",
+  )
+
+  const handleDocLinkClick = () => {
+    window.open("https://www.illacloud.com/docs/illa-cli", "_blank")
+  }
+
+  const handleHostValidate = useCallback(
+    (value: string) => {
+      const isShowAlert = isContainLocalPath(value ?? "")
+      if (isShowAlert !== showAlert) {
+        setShowAlert(isShowAlert)
+      }
+      return true
+    },
+    [showAlert],
+  )
 
   return (
     <>
-      <div css={configItem}>
-        <div css={labelContainer}>
-          <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-          <span
-            css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-          >
-            {t("editor.action.resource.db.label.hostname")}
-          </span>
-        </div>
-        <div css={hostInputContainer}>
-          <Controller
-            defaultValue={content.host}
-            control={control}
-            rules={{
-              required: true,
-            }}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Input
-                w="100%"
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-                borderColor="techPurple"
-                placeholder={t(
-                  "editor.action.resource.db.placeholder.hostname",
-                )}
-              />
-            )}
-            name="host"
-          />
-        </div>
-      </div>
-      <div css={configItem}>
-        <div css={labelContainer}>
-          <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-          <span
-            css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-          >
-            {t("editor.action.resource.db.label.connection_format")}
-          </span>
-        </div>
-        <Controller
-          defaultValue={connectionFormat}
-          control={control}
-          rules={{
+      <ControlledElement
+        title={t("editor.action.resource.db.label.hostname")}
+        defaultValue={content.host}
+        name="host"
+        controlledType="input"
+        control={control}
+        isRequired
+        rules={[
+          {
             required: true,
-          }}
-          render={({ field: { value, onChange, onBlur } }) => (
-            <RadioGroup
-              w="100%"
-              colorScheme="gray"
-              ml="16px"
-              mr="24px"
-              type="button"
-              onBlur={onBlur}
-              onChange={(v, event) => {
-                setConnectionFormat(v)
-                onChange(v, event)
-              }}
-              value={value}
-              options={[
-                {
-                  value: "standard",
-                  label: t(
-                    "editor.action.resource.db.label.mongodb_connection_standard",
-                  ),
-                },
-                {
-                  value: "mongodb+srv",
-                  label: t(
-                    "editor.action.resource.db.label.mongodb_connection_dns_seed_list",
-                  ),
-                },
-              ]}
+            validate: handleHostValidate,
+          },
+        ]}
+        placeholders={[t("editor.action.resource.db.placeholder.hostname")]}
+      />
+      {showAlert && (
+        <ControlledElement
+          defaultValue=""
+          name=""
+          title=""
+          controlledType="none"
+          control={control}
+          tips={
+            <Alert
+              title={t("editor.action.form.tips.connect_to_local.title.tips")}
+              closable={false}
+              content={
+                isCloudVersion ? (
+                  <Trans
+                    i18nKey="editor.action.form.tips.connect_to_local.cloud"
+                    t={t}
+                    components={[
+                      <TextLink
+                        key="editor.action.form.tips.connect_to_local.cloud"
+                        onClick={handleDocLinkClick}
+                      />,
+                    ]}
+                  />
+                ) : (
+                  t("editor.action.form.tips.connect_to_local.selfhost")
+                )
+              }
             />
-          )}
-          name="connectionFormat"
+          }
         />
-      </div>
-      {connectionFormat === "standard" && (
-        <div css={configItem}>
-          <div css={labelContainer}>
-            <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-            <span
-              css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-            >
-              {t("editor.action.resource.db.label.port")}
-            </span>
-          </div>
-          <div css={hostInputContainer}>
-            <Controller
-              defaultValue={content.port}
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field: { value, onChange, onBlur } }) => (
-                <InputNumber
-                  w="100%"
-                  onBlur={onBlur}
-                  onChange={onChange}
-                  value={value}
-                  borderColor="techPurple"
-                  placeholder="3306"
-                />
-              )}
-              name="port"
-            />
-          </div>
-        </div>
       )}
-      <div css={configItem}>
-        <div css={labelContainer}>
-          <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-          <span
-            css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-          >
-            {t("editor.action.resource.db.label.database")}
-          </span>
-        </div>
-        <Controller
-          defaultValue={content.databaseName}
-          control={control}
-          rules={{
+      <ControlledElement
+        title={t("editor.action.resource.db.label.connection_format")}
+        defaultValue={content.connectionFormat}
+        name="connectionFormat"
+        controlledType="radio-group"
+        control={control}
+        isRequired
+        rules={[
+          {
             required: true,
-          }}
-          render={({ field: { value, onChange, onBlur } }) => (
-            <Input
-              w="100%"
-              ml="16px"
-              mr="24px"
-              onBlur={onBlur}
-              onChange={onChange}
-              value={value}
-              borderColor="techPurple"
-              placeholder={t("editor.action.resource.db.placeholder.database")}
-            />
-          )}
-          name="databaseName"
+          },
+        ]}
+        forceEqualWidth
+        options={[
+          {
+            value: "standard",
+            label: t(
+              "editor.action.resource.db.label.mongodb_connection_standard",
+            ),
+          },
+          {
+            value: "mongodb+srv",
+            label: t(
+              "editor.action.resource.db.label.mongodb_connection_dns_seed_list",
+            ),
+          },
+        ]}
+      />
+      {connectionFormat === "standard" && (
+        <ControlledElement
+          title={t("editor.action.resource.db.label.port")}
+          defaultValue={content.port}
+          name="port"
+          controlledType="number"
+          control={control}
+          placeholders={["3306"]}
+          isRequired
+          rules={[
+            {
+              required: true,
+            },
+          ]}
         />
-      </div>
-      <div css={configItem}>
-        <div css={labelContainer}>
-          <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-          <span
-            css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-          >
-            {t("editor.action.resource.db.label.username_password")}
-          </span>
-        </div>
-        <div css={hostInputContainer}>
-          <Controller
-            defaultValue={content.databaseUsername}
-            control={control}
-            rules={{
-              required: true,
-            }}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Input
-                w="100%"
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-                borderColor="techPurple"
-                placeholder={t(
-                  "editor.action.resource.db.placeholder.username",
-                )}
-              />
-            )}
-            name="databaseUsername"
-          />
-          <Controller
-            control={control}
-            defaultValue={content.databasePassword}
-            rules={{
-              required: true,
-            }}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Password
-                borderColor="techPurple"
-                w="100%"
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-                ml="8px"
-                placeholder={t(
-                  "editor.action.resource.db.placeholder.password",
-                )}
-              />
-            )}
-            name="databasePassword"
-          />
-        </div>
-      </div>
+      )}
+      <ControlledElement
+        title={t("editor.action.resource.db.label.database")}
+        defaultValue={content.databaseName}
+        control={control}
+        placeholders={[t("editor.action.resource.db.placeholder.database")]}
+        name="databaseName"
+        controlledType="input"
+        isRequired
+        rules={[
+          {
+            required: true,
+          },
+        ]}
+      />
+
+      <ControlledElement
+        title={t("editor.action.resource.db.label.username_password")}
+        name={["databaseUsername", "databasePassword"]}
+        controlledType={["input", "password"]}
+        defaultValue={[content.databaseUsername, content.databasePassword]}
+        control={control}
+        rules={[
+          {
+            required: true,
+          },
+          {
+            required: true,
+          },
+        ]}
+        isRequired
+        placeholders={[
+          t("editor.action.resource.db.placeholder.username"),
+          t("editor.action.resource.db.placeholder.password"),
+        ]}
+      />
       {isCloudVersion && (
         <>
           <div css={configItemTip}>

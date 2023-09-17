@@ -4,6 +4,7 @@ import {
   NumberInputWidgetProps,
   WrappedNumberInputProps,
 } from "@/widgetLibrary/NumberInputWidget/interface"
+import { AutoHeightContainer } from "@/widgetLibrary/PublicSector/AutoHeightContainer"
 import { InvalidMessage } from "@/widgetLibrary/PublicSector/InvalidMessage"
 import { handleValidateCheck } from "@/widgetLibrary/PublicSector/InvalidMessage/utils"
 import { Label } from "@/widgetLibrary/PublicSector/Label"
@@ -72,7 +73,7 @@ export const WrappedInputNumber = forwardRef<
 
   return (
     <InputNumber
-      inputRef={ref}
+      ref={ref}
       max={max}
       min={min}
       formatter={formatDisplayValue}
@@ -85,29 +86,17 @@ export const WrappedInputNumber = forwardRef<
       suffix={finalSuffix}
       mode="button"
       onChange={changeValue}
-      borderColor={colorScheme}
+      colorScheme={colorScheme}
     />
   )
 })
 WrappedInputNumber.displayName = "WrappedInputNumber"
 export const NumberInputWidget: FC<NumberInputWidgetProps> = (props) => {
   const {
-    openThousandSeparator,
-    max,
-    min,
-    placeholder,
     value,
-    precision,
-    disabled,
-    readOnly,
-    prefix,
-    suffix,
-    loading,
-    colorScheme,
     handleUpdateDsl,
-    handleUpdateGlobalData,
-    handleDeleteGlobalData,
-    displayName,
+    updateComponentRuntimeProps,
+    deleteComponentRuntimeProps,
     labelPosition,
     labelFull,
     label,
@@ -124,6 +113,7 @@ export const NumberInputWidget: FC<NumberInputWidgetProps> = (props) => {
     hideValidationMessage,
     updateComponentHeight,
     validateMessage,
+    triggerEventHandler,
   } = props
   const numberInputRef = useRef<HTMLInputElement>(null)
 
@@ -157,19 +147,7 @@ export const NumberInputWidget: FC<NumberInputWidgetProps> = (props) => {
   )
 
   useEffect(() => {
-    handleUpdateGlobalData(displayName, {
-      openThousandSeparator,
-      max,
-      min,
-      placeholder,
-      value,
-      precision,
-      disabled,
-      readOnly,
-      prefix,
-      suffix,
-      loading,
-      colorScheme,
+    updateComponentRuntimeProps({
       focus: () => {
         numberInputRef.current?.focus()
       },
@@ -190,38 +168,30 @@ export const NumberInputWidget: FC<NumberInputWidgetProps> = (props) => {
     })
 
     return () => {
-      handleDeleteGlobalData(displayName)
+      deleteComponentRuntimeProps()
     }
   }, [
-    openThousandSeparator,
-    max,
-    min,
-    placeholder,
-    value,
-    precision,
-    disabled,
-    readOnly,
-    prefix,
-    suffix,
-    loading,
-    colorScheme,
-    displayName,
-    handleUpdateGlobalData,
+    updateComponentRuntimeProps,
     handleUpdateDsl,
-    handleDeleteGlobalData,
+    deleteComponentRuntimeProps,
     handleValidate,
+    value,
   ])
 
-  const wrapperRef = useRef<HTMLDivElement>(null)
+  const handleOnChange = useCallback(() => {
+    triggerEventHandler("change")
+  }, [triggerEventHandler])
 
-  useEffect(() => {
-    if (wrapperRef.current) {
-      updateComponentHeight(wrapperRef.current?.clientHeight)
-    }
-  }, [validateMessage, labelPosition, updateComponentHeight])
+  const handleOnBlur = useCallback(() => {
+    triggerEventHandler("blur")
+  }, [triggerEventHandler])
+
+  const handleOnFocus = useCallback(() => {
+    triggerEventHandler("focus")
+  }, [triggerEventHandler])
 
   return (
-    <div ref={wrapperRef}>
+    <AutoHeightContainer updateComponentHeight={updateComponentHeight}>
       <TooltipWrapper tooltipText={tooltipText} tooltipDisabled={!tooltipText}>
         <div css={applyLabelAndComponentWrapperStyle(labelPosition)}>
           <Label
@@ -240,19 +210,25 @@ export const NumberInputWidget: FC<NumberInputWidgetProps> = (props) => {
             {...props}
             ref={numberInputRef}
             getValidateMessage={getValidateMessage}
+            handleOnChange={handleOnChange}
+            handleOnBlur={handleOnBlur}
+            handleOnFocus={handleOnFocus}
           />
         </div>
       </TooltipWrapper>
-      <div
-        css={applyValidateMessageWrapperStyle(
-          labelWidth,
-          labelPosition,
-          labelHidden || !label,
-        )}
-      >
-        <InvalidMessage validateMessage={validateMessage} />
-      </div>
-    </div>
+      {!hideValidationMessage && (
+        <div
+          css={applyValidateMessageWrapperStyle(
+            labelWidth,
+            labelPosition,
+            labelHidden || !label,
+          )}
+        >
+          <InvalidMessage validateMessage={validateMessage} />
+        </div>
+      )}
+    </AutoHeightContainer>
   )
 }
 NumberInputWidget.displayName = "NumberInputWidget"
+export default NumberInputWidget

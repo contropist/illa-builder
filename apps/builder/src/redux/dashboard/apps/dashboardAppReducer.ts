@@ -1,7 +1,9 @@
 import { CaseReducer, PayloadAction } from "@reduxjs/toolkit"
 import {
   AddDashboardAppPayload,
-  RenameDashboardAppPayload,
+  ModifyDashboardAppContribute,
+  ModifyDashboardAppDeployed,
+  ModifyDashboardAppPublic,
 } from "@/redux/dashboard/apps/dashboardAppPayload"
 import {
   DashboardApp,
@@ -31,7 +33,7 @@ export const removeDashboardAppReducer: CaseReducer<
   DashboardAppsState,
   PayloadAction<string>
 > = (state, action) => {
-  let index = state.list.findIndex((element, index) => {
+  let index = state.list.findIndex((element) => {
     return element.appId == action.payload
   })
   if (index != -1) {
@@ -39,17 +41,68 @@ export const removeDashboardAppReducer: CaseReducer<
   }
 }
 
-export const renameDashboardAppReducer: CaseReducer<
+export const updateDashboardAppReducer: CaseReducer<
   DashboardAppsState,
-  PayloadAction<RenameDashboardAppPayload>
+  PayloadAction<DashboardApp>
 > = (state, action) => {
-  let index = state.list.findIndex((element, index) => {
+  let index = state.list.findIndex((element) => {
     return element.appId == action.payload.appId
   })
   if (index != -1) {
     state.list[index] = {
       ...state.list[index],
-      appName: action.payload.newName,
+      ...action.payload,
+    }
+  }
+}
+
+export const updateDashboardAppPublicReducer: CaseReducer<
+  DashboardAppsState,
+  PayloadAction<ModifyDashboardAppPublic>
+> = (state, action) => {
+  let index = state.list.findIndex((element) => {
+    return element.appId == action.payload.appId
+  })
+  if (index != -1) {
+    state.list[index] = {
+      ...state.list[index],
+      config: {
+        ...state.list[index]?.config,
+        public: action.payload.isPublic,
+      },
+    }
+  }
+}
+
+export const updateDashboardAppContributeReducer: CaseReducer<
+  DashboardAppsState,
+  PayloadAction<ModifyDashboardAppContribute>
+> = (state, action) => {
+  let index = state.list.findIndex((element) => {
+    return element.appId == action.payload.appId
+  })
+  if (index != -1) {
+    state.list[index] = {
+      ...state.list[index],
+      config: {
+        ...state.list[index]?.config,
+        publishedToMarketplace: action.payload.publishedToMarketplace,
+      },
+    }
+  }
+}
+
+export const updateDashboardAppDeployedReducer: CaseReducer<
+  DashboardAppsState,
+  PayloadAction<ModifyDashboardAppDeployed>
+> = (state, action) => {
+  let index = state.list.findIndex((element) => {
+    return element.appId == action.payload.appId
+  })
+  if (index != -1) {
+    state.list[index] = {
+      ...state.list[index],
+      deployed: action.payload.deployed,
     }
   }
 }

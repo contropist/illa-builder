@@ -1,37 +1,57 @@
+import {
+  ILLA_MIXPANEL_BUILDER_PAGE_NAME,
+  ILLA_MIXPANEL_EVENT_TYPE,
+} from "@illa-public/mixpanel-utils"
+import {
+  getCurrentTeamInfo,
+  getCurrentUser,
+  getPlanUtils,
+} from "@illa-public/user-data"
+import { canManage } from "@illa-public/user-role-utils"
+import { ACTION_MANAGE, ATTRIBUTE_GROUP } from "@illa-public/user-role-utils"
 import { Unsubscribe } from "@reduxjs/toolkit"
 import { motion, useAnimation } from "framer-motion"
 import { FC, MouseEvent, useCallback, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useBeforeUnload, useParams } from "react-router-dom"
 import { TriggerProvider, WarningCircleIcon } from "@illa-design/react"
-import { Api } from "@/api/base"
-import { Connection } from "@/api/ws"
+import { Connection, fixedWsURL } from "@/api/ws"
+import {
+  ILLA_WEBSOCKET_CONTEXT,
+  ILLA_WEBSOCKET_STATUS,
+} from "@/api/ws/interface"
 import { useInitBuilderApp } from "@/hooks/useInitApp"
 import { ActionEditor } from "@/page/App/components/Actions"
-import { initS3Client } from "@/page/App/components/Actions/ActionPanel/utils/clientS3"
 import { AppLoading } from "@/page/App/components/AppLoading"
 import { CanvasPanel } from "@/page/App/components/CanvasPanel"
 import { ComponentsManager } from "@/page/App/components/ComponentManager"
 import { Debugger } from "@/page/App/components/Debugger"
 import { setupConfigListeners } from "@/redux/config/configListener"
 import {
+  getAppWSStatus,
   getIsOnline,
   isOpenBottomPanel,
   isOpenDebugger,
   isOpenLeftPanel,
   isOpenRightPanel,
 } from "@/redux/config/configSelector"
+import { configActions } from "@/redux/config/configSlice"
 import { setupActionListeners } from "@/redux/currentApp/action/actionListener"
+import { collaboratorsActions } from "@/redux/currentApp/collaborators/collaboratorsSlice"
 import { setupComponentsListeners } from "@/redux/currentApp/editor/components/componentsListener"
 import { setupExecutionListeners } from "@/redux/currentApp/executionTree/executionListener"
-import { getCurrentUser } from "@/redux/currentUser/currentUserSelector"
-import { resourceActions } from "@/redux/resource/resourceSlice"
-import { Resource, ResourceContent } from "@/redux/resource/resourceState"
+import { fetchAppBinaryWsUrl, fetchAppTextWsUrl } from "@/services/public"
 import { startAppListening } from "@/store"
+import {
+  track,
+  trackPageDurationEnd,
+  trackPageDurationStart,
+} from "@/utils/mixpanelHelper"
 import { Shortcut } from "@/utils/shortcut"
 import { DataWorkspace } from "./components/DataWorkspace"
 import { PageNavBar } from "./components/PageNavBar"
+import { useResize } from "./components/ScaleSquare/components/InnerResizingContainer/ResizeHandler/hooks"
 import {
   bottomPanelStyle,
   centerPanelStyle,
@@ -49,31 +69,72 @@ import {
 export const Editor: FC = () => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  let { appId } = useParams()
+  const { appId } = useParams()
   const controls = useAnimation()
 
   const currentUser = useSelector(getCurrentUser)
+  const teamInfo = useSelector(getCurrentTeamInfo)
+  const wsStatus = useSelector(getAppWSStatus)
 
+  const currentUserRole = teamInfo?.myRole
+
+  const handleLeaveRoom = useCallback(() => {
+    Connection.leaveRoom("app", appId ?? "")
+  }, [appId])
+
+  // check if user can manage the app
+  if (currentUserRole) {
+    const canEditApp = canManage(
+      currentUserRole,
+      ATTRIBUTE_GROUP.APP,
+      getPlanUtils(teamInfo),
+      ACTION_MANAGE.EDIT_APP,
+    )
+    if (!canEditApp) {
+      throw new Error("You don't have permission to edit this app")
+    }
+  }
   useEffect(() => {
-    if (currentUser != null && currentUser.userId != "") {
-      Connection.enterRoom(
-        "app",
-        appId ?? "",
-        (loading) => {},
-        (errorState) => {},
-      )
+    const abortController = new AbortController()
+    if (currentUser != null && currentUser.userID != "" && appId) {
+      Promise.all([
+        fetchAppTextWsUrl(appId, abortController.signal),
+        fetchAppBinaryWsUrl(appId, abortController.signal),
+      ])
+        .then((res) => {
+          Connection.enterAppRoom(
+            fixedWsURL(res[0].data.wsURL),
+            fixedWsURL(res[1].data.wsURL),
+            appId as string,
+          )
+        })
+        .catch(() => {})
+      window.addEventListener("beforeunload", handleLeaveRoom)
     }
     return () => {
-      Connection.leaveRoom("app", appId ?? "")
+      abortController.abort()
+      handleLeaveRoom()
+      dispatch(
+        collaboratorsActions.setInRoomUsers({
+          inRoomUsers: [],
+        }),
+      )
+      dispatch(
+        configActions.updateWSStatusReducer({
+          context: ILLA_WEBSOCKET_CONTEXT.APP,
+          wsStatus: ILLA_WEBSOCKET_STATUS.CLOSED,
+        }),
+      )
+      window.removeEventListener("beforeunload", handleLeaveRoom)
     }
-  }, [currentUser, appId])
+  }, [currentUser, appId, handleLeaveRoom, dispatch])
 
   useEffect(() => {
     const subscriptions: Unsubscribe[] = [
+      setupExecutionListeners(startAppListening),
       setupComponentsListeners(startAppListening),
       setupActionListeners(startAppListening),
       setupConfigListeners(startAppListening),
-      setupExecutionListeners(startAppListening),
     ]
     return () => subscriptions.forEach((unsubscribe) => unsubscribe())
   }, [])
@@ -85,25 +146,7 @@ export const Editor: FC = () => {
   const isOnline = useSelector(getIsOnline)
 
   // init app
-  const loadingState = useInitBuilderApp("edit")
-  // init resource
-  useEffect(() => {
-    const controller = new AbortController()
-    Api.request<Resource<ResourceContent>[]>(
-      {
-        url: "/resources",
-        method: "GET",
-        signal: controller.signal,
-      },
-      (response) => {
-        dispatch(resourceActions.updateResourceListReducer(response.data))
-        initS3Client(response.data)
-      },
-    )
-    return () => {
-      controller.abort()
-    }
-  }, [dispatch])
+  const { loadingState } = useInitBuilderApp("edit")
 
   const handleMouseDownOnModal = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
@@ -127,21 +170,49 @@ export const Editor: FC = () => {
     [controls],
   )
 
+  useEffect(() => {
+    track(
+      ILLA_MIXPANEL_EVENT_TYPE.VISIT,
+      ILLA_MIXPANEL_BUILDER_PAGE_NAME.EDITOR,
+    )
+    trackPageDurationStart()
+    return () => {
+      trackPageDurationEnd(ILLA_MIXPANEL_BUILDER_PAGE_NAME.EDITOR)
+    }
+  }, [])
+
+  useBeforeUnload(() => {
+    trackPageDurationEnd(ILLA_MIXPANEL_BUILDER_PAGE_NAME.EDITOR)
+  })
+
+  const [, resizeDropRef] = useResize()
+
+  const combineLoadingState =
+    loadingState ||
+    wsStatus === ILLA_WEBSOCKET_STATUS.INIT ||
+    wsStatus === ILLA_WEBSOCKET_STATUS.CONNECTING
+
   return (
-    <div css={editorContainerStyle}>
-      {loadingState && <AppLoading />}
-      {!loadingState && (
+    <div css={editorContainerStyle} ref={resizeDropRef}>
+      {combineLoadingState && <AppLoading />}
+      {!combineLoadingState && (
         <Shortcut>
-          <PageNavBar css={navbarStyle} />
+          <TriggerProvider renderInBody zIndex={10}>
+            <PageNavBar css={navbarStyle} />
+          </TriggerProvider>
           <div css={contentStyle}>
-            {showLeftPanel && <DataWorkspace css={leftPanelStyle} />}
+            <TriggerProvider renderInBody zIndex={10}>
+              {showLeftPanel && <DataWorkspace css={leftPanelStyle} />}
+            </TriggerProvider>
             <div css={middlePanelStyle}>
               <TriggerProvider renderInBody zIndex={10}>
                 <CanvasPanel css={centerPanelStyle} />
               </TriggerProvider>
-              {showBottomPanel && !showDebugger ? (
-                <ActionEditor css={bottomPanelStyle} />
-              ) : null}
+              <TriggerProvider renderInBody zIndex={10}>
+                {showBottomPanel && !showDebugger ? (
+                  <ActionEditor css={bottomPanelStyle} />
+                ) : null}
+              </TriggerProvider>
               {showDebugger && <Debugger css={bottomPanelStyle} />}
             </div>
             {showRightPanel && (
@@ -154,7 +225,9 @@ export const Editor: FC = () => {
             <div css={modalStyle} onMouseDown={handleMouseDownOnModal}>
               <motion.div css={messageWrapperStyle} animate={controls}>
                 <WarningCircleIcon css={waringIconStyle} />
-                {t("not_online_tips")}
+                {wsStatus === ILLA_WEBSOCKET_STATUS.LOCKING
+                  ? t("editor.history.message.version_change")
+                  : t("not_online_tips")}
               </motion.div>
             </div>
           )}
@@ -163,5 +236,7 @@ export const Editor: FC = () => {
     </div>
   )
 }
+
+export default Editor
 
 Editor.displayName = "Editor"

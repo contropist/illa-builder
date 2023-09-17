@@ -37,7 +37,10 @@
       "delete_title": "확인하다",
       "error_button": "다시 해 보다",
       "error_description": "잘못된 요청",
-      "error_title": "실수"
+      "error_title": "실수",
+      "marketplace": "Marketplace",
+      "run": "Run",
+      "fork": "Fork"
     },
     "resource": {
       "create_resource": "리소스 만들기",
@@ -51,7 +54,31 @@
       "save_success": "성공적으로 저장되었습니다",
       "test_fail": "테스트 실패",
       "test_success": "성공적으로 테스트"
-    }
+    },
+    "list-type": {
+      "team": "Team's",
+      "marketplace": "Agent market"
+    },
+    "sort-type": {
+      "popular": "Most popular",
+      "recent": "Recently updated",
+      "star": "Starred"
+    },
+    "search": "Search",
+    "no-result": "No result here. Please refresh or change your search terms.",
+    "message": {
+      "next-page-error": "Failed to load next page. Please try again.",
+      "create-failed": "Failed to create agent. Please try again.",
+      "sort-failed": "Failed to change the filter type. Please try again.",
+      "detail-load-failed": "Failed to retrieve details, please try again.",
+      "fork-failed": "Failed to fork, please try again.",
+      "create-suc": "Failed to create, please try again.",
+      "fork-suc": "Successfully forked.",
+      "delete-failed": "Faild to delete. Please try again. ",
+      "delete-suc": "Successfully deleted. ",
+      "mobile-fork-suc": "Forked successfully. Please edit on desktop."
+    },
+    "create": "Create"
   },
   "dayjs": {
     "just_now": "단지"
@@ -135,10 +162,269 @@
           "api": "아피스",
           "configure": "구성 {{ name }}",
           "database": "데이터 베이스",
-          "select": "리소스 유형 선택"
+          "select": "리소스 유형 선택",
+          "huggingface": "Hugging Face",
+          "appwrite": "Appwrite",
+          "couchdb": {
+            "couchdb": "CouchDB"
+          },
+          "oracle": {
+            "oracle": "Oracle DB"
+          },
+          "gs": {
+            "google_sheets": "Google Sheets"
+          },
+          "neon": {
+            "neon": "Neon"
+          },
+          "airtable": {
+            "airtable": "Airtable"
+          }
         },
         "validate": {
           "required": "{name} 을(를) 입력하세요"
+        },
+        "label": {
+          "inference_api": "Inference API",
+          "inference_endpoint": "Inference Endpoint",
+          "s3": "공개 앱에서 유효하지 않음",
+          "acl": "업로드 된 파일의 경우 기본 S3 ACL",
+          "appwrite": {
+            "host": "주인",
+            "dbid": "데이터베이스 ID",
+            "projectid": "프로젝트 ID",
+            "secret": "X-Appwrite-JWT",
+            "collectionid": "컬렉션 ID",
+            "documentid": "문서 ID",
+            "data": "데이터",
+            "filter": "Filter",
+            "order": "Order by",
+            "limit": "Limit"
+          },
+          "oracle": {
+            "sid": "데이터베이스 이름",
+            "ssl": "SSL"
+          },
+          "couchdb": {
+            "ssl": "SSL/TLS"
+          },
+          "restapi": {
+            "certificates": "인증서",
+            "verification_mode": "확인 모드"
+          },
+          "gs": {
+            "private_key": "개인 키",
+            "action_type": "작업 유형",
+            "spreadsheet": "쉼표 구분자 데이터 파일",
+            "sheet_name": "시트 이름",
+            "data_range": "데이터 범위",
+            "limit": "Limit",
+            "offset": "Offset",
+            "a1_notation": "A1 표기",
+            "values_to_append": "추가할 값",
+            "filter_by": "필터링 기준",
+            "update_value": "업데이트할 값",
+            "primary_key_column": "기본 키 열 이름",
+            "array_of_rows_to_upd": "업데이트할 행의 배열",
+            "filters_to_match_row": "행 인덱스",
+            "consider_queries_tha": "행을 삭제하지 않는 쿼리를 성공으로 간주",
+            "title_of_spreadsheet": "스프레드시트 제목",
+            "sheet_id_to_copy": "복사할 시트 ID",
+            "sheet_to_copy_to": "복사할 시트",
+            "authentication": "입증",
+            "connect_with_oauth": "OAuth 와 연결 및 저장",
+            "reconnect_with_oauth": "OAuth로 다시 연결",
+            "access_type": "액세스 유형"
+          },
+          "mongodb": {
+            "command": "명령"
+          },
+          "airtable": {
+            "authentication": "입증"
+          }
+        },
+        "placeholder": {
+          "url": "여기에 요청 URL 입력",
+          "appwrite": {
+            "host": "호스트 이름 또는 IP",
+            "dbid": "데이터베이스 ID",
+            "projectid": "프로젝트 ID",
+            "secret": "••••••••••••••••••••",
+            "filter": {
+              "attribute": "attribute",
+              "value": "1234"
+            },
+            "order": "attribute",
+            "collectionid": "컬렉션 선택",
+            "data": "{{ }}로 묶인 객체. 예: {{ { \"key\": \"value\" } }}"
+          },
+          "couchdb": {
+            "port": {
+              "5984": "5984"
+            }
+          },
+          "oracle": {
+            "username": "oracle",
+            "password": "••••••••"
+          },
+          "gs": {
+            "private_key": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"projectId\",\n  \"private_key_id\": \"privateKeyId\",\n  \"private_key\": \"-----BEGIN PRIVATE KEY-----\nprivateKey\n-----END PRIVATE KEY-----\",\n  \"client_email\": \"clientEmail\",\n  \"client_id\": \"100000000000000000000\",\n  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n  \"client_x509_cert_url\": \"clientx509CertUrl\"\n}",
+            "row_filter": {
+              "column_name": "column_name",
+              "value": "값"
+            },
+            "update_value": "{{ [ {\n\"column1\":\"newValue1\",\n\"column2\":\"newValue2\"\n} ] }}",
+            "primary_key_column": "column_name",
+            "array_of_rows_to_upd": "{{ table1.recordUpdates }}",
+            "filters_to_match_row": {
+              "key": "키",
+              "value": "값"
+            }
+          }
+        },
+        "tips": {
+          "acl": "버킷에 CORS를 구성하는 것을 잊지 마십시오. <0>CORS(Cross-Origin Resource Sharing) 를 참조하세요.</0>",
+          "connect_to_local": {
+            "cloud": "컴퓨터에 로컬이거나 개인 네트워크의 일부인 데이터베이스에 연결하려는 것 같습니다. ILLA 클라우드 버전에서는 작동하지 않을 수 있습니다. 자체 호스트 버전에 대한 방법은 <0>문서<0>를 확인하십시오.",
+            "selfhost": "컴퓨터에 로컬인 데이터베이스에 연결하려는 것 같습니다. \"localhost\" 또는 \"127.0.0.1\" 대신 머신의 로컬 영역 네트워크 IP 주소를 사용하십시오.",
+            "title": {
+              "tips": "팁"
+            }
+          },
+          "restapi": {
+            "verification_mode": {
+              "skip_ca_certificate": "서버가 공격에 취약할 수 있습니다"
+            }
+          },
+          "gs": {
+            "private_key": "Google 스프레드시트에 연결하는 데 사용됩니다. <0>여기</0>를 클릭하여 프로젝트를 만들고 OAuth 자격 증명을 받으세요. 서비스 계정 인증을 사용하면 사용된 서비스 계정에 해당하는 이메일 주소와 공유하는 스프레드시트에만 액세스할 수 있습니다. 서비스 계정 및 액세스 키 생성에 대한 문서는 <1>여기</1>를 참조하세요. 사용자는 스프레드시트에서 제어하지 않는 다양한 처리 구성요소의 제한을 경험할 수 있습니다. <2>할당량 한도</2>에 대해 자세히 알아보기",
+            "leave_blank_to_selec": "첫 번째 시트를 선택하려면 비워두세요.",
+            "to_select_the_first_": "To select the first five cells in the first column of a sheet titled sheet1, A1 notation is sheet1!A1:A5. <0>See Google's docs for more information. <0>",
+            "values_to_append": "{{ [ {\n\"column1\":\"newValue1\",\n\"column2\":\"newValue2\"\n} ] }}",
+            "a1_notation": "sheet1이라는 시트의 첫 번째 열에서 처음 5개 셀을 선택하려면 A1 표기법은 sheet1!A1:A5입니다. <0>자세한 내용은 Google 문서를 참조하세요.  </0>",
+            "sheet_id_to_copy": "Google 시트의 URL에서 ?gid=123123을 보고 찾으십시오.",
+            "copy_to_sheet_name": "필수의. 복사된 시트의 이름을 바꿉니다.",
+            "successfully_authent": "성공적으로 인증됨",
+            "failed_to_authentica": "인증 실패"
+          },
+          "tidb": {
+            "ca_certificate": "기본적으로 서버리스 계층에 대한 TLS 연결에 사용되는 CA 인증서를 입력합니다. 전용 계층에 대한 TLS 연결이 필요한 경우 구성 방법을 보려면 <0>여기를 클릭</0>하세요."
+          },
+          "neon": {
+            "normal": "Neon 프로젝트를 만들고 <0>프로젝트 대시보드</0>에서 문자열을 가져옵니다.",
+            "failed": "문자열을 구문 분석하지 못했습니다. 문자열을 확인하거나 수동으로 구성하십시오.",
+            "no_password": "문자열에 암호가 없습니다. 복사하기 전에 Neon 대시보드에 암호를 표시하십시오."
+          },
+          "clickhouse": {
+            "ssl": "ClickHouse Cloud Service를 사용할 때 SSL을 켜는 것이 좋습니다."
+          },
+          "airtable": {
+            "access_token": "액세스 토큰을 받는 방법을 알아보려면 <0>여기를 클릭</0>하세요.",
+            "api_key": "API 키는 2024년 2월 1일부터 지원이 중단됩니다. 리소스 액세스 오류를 방지하려면 <0>Airtable의 공식 문서</0>를 주의 깊게 살펴보세요."
+          }
+        },
+        "option": {
+          "appwrite": {
+            "method": {
+              "create": "문서 만들기",
+              "list": "문서 나열",
+              "get": "문서 받기",
+              "update": "문서 업데이트",
+              "delete": "문서 삭제"
+            },
+            "filter": {
+              "and": "AND",
+              "or": "OR",
+              "equal": "=",
+              "notequal": "<>",
+              "lessthan": "<",
+              "lessthanEqual": "<=",
+              "greaterthan": ">",
+              "greaterthanequal": ">="
+            },
+            "order": {
+              "asc": "Asc",
+              "desc": "Desc"
+            }
+          },
+          "oracle": {
+            "sid": {
+              "sid": "SID",
+              "service": "서비스 명"
+            },
+            "ssl": "가능한 경우 SSL 사용"
+          },
+          "couchdb": {
+            "ssl": "가능한 경우 SSL/TLS 사용"
+          },
+          "restapi": {
+            "authentication": {
+              "digest_auth": "Digest Auth",
+              "auth_1": "OAuth 1.0",
+              "hawk_authentication": "Hawk Authentication",
+              "aws_v4": "AWS Signature V4",
+              "session_based_auth": "Session Based Auth (deprecated)"
+            },
+            "certificates": "자체 서명된 인증서 사용",
+            "ca_certificate": "서버 인증서",
+            "client_key": "클라이언트 키",
+            "client_certificate": "클라이언트 인증서",
+            "verification_mode": {
+              "full_verification": "전체 확인",
+              "verify_ca_certificat": "서버 인증서 확인",
+              "skip_ca_certificate_": "서버 인증서 확인 건너뛰기"
+            }
+          },
+          "gs": {
+            "action_type": {
+              "read_data_from_a_spr": "스프레드시트에서 데이터 읽기",
+              "append_data_to_a_spr": "스프레드시트에 데이터 추가",
+              "update_a_spreadsheet": "스프레드 시트 업데이트",
+              "bulk_update_a_spread": "기본 키로 스프레드시트 대량 업데이트",
+              "delete_a_single_row_": "스프레드시트 업데이트",
+              "create_a_spreadsheet": "스프레드시트 만들기",
+              "copy_a_single_sheet_": "단일 시트를 다른 스프레드시트로 복사",
+              "list_available_sprea": "사용 가능한 스프레드시트 나열",
+              "get_spreadsheet_info": "스프레드시트 정보 가져오기"
+            },
+            "data_range": {
+              "use_a1_notation": "A1 표기법 사용",
+              "use_limit_and_offset": "제한 및 오프셋 사용"
+            },
+            "filter_by": {
+              "use_a1_notation": "A1 표기법 사용",
+              "use_row_filters": "행 필터 사용"
+            },
+            "oauth_2": {
+              "0": "OAuth 2.0"
+            },
+            "service_account": "서비스 계정",
+            "read_and_write": "읽고 쓰기",
+            "read_only": "읽기 전용"
+          },
+          "neon": {
+            "parse": "구문 분석",
+            "connection_string": "연결 문자열"
+          },
+          "airtable": {
+            "access_token": "토큰 접근하기",
+            "api_key": "API key"
+          }
+        },
+        "default": {
+          "appwrite": {
+            "limit": " {{ 1000 }}"
+          }
+        },
+        "group": {
+          "gs": {
+            "service_account": "서비스 계정"
+          }
+        },
+        "button": {
+          "marketplace": {
+            "select": "Select"
+          }
         }
       },
       "panel": {
@@ -146,10 +432,11 @@
           "disable": "폐쇄",
           "enable": "켜다",
           "new": "추가하다",
-          "run": "운영",
+          "run": "실행하다",
           "save": "저장",
           "save_and_run": "저장 및 실행",
-          "save_fail": "저장 실패"
+          "save_fail": "저장 실패",
+          "test_run": "테스트 실행 중"
         },
         "elastic": {
           "action_type": "작업 유형",
@@ -179,7 +466,7 @@
           "placeholder": {
             "asc": "asc",
             "document_value": "{{ { \"stringField\":\"value\", \"numberField\": 42, \"docRef\": { $ref: \"collection/8FB4EF\" } } }}",
-            "input_collection": "Enter a collection",
+            "input_collection": "컬렉션 입력",
             "key": "key",
             "select_an_action": "Select an action",
             "select_collection": "Select a collection",
@@ -205,7 +492,196 @@
           "failure": "불합격",
           "resource": "자원",
           "success": "성공",
-          "transformer": "변신 로봇"
+          "transformer": "변신 로봇",
+          "couchdb": {
+            "database": "데이터 베이스",
+            "action_type": "작업 유형"
+          },
+          "placeholder": {
+            "couchdb": {
+              "database": "데이터베이스 선택",
+              "record": "{{ {\"x\":1, \"y\":2, ...} }}",
+              "mangoquery": "\"{{ {\r\n  \"\"selector\"\": {},\r\n  \"\"limit\"\": 5\r\n} }}\""
+            },
+            "restapi": {
+              "consumer_key": "Consumer key",
+              "consumer_secret": "••••••••••••••••••••••",
+              "realm": "testrealm@example.com",
+              "ext": "some-app-extra-data",
+              "app": "애플리케이션 ID",
+              "dig": "delegated-by",
+              "us-east-1": "us-east-1",
+              "authenticate_using_t": "쿼리 매개변수 대신 HTTP Authorization 헤더를 사용하여 인증",
+              "find_instructions_on": "<0>AWS 문서</0>에서 액세스 키를 찾을 수 있는 위치에 대한 지침을 찾아보세요.",
+              "role_to_assume": "Use a <0>different role<0> when accessing the API"
+            },
+            "advanced": {
+              "select_pages": "페이지 선택"
+            },
+            "ai-agent": {
+              "value": "Value"
+            }
+          },
+          "option": {
+            "couchdb": {
+              "action_type": {
+                "list": "레코드 나열",
+                "retrieve": "레코드 검색",
+                "create": "레코드 만들기",
+                "update": "레코드 업데이트",
+                "delete": "레코드 삭제",
+                "find": "찾다",
+                "get": "보기"
+              },
+              "skip": "Skip",
+              "limit": "Limit",
+              "include": "문서 포함",
+              "des": "Descending order",
+              "id": "_id",
+              "rev": "_rev",
+              "record": "기록",
+              "mangoquery": "MangoQuery",
+              "ViewURL": "보기URL",
+              "StartKey": "StartKey",
+              "EndKey": "EndKey",
+              "include_doc_option": "반환된 결과에 포함된 문서",
+              "des_option": "Use descending order"
+            },
+            "restapi": {
+              "signature_method": {
+                "hmac_sha1": "HMAC-SHA1",
+                "hmac_sha256": "HMAC-SHA256",
+                "hmac_sha512": "HMAC-SHA512",
+                "rsa_sha1": "RSA-SHA1",
+                "rsa_sha256": "RSA-SHA256",
+                "rsa_sha512": "RSA-SHA512",
+                "plaintext": "PLAINTEXT"
+              },
+              "algorithm": {
+                "sha256": "sha256",
+                "sha1": "sha1"
+              },
+              "body_type": {
+                "file": "File",
+                "text": "Text"
+              },
+              "method": {
+                "options": "OPTIONS",
+                "head": "HEAD"
+              },
+              "add_access_token_to": {
+                "query_parameters": "Query Parameters",
+                "header_authorization": "Header권한 부여"
+              }
+            },
+            "advanced": {
+              "trigger_this_action_": "페이지 로딩시 이 작업을 트리거합니다",
+              "show_a_loading_page_": "페이지 로딩시 로딩 페이지를 보여줍니다",
+              "on_page_loading": "페이지 로딩 중",
+              "on_app_loading": "앱에 로드됨",
+              "none": "없음"
+            },
+            "airtable": {
+              "method": {
+                "list_records": "레코드 나열",
+                "get_record": "수령 기록",
+                "create_record": "레코드 만들기",
+                "update_multiple_reco": "여러 레코드 업데이트",
+                "update_record": "레코드 업데이트",
+                "delete_multiple_reco": "여러 레코드 삭제",
+                "delete_record": "레코드 삭제"
+              },
+              "sort": {
+                "asc": "ASC",
+                "desc": "DESC"
+              }
+            },
+            "ai-agent": {
+              "model": {
+                "gpt-3": {
+                  "5-turbo": "gpt-3.5-turbo"
+                },
+                "gpt-4": "gpt-4"
+              }
+            }
+          },
+          "restapi": {
+            "signature_method": "서명 방법",
+            "consumer_key": "소비자 키",
+            "consumer_secret": "소비자 비밀",
+            "access_token": "토큰 접근하기",
+            "token_secret": "토큰 암호",
+            "private_key": "개인 키",
+            "realm": "Realm",
+            "hawk_auth_id": "Hawk Auth ID",
+            "hawk_auth_key": "Hawk Auth Key",
+            "algorithm": "Algorithm",
+            "user": "User",
+            "nonce": "Nonce",
+            "ext": "ext",
+            "app": "app",
+            "dig": "dig",
+            "timestamp": "Timestamp",
+            "aws_region": "AWS 리전",
+            "aws_service": "AWS 서비스",
+            "aws_access_key_id": "AWS 액세스 키 ID",
+            "aws_secret_key_id": "AWS 비밀 키 ID",
+            "role_to_assume": "수임할 역할(ARN)",
+            "list_of_cookies_to_f": "전달할 쿠키 목록",
+            "add_access_token_to": "Add Access Token To"
+          },
+          "tips": {
+            "restapi": {
+              "body_type": {
+                "file": "Either a binary string, or an object: {{ { data: binary string, filename?: string } }}"
+              }
+            },
+            "advanced": {
+              "no_actions_will_be_t": "이 페이지 로딩시에는 작업이 실행되지 않습니다. 이 작업을 수동으로 실행하고 고급 설정에서 '페이지 로딩시 이 작업을 트리거합니다'를 활성화할 수 있습니다."
+            },
+            "airtable": {
+              "base_id": "기본 URL에서 기본 ID를 가져옵니다. 일반적으로 \"app\"으로 시작하는 문자열입니다.",
+              "filter_by_formula": "수식 사용 방법을 알아보려면 <0>여기를 클릭</0>하세요.",
+              "time_zone": "지원되는 모든 시간대를 확인하려면 <0>여기를 클릭</0>하세요.",
+              "user_locales": "지원되는 모든 언어를 확인하려면 <0>여기를 클릭</0>하세요."
+            }
+          },
+          "advanced": {
+            "advanced": "고급 설정",
+            "page_trigger": "트리거 타이밍",
+            "loading_page": "로딩 페이지",
+            "page_load_delay": "지연(ms)",
+            "run_this_action_peri": "이 작업을 주기적으로 실행합니다",
+            "interval": "주기 간격 (s)",
+            "actions_running_when": "페이지가 로드될 때 실행되는 작업",
+            "pages": "페이지",
+            "periodically_run": "주기적으로 실행"
+          },
+          "airtable": {
+            "base_id": "기지국 ID",
+            "table_name": "테이블 이름",
+            "method": "방법",
+            "view": "보기",
+            "fields": "Fields",
+            "filter_by_formula": "수식으로 필터링",
+            "sort": "정렬하다",
+            "max_records": "최대 기록",
+            "page_size": "페이지 크기",
+            "offset": "오프셋",
+            "cell_format": "셀 형식",
+            "time_zone": "시간대",
+            "user_locales": "사용자 로케일",
+            "record_id": "Record ID",
+            "records": "Records",
+            "record": "Record",
+            "record_ids": "Record IDs"
+          },
+          "ai-agent": {
+            "model": "Model",
+            "variable": "Variable",
+            "input": "Send content",
+            "max-token": "Max token"
+          }
         },
         "menu": {
           "more": {
@@ -265,7 +741,9 @@
           "upload_data": "데이터 업로드",
           "upload_data_list": "데이터 목록 업로드",
           "upload_object_name": "객체 이름 업로드",
-          "upload_object_name_list": "개체 이름 목록 업로드"
+          "upload_object_name_list": "개체 이름 목록 업로드",
+          "timeout_upload": "파일 업로드 제한 시간(분)",
+          "timeout_upload_multiple": "단일 파일 업로드 제한 시간(분)"
         },
         "smtp": {
           "attachment": "부록",
@@ -303,7 +781,7 @@
           "placeholder": {
             "mode_id": "bert-base-uncased",
             "text": "The answer to the universe is [MASK].",
-            "json": "{ \r\n\"past_user_inputs\": [\"Which movie is the best ?\"], \r\n\"generated_responses\": [\"It's Die Hard for sure.\"], \r\n\"text\": \"Can you explain why ?\" \r\n}",
+            "json": "{ \n\"past_user_inputs\": [\"Which movie is the best ?\"], \n\"generated_responses\": [\"It's Die Hard for sure.\"], \n\"text\": \"Can you explain why ?\" \n}",
             "binary": "'@cats.jpg' \\",
             "use_cache": "Boolean, leave blank for true",
             "min_length": "Integer to define the minimum length in tokens of the output summary",
@@ -311,7 +789,8 @@
             "top_p": "Float to define the tokens",
             "temperature": "Float(0.0-100.0)，leave blank for 1.0",
             "repetition_penalty": "Float (0.0-100.0)",
-            "max_time": "Float (0.0-120.0) to define the amount of time in seconds"
+            "max_time": "Float (0.0-120.0) to define the amount of time in seconds",
+            "selectParameterType": "Select a type"
           },
           "tips": {
             "mode_id": "Go to the <0>Model Hub</0> and select the model you want to use.",
@@ -319,8 +798,8 @@
             "temperature": "1 means regular sampling, 0 means always taking the highest score, 100.0 is getting closer to uniform probability.",
             "repetition_penalty": "The more a token is used within generation the more it is penalized to not be picked in successive generation passes."
           },
-          "parameter": "Parameter",
-          "use_detail_parameters": "Use detail parameters",
+          "parameter": "매개 변수",
+          "use_detail_parameters": "세부 매개변수 사용",
           "use_cache": "Use cache",
           "wait_for_model": "Wait for model",
           "min_length": "Min length",
@@ -330,6 +809,78 @@
           "temperature": "Temperature",
           "repetition_penalty": "Repetition penalty",
           "max_time": "Max time"
+        },
+        "sqlgc": {
+          "placeholder": {
+            "text": "어떤 SQL 문을 생성하시겠습니까?"
+          },
+          "button": {
+            "text": "SQL 생성"
+          }
+        },
+        "mssql": {
+          "config_type": "구성 유형",
+          "query": "질문",
+          "placeholder": {
+            "query": "select * from users;",
+            "table": "테이블 선택",
+            "insert_record": "{{ [{x1:1, y1:1}, {x2:1, y2:1},...] }}"
+          },
+          "table": "시트",
+          "insert_record": "삽입할 레코드 배열",
+          "dropdown": {
+            "retry": "클릭하여 재시도하기"
+          }
+        },
+        "dynamo": {
+          "label": {
+            "method": "방법",
+            "table": "시트",
+            "json_input": "JSON 매개변수 편집기 사용",
+            "parameters": "Parameters",
+            "index": "Index name",
+            "key_condition": "Key condition expression",
+            "projection_expression": "Projection expression",
+            "filter_expression": "Filter expression",
+            "attribute_name": "Expression attribute names",
+            "attribute_value": "Expression attribute values",
+            "limit": "Limit",
+            "select": "Select",
+            "item": "Item",
+            "condition_expression": "Condition expression",
+            "key": "Key",
+            "update_expression": "Update expression"
+          },
+          "option": {
+            "query": "query",
+            "scan": "scan",
+            "put_item": "putItem",
+            "get_item": "getItem",
+            "update_item": "updateItem",
+            "delete_item": "deleteItem"
+          },
+          "placeholder": {
+            "parameters": "{{ {\r\n\"TableName\":\"abc\",\r\n\"KeyConditionExpression\":\"abc\",\r\n\"ExpressionAtt...\r\n} }}"
+          }
+        },
+        "status": {
+          "ran_failed": "실패하다",
+          "ran_successfully": "실행 성공"
+        },
+        "result": {
+          "restapi": {
+            "status": "상태",
+            "headers": "헤더",
+            "response": "데이터",
+            "rawdata": "로우 데이터"
+          }
+        },
+        "placeholder": {
+          "restapi": {
+            "body_type": {
+              "file": "{{ { data: binary string, filename: string } }}"
+            }
+          }
         }
       },
       "resource": {
@@ -364,7 +915,7 @@
             "private_key": "개인 키",
             "private_key_hover": "The private key is associated with a Service Account with Firebase privileges.",
             "ssl_options": "SSL 옵션",
-            "username_password": "사용자 이름 비밀번호",
+            "username_password": "사용자 이름/비밀번호",
             "self_signed_certificate": "자가 서명 인증서 사용",
             "disable_introspection": "Disable Introspection",
             "value": "Value",
@@ -372,13 +923,25 @@
             "header_prefix": "Header prefix",
             "key": "Key",
             "introspection": "Introspection",
-            "bear_token": "Token"
+            "bear_token": "Token",
+            "connection_options": "연결 옵션",
+            "account_name": "Account Identifier",
+            "warehouse": "Warehouse",
+            "schema": "Schema",
+            "snowflake_basic_auth": "Basic Auth",
+            "snowflake_key_auth": "Key Pair (only encrypted private keys are supported)",
+            "role": "역할",
+            "username": "사용자 이름",
+            "password": "비밀번호",
+            "dynamo_region": "AWS 지역",
+            "dynamo_access_key_id": "AWS 엑세스 키 ID",
+            "dynamo_secret_key": "AWS 비밀 키"
           },
           "placeholder": {
             "certificate": "-----인증서 시작-----\n MIIEMDCCapigAwIBAgIDI2GWMA0GCSqGSIb3DQEBDAUAMDoxODA2BgNVBAMML2Fm\n DTE5MDQwoDAzNDIyMloXDTI5MDQwNTAzNDIyMlowOjE4MDYGA1UEAwwvYWY1ZjU4\n DTE5MDQwoDAzNDIyMloXDTI5MDQwNTAzNDIyMlowOjE4MDYGA1UEAwwvYWY1ZjU4\n DTE5MDQwoDAzNDIyMloXDTI5MDQwNTAzNDIyMlowOjE4MDYGA1UEAwwvYWY1ZjU4\n ...\n -----인증서 종료-----",
             "database": "acme_production",
             "database_index": "기본값 0",
-            "hostname": "CPU 이름",
+            "hostname": "호스트 이름",
             "hosturl": "예를 들어 https://example.com",
             "mongo_certificate": "-----RSA 개인 키 시작-----\n MIIEMDCCapigAwIBAgIDI2GWMA0GCSqGSIb3DQEBDAUAMDoxODA2BgNVBAMML2Fm\n DTE5MDQwoDAzNDIyMloXDTI5MDQwNTAzNDIyMlowOjE4MDYGA1UEAwwvYWY1ZjU4\n DTE5MDQwoDAzNDIyMloXDTI5MDQwNTAzNDIyMlowOjE4MDYGA1UEAwwvYWY1ZjU4\n DTE5MDQwoDAzNDIyMloXDTI5MDQwNTAzNDIyMlowOjE4MDYGA1UEAwwvYWY1ZjU4\n ...\n -----RSA 개인 키 종료-----\n -----인증서 시작-----\n MIIEMDCCapigAwIBAgIDI2GWMA0GCSqGSIb3DQEBDAUAMDoxODA2BgNVBAMML2Fm\n DTE5MDQwoDAzNDIyMloXDTI5MDQwNTAzNDIyMlowOjE4MDYGA1UEAwwvYWY1ZjU4\n DTE5MDQwoDAzNDIyMloXDTI5MDQwNTAzNDIyMlowOjE4MDYGA1UEAwwvYWY1ZjU4\n DTE5MDQwoDAzNDIyMloXDTI5MDQwNTAzNDIyMlowOjE4MDYGA1UEAwwvYWY1ZjU4\n ...\n -----인증서 종료-----\n",
             "name": "ie \"Users DB(읽기전용)\" 또는 \"Internal Admin API\"",
@@ -386,7 +949,17 @@
             "private_key": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"projectId\",\n  \"private_key_id\": \"privateKeyId\",\n  \"private_key\": \"-----BEGIN PRIVATE KEY-----\nprivateKey\n-----END PRIVATE KEY-----\",\n  \"client_email\": \"clientEmail\",\n  \"client_id\": \"100000000000000000000\",\n  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n  \"client_x509_cert_url\": \"clientx509CertUrl\"\n}",
             "username": "사용자 이름",
             "default": "default",
-            "hugging_face_url": "Use the absolute URL (e.g https://api-inference.huggingface.co/models/). "
+            "hugging_face_url": "Use the absolute URL (e.g https://api-inference.huggingface.co/models/). ",
+            "database_name": "데이터베이스 이름",
+            "account_name": "xy12345.us-east-2.aws",
+            "warehouse": "COMPUTE_WH",
+            "snowflake_database": "SNOWFLAKE_SAMPLE_DATA",
+            "schema": "PUBLIC",
+            "role": "역할",
+            "snowflake_username": "illa",
+            "snowflake_password": "••••••••",
+            "snowflake_private_key": "-----BEGIN ENCRYPTED PRIVATE KEY-----\r\n••••••••\r\n -----END ENCRYPTED PRIVATE KEY-----",
+            "dynamo_region": "us-west-1"
           },
           "tip": {
             "connect_type": "클라우드 서버: ILLA 서버가 데이터베이스에 안전하게 연결됩니다.",
@@ -396,7 +969,8 @@
             "username_password": "자격 증명은 암호화되어 서버에 안전하게 저장됩니다.",
             "introspection": "Turn on this if your GraphQL endpoint does not support introspection queries. Note that disabling introspection reduces the usability of GraphQL, as auto-complete and linting for this resource will no longer work.",
             "hugging_face_url": "<0>Click here</0> to learn more about Hugging Face.",
-            "bear_token": "Get a User Access or API token <0>in your Hugging Face profile settings.</0>"
+            "bear_token": "Get a User Access or API token <0>in your Hugging Face profile settings.</0>",
+            "connection_options": "Add connection options for your connection. When the SSL option is enabled, we will add encrypt and trustServerCertificate by default. "
           },
           "title": {
             "advanced_option": "고급 구성",
@@ -440,7 +1014,9 @@
             "scopes": "범위",
             "share_oauth2_credentials_between_users": "사용자 간에 OAuth2.0 자격 증명 공유",
             "url_parameters": "URL 매개변수",
-            "use_client_credentials_auth": "클라이언트 자격 증명을 사용하여 인증"
+            "use_client_credentials_auth": "클라이언트 자격 증명을 사용하여 인증",
+            "digest_auth_username": "사용자 이름",
+            "digest_auth_password": "비밀번호"
           },
           "option": {
             "authentication": {
@@ -498,6 +1074,32 @@
           "tip": {
             "external_reference": "정의된 변수에 대한 외부 참조를 생성할 수 있습니다. 예를 들어 {{ transformer2.value }}"
           }
+        },
+        "api": {
+          "description": {
+            "hf": "Learn more about Hugging Face:",
+            "hf_endpoint": "Inference Endpoint"
+          },
+          "label": {
+            "hf_endpoint_token": "Token",
+            "hf_endpoint": "Endpoint URL"
+          },
+          "tips": {
+            "hf_endpoint_token": "<0>Hugging Face 프로필 설정</0>에서 Organizations API 토큰을 받으세요.",
+            "hf_endpoint": "learn more about <0>Endpoint</0>"
+          },
+          "placeholder": {
+            "hf_endpoint": "https://uu149rez6gw9ehej.eu-west-1.aws.endpoints.huggingface.cloud..."
+          }
+        },
+        "tip": {
+          "allowlist": {
+            "title": "IP 주소 허용",
+            "message": "리소스에 공개적으로 액세스할 수 없는 경우 ILLA가 리소스에 연결할 수 있도록 네트워크 또는 방화벽 설정을 업데이트하여 ILLA의 IP 주소를 허용 목록에 추가하세요."
+          }
+        },
+        "button": {
+          "copy_ip": "IP 복사"
         }
       },
       "resource_choose": {
@@ -508,7 +1110,7 @@
           "api_request": "API 요청 매개변수",
           "error": "쿼리 실패",
           "json": "JSON",
-          "response": "반환 결과",
+          "response": "응답 데이터",
           "success": "검색 성공",
           "table": "시트"
         }
@@ -517,13 +1119,31 @@
         "api": "아피스",
         "database": "데이터 베이스",
         "js_transformer": "자바스크립트 변환기"
+      },
+      "message": {
+        "mssql": {
+          "table_error": "테이블을 표시하지 못했습니다. 나중에 다시 시도 해주십시오."
+        }
+      },
+      "acl": {
+        "option": {
+          "blank": "—",
+          "private": "private",
+          "public_read": "public-read",
+          "public_read_write": "public-read-write",
+          "aws_exec_read": "aws-exec-read",
+          "auth": "authenticated-read",
+          "bucket_owner_read": "bucket-owner-read",
+          "bucket_owner_full_control": "bucket-owner-full-control"
+        }
       }
     },
     "component": {
       "cancel": "취소",
       "delete": "삭제",
       "delete_content": "삭제 후 복구가 불가능하여 프로그램 오류가 발생할 수 있으니 참조 확인 후 삭제 부탁드립니다.",
-      "delete_title": "{{ displayName }}을(를) 삭제하시겠습니까?"
+      "delete_title": "{{ displayName }}을(를) 삭제하시겠습니까?",
+      "editor_list": "Current editors"
     },
     "context_menu": {
       "delete": "삭제",
@@ -533,7 +1153,20 @@
       "actions_title": "작업 목록",
       "components_title": "구성 요소 목록",
       "globals_title": "글로벌 변수",
-      "pages_title": "페이지 목록"
+      "pages_title": "페이지 목록",
+      "global_data_modal": {
+        "title": "전역 데이터 편집",
+        "variable_name": {
+          "tooltips": "Use the initial value in this app via {{variableName}}",
+          "label": "변수 이름",
+          "message": "리스트 이름을 입력하세요."
+        },
+        "initial_value": {
+          "label": "초기 값",
+          "tooltips": "개체 또는 기본 값을 지원합니다. 예: { 개수: 0 }",
+          "placeholder": "{ count: 0 }"
+        }
+      }
     },
     "deploy": {
       "fail": "배포 실패"
@@ -618,9 +1251,55 @@
           "sortingChange": "변경된 순으로 정렬",
           "submit": "제출하다",
           "success": "성공 후",
-          "onOpenModal": "Open modal",
-          "onCloseModal": "Close modal"
-        }
+          "onOpenModal": "오픈 모달",
+          "onCloseModal": "모달 닫기",
+          "play": "재생",
+          "pause": "정지시키다",
+          "ended": "종료",
+          "loaded": "짐을 실은",
+          "rowSelect": "행 선택",
+          "markerSelected": "마커 선택",
+          "markerCreated": "마커 만들기",
+          "select": "선택",
+          "DragOrClickNoEventArea": "이벤트가 없는 영역을 드래그 또는 클릭",
+          "rowClick": "행 클릭",
+          "refresh": "새로 고치다",
+          "filtersChange": "행 필터 변경",
+          "rowSelectChange": "행 선택 변경",
+          "onCellSelect": "셀 선택",
+          "delete": "Delete",
+          "replay": "Reply",
+          "startUploading": "Start uploading",
+          "uploadSuccessfully": "Uploaded successfully",
+          "uploadFailed": "Failed to upload",
+          "onMenuSelect": "Select item",
+          "on_menu_select": "Select menu item",
+          "pageChange": "Page change"
+        },
+        "image_list": {
+          "title": "이미지",
+          "empty": "이미지 없음",
+          "model_title": "이미지 편집",
+          "config": {
+            "model_label": "상표",
+            "image_url": "이미지 URL"
+          }
+        },
+        "image_setter": {
+          "new": "새로운 빌드"
+        },
+        "Change": "Change",
+        "Select": "Select",
+        "eventCalendar": {
+          "no_title": "제목 없음"
+        },
+        "oncellselect": "onCellSelect",
+        "onRowSelectChange": "onRowSelectChange",
+        "onRowClickChange": "onRowClickChange",
+        "filterChange": "filterChange",
+        "sortChange": "sortChange",
+        "pageChange": "pageChange",
+        "refresh": "Refresh"
       },
       "setter_default_value": {
         "fill": "충전재",
@@ -635,6 +1314,41 @@
           "email": "우편",
           "regex": "정규식",
           "url": "URL"
+        },
+        "height": {
+          "fixed": "고정식",
+          "auto": "방문 허용"
+        },
+        "upload_type": {
+          "button": "단추",
+          "dropzone": "파일 영역"
+        },
+        "selection_types": {
+          "single_file": "단일 파일",
+          "multiple_files": "여러 파일",
+          "directory": "예배 규칙서"
+        },
+        "size_type": {
+          "kb": "KB",
+          "mb": "MB"
+        },
+        "time_picker": {
+          "select_time": "시간을 선택하세요."
+        },
+        "time_range": {
+          "start_placeholder": "시작 시간",
+          "end_placeholder": "종료 시간"
+        },
+        "recording": {
+          "start_button_text": "녹음 시작",
+          "stop_button_text": "멈추다",
+          "clear_button_text": "분명한"
+        },
+        "rich_text": {
+          "default_text": "Type text here"
+        },
+        "drive_builder": {
+          "button_text": "Select"
         }
       },
       "setter_group": {
@@ -648,15 +1362,36 @@
         "menu": "메뉴",
         "options": "옵션",
         "pagination": "페이지를 넘기다",
-        "row_selection": "라인 선택",
+        "row_selection": "사용자 선택",
         "sort": "정렬하다",
         "style": "스타일",
         "tabs": "탭",
         "toolbar": "툴바",
         "validation": "확인하다",
-        "views": "보다"
+        "views": "보다",
+        "images": "이미지",
+        "primary_value": "기본 값",
+        "secValue": "보조 값",
+        "border": "뇌졸중",
+        "color": "색깔",
+        "icon": "상",
+        "secondary_value": "SECONDARY VALUE",
+        "resource": "RESOURCE",
+        "eventCalendar": {
+          "calendar": "달력"
+        },
+        "event": "이벤트",
+        "MESSAGE": "메시지",
+        "Toolbar": "툴바"
       },
       "setter_label": {
+        "chat": {
+          "data_source": "Data source",
+          "enable_message_selec": "Enable message selection",
+          "selection_type": "Selection type",
+          "loading_when_sending": "Loading when sending",
+          "image_background": "Image background"
+        },
         "action": "동작",
         "align": "맞추다",
         "allow_clear": "클리어 허용",
@@ -689,6 +1424,9 @@
           "name": "데이터 세트 이름",
           "remove": "데이터 세트 제거",
           "value": "데이터 열"
+        },
+        "switch_group": {
+          "option_label_alignment": "옵션 라벨의 위치"
         },
         "dataset_config": "데이터 세트 구성",
         "datasets": "데이터 세트",
@@ -774,7 +1512,9 @@
         "scale_type": "확대/축소 유형",
         "set_router": "라우팅 설정",
         "set_temporary_state": "임시 상태 설정",
-        "shadow": "그림자",
+        "shadow": {
+          "shadow": "그림자"
+        },
         "show_character_count": "문자 수 표시",
         "show_clear_button": "지우기 버튼 표시",
         "show_footer": "디스플레이 작동 영역",
@@ -812,7 +1552,256 @@
         "x_axis_type": "X축 유형",
         "x_axis_value": "X축",
         "y_axis_name": "좌표 이름",
-        "y_axis_title": "Y축 제목"
+        "y_axis_title": "Y축 제목",
+        "height": "높은",
+        "min_height": "최소 높이(px)",
+        "show_underline": "밑줄 표시",
+        "auto_play": "자동 재생",
+        "interval": "간격(ms)",
+        "show_button": "화살표 표시",
+        "show_dot": "하단에 점 표시",
+        "hidden_images": "숨겨진 이미지",
+        "file_type": "파일 종류",
+        "selection_types": "선택 유형",
+        "append_newly_files": "새로 선택한 파일 추가",
+        "file_list": "파일 목록",
+        "parse_value": "파싱 파일",
+        "max_files": "최대 파일",
+        "min_files": "최소 파일",
+        "max_size": "최대 크기",
+        "min_size": "최소 크기",
+        "text_overflow": "텍스트 오버플로",
+        "file_url": "PDF 소스",
+        "show_tool_bar": "도구 모음 표시",
+        "scale": "줌 페이지",
+        "scroll": "각 페이지에 스냅 스크롤",
+        "min_max_size": "가장 작은~최대 파일 크기",
+        "video_url": "비디오 소스",
+        "autoplay": "자동 플레이",
+        "loop": "반복",
+        "volume": "음량",
+        "show_controls": "제어도구 보이기",
+        "img_url_array": "이미지 URL 배열",
+        "statistics": {
+          "label": "상표",
+          "primary_value": "기본 값",
+          "secValue": "보조 값",
+          "decimal": "소수 자릿수",
+          "trend_sign": "추세 표시 표시",
+          "positive_sign": "양의 부호",
+          "negative_sign": "음",
+          "thousand_separator": "천 단위 구분 기호 표시",
+          "trend_color": "트렌드 컬러",
+          "prefix_text": "접두사 텍스트",
+          "suffix_text": "접미사",
+          "title": "Title"
+        },
+        "mute": "음소거",
+        "collapse": {
+          "type": "유형",
+          "accordin_mode": "아코디언 모드",
+          "header_color": "헤더",
+          "body_color": "본체",
+          "expand_icon": "넓히기",
+          "collapse_icon": "무너지다",
+          "icon_color": "색깔"
+        },
+        "choose_at_least": "최소한의 선택",
+        "choose_up_to": "가장 많이 선택된",
+        "copy_to_clipboard": "Copy to clipboard",
+        "file_download": {
+          "file_data": "파일 데이터",
+          "file_name": "확장자가 있는 파일 이름",
+          "file_type": "파일 종류"
+        },
+        "action_name": "액션 이름",
+        "variable": {
+          "path_of_value": "값 경로",
+          "variable": "전역 데이터 편집"
+        },
+        "code": {
+          "write_code": "코드 작성"
+        },
+        "slider": {
+          "step_size": "단계 크기",
+          "minimum": "최저한의",
+          "maximum": "최고",
+          "hide_output": "출력 숨기기",
+          "prefix_icon": "접두사 아이콘",
+          "suffix_icon": "접미사 아이콘",
+          "allow_wrapping": "자동 포장"
+        },
+        "range_slider": {
+          "start_value": "시작 값",
+          "end_value": "종료 값"
+        },
+        "name": "이름",
+        "audio": {
+          "audio_url": "오디오 소스"
+        },
+        "map": {
+          "markers": "마커",
+          "initial_location": "초기 위치",
+          "default_markers": "기본 마커",
+          "latitude_field_name": "위도 필드 이름",
+          "longitude_field_name": "경도 필드 이름",
+          "zoom": "줌",
+          "enable_add_markers": "마커 추가 활성화",
+          "enable_search_locati": "검색 위치 활성화",
+          "enable_clustering": "클러스터링 활성화"
+        },
+        "time_range": {
+          "start_time": "시작 시간",
+          "end_time": "시작 시간"
+        },
+        "eventCalendar": {
+          "event_value": "이벤트 값",
+          "event_id": "이벤트 ID",
+          "title": "제목",
+          "description": "설명",
+          "start": "시작 시간",
+          "end": "종료 시간",
+          "resource_id": "리소스 ID",
+          "resource_title": "리소스 제목",
+          "all_day": "하루 종일 이벤트",
+          "data_source": "데이터 소스",
+          "default_date": "기본 날짜",
+          "resource_grid": "리소스 그리드",
+          "default_view": "기본 보기",
+          "show_current_time": "현재 시간 표시",
+          "background": "배경",
+          "calendar_background": "배경",
+          "calendar_border": "프레임",
+          "calendar_text": "텍스트 양",
+          "event_background": "배경",
+          "event_text": "프레임",
+          "draggable": "드래그 가능",
+          "resizable": "크기 조정 가능",
+          "custom_message_draggable": "드래그 비활성화 시 사용자 지정 메시지",
+          "custom_message_resizable": "크기 조정 비활성화 시 사용자 지정 메시지"
+        },
+        "table": {
+          "page_index": "페이지 색인",
+          "index": "색인",
+          "scroll_to_the_select": "선택한 행으로 스크롤",
+          "filters": "필터",
+          "filter_mode": "필터 모드",
+          "show_thousands_separ": "천 단위 구분 기호 표시 ",
+          "tag_label": "태그 레이블",
+          "tag_color": "태그 색상",
+          "open_in_new_tab": "새 탭으로 열기",
+          "variant": "스타일",
+          "icon": "상",
+          "color": "색깔",
+          "sort_by_mapped_value": "매핑된 값으로 정렬",
+          "background": "배경색",
+          "alignment": "조정",
+          "column_width": "열 너비",
+          "width": "너비",
+          "disable_user_selecti": "사용자 선택 비활성화",
+          "default_selected_row": "기본 선택 행",
+          "refresh": "새로 고치다",
+          "download_row_data": "원시 데이터 다운로드",
+          "column_setting": "Column setting",
+          "cell_overflow": "셀 오버플로",
+          "enable_server_side_p": "서버 측 페이지 매김 활성화",
+          "pagination_type": "페이지 매김 유형",
+          "total_row_count": "총 행 수",
+          "next_cursor": "다음 커서",
+          "has_next_page": "다음 페이지 있음",
+          "currency_code": "통화 코드",
+          "cell_selection": "셀 선택",
+          "click_outside_to_des": "바깥쪽을 클릭하여 선택 해제"
+        },
+        "previous_cursor": "이전 커서",
+        "input": {
+          "type": "유형",
+          "show_visible_button": "보이는 버튼의 표시 여부를 설정하려면"
+        },
+        "recording": {
+          "start_button_text": "시작 버튼 텍스트",
+          "clear_button_text": "버튼 텍스트 지우기",
+          "min_duration": "최소 기간(s)",
+          "max_duration": "최대 기간(s)",
+          "stop_button_text": "중지 버튼 텍스트"
+        },
+        "message_id": "메시지 ID",
+        "message": "Message",
+        "message_type": "Message type",
+        "sendTime": "Send time",
+        "timeFormat": "시간 형식",
+        "currentSenderId": "Current sender ID",
+        "receiving": "Loading when receiving",
+        "toolbar-replay": "Show reply button",
+        "toolbar-delete": "Show delete button",
+        "showAvatar": "Show avatar",
+        "showSendTime": "Show send time",
+        "showFooter": "Show footer",
+        "leftMessageColor": "왼쪽 메시지",
+        "rightMessageColor": "오른쪽 메시지",
+        "expandAll": "Expand all",
+        "replayMessageId": "답장 메시지 ID",
+        "senderName": "Sender name",
+        "senderId": "Sender ID",
+        "showName": "Show name",
+        "rich_text": {
+          "default_text": "Placeholder"
+        },
+        "senderAvatar": "Sender avatar",
+        "drive_builder": {
+          "allow_public_use": "Use in public app",
+          "illa_drive_folder": "ILLA Drive folder",
+          "generate_signed_url": "Generate signed URL",
+          "expired_time": "Expired type",
+          "time": "Expired time(s)",
+          "turn_on_hotlink": "Turn on hotlink protect",
+          "button_text": "Button text",
+          "selection_type": "Selection type",
+          "allowed_file_types": "Allowed file types",
+          "file_list": "File list",
+          "min_size": "Min size",
+          "max_size": "Max size",
+          "min_file_num": "Min file num",
+          "max_file_num": "Max file num",
+          "file_name_duplicatio": "File name duplication",
+          "fileData": "File data",
+          "downloadZIP": "Download as a ZIP"
+        },
+        "download_from_drive": "Download from ILLA Drive",
+        "save_to_drive": "Save to ILLA Drive",
+        "menu": {
+          "logo": "Logo",
+          "title": "Title",
+          "only_show_icon": "Only show icon",
+          "groupLabels": "Group labels"
+        },
+        "hover_bg_color": "Hover background",
+        "jsonSchemaForm": {
+          "JSONSchema": "JSONSchema",
+          "UISchema": "UISchema",
+          "default_form_data": "Default form data",
+          "hidden_submit_button": "Hidden submit button",
+          "submit_button_full_w": "Submit button full width",
+          "submit_button_text": "Submit button text"
+        },
+        "chart": {
+          "direction": "Direction",
+          "y-axis_value": "Y-axis value",
+          "stack_grouped_data": "Stack grouped data",
+          "x-axis_type": "X-axis type",
+          "format": "Format",
+          "legend_position": "Legend position",
+          "grid_line": "Grid line",
+          "y-axis_type": "Y-axis type"
+        },
+        "grid_list": {
+          "column_adaptation": "Column adaptation",
+          "column_count": "Column count",
+          "row_height": "Row adaptation",
+          "item_radius": "Item radius",
+          "item_shadow": "Item shadow",
+          "item_spacing": "Item spacing"
+        }
       },
       "setter_tooltip": {
         "action": "구성 요소에 대한 작업은 쿼리, 구성 요소 조작 또는 리소스의 데이터 호출과 같은 작업을 트리거합니다. 여러 비동기 작업이 병렬로 실행됩니다.",
@@ -832,26 +1821,473 @@
         "loading": "구성 요소가 로드되는지 여부를 제어합니다.",
         "map_data_option": "숫자 값 또는 키-값 개체를 사용하여 옵션을 매핑합니다. 데이터 소스의 모든 항목은 모든 옵션에 매핑됩니다.",
         "mapped_value": "{{ currentRow }}를 사용하여 현재 행의 데이터에 액세스합니다. 예를 들어 '비용' 및 '클릭수' 열에서 계산된 '클릭당 비용'은 다음과 같습니다.\n {{ currentRow.cost / currentRow.clickTimes }}",
-        "multi_row_selection": "{{table.selectedRow.data}} 를 사용하여 데이터에 액세스할 수 있습니다. 다중 행 선택이 활성화된 경우 다음과 같이 사용할 수 있는 배열을 반환합니다. {{ table1.selectedRow.data[0].email }}}. 다중 행 선택을 활성화하지 않은 경우 {{ table1.selectedRow.data.email }}과 같이 사용할 수 있는 객체를 반환합니다.",
+        "multi_row_selection": "{{table.selectedRow[n].columnName}} 를 사용하여 데이터에 액세스합니다.",
         "only_run_when": "이 이벤트가 실행되기 전에 충족되어야 하는 조건을 여기에 입력하십시오.",
         "placeholder": "입력에 값이 없을 때 표시할 메시지입니다.",
         "progress_percentage": "진행률 표시줄의 값 범위는 0-100입니다.",
         "read_only": "구성 요소가 읽기 전용인지 여부를 제어합니다. 읽기 전용 구성 요소의 내용을 선택하고 초점을 맞출 수 있지만 수정할 수는 없습니다.",
         "required_field": "스위치를 켠 후 입력 상자에서 유효성 검사를 수행합니다.",
         "switch_default_value": "스위치의 초기 상태를 설정합니다. JavaScript를 통해 스위치의 초기 상태를 동적으로 변경할 수 있습니다.",
-        "table_only_run_when": "Conditions that must be met before the event executes. Use {{ currentRow }} to access the data of current row. For example, only run when \"imgSize\" less than 5120: {{ currentRow.imgSize <= 5120 }}.",
-        "table_set_value": "Use currentRow to access the data of current row. For example, to set value of editableText component based on \"email\":  {{ currentRow.email }}.\n  And also, you can set value in INSPECT of the component by using {{ table. selectedRow[n] }}: {{ table1.selectedRow[n].email }}.",
-        "table_url": "Use {{ currentRow }} to access the data of current row. For example, to go to url with parameter \"appid\": {{ \"www.example.com/#\" + currentRow.appid }}.",
+        "table_only_run_when": "이벤트가 실행되기 전에 충족되어야 하는 조건입니다. {{ currentRow }}를 사용하여 현재 행의 데이터에 액세스합니다. 예를 들어 \"imgSize\"가 5120보다 작은 경우에만 실행합니다: {{ currentRow.imgSize <= 5120 }}.",
+        "table_set_value": "currentRow를 사용하여 현재 행의 데이터에 액세스하십시오. 예를 들어 \"email\"을 기반으로 editableText 구성 요소의 값을 설정하려면 {{ currentRow.email }}. 또한 {{ table. selectedRow[n] }} 를 사용하여 구성 요소의 INSPECT에서 값을 설정할 수 있습니다:  {{ table1.selectedRow[n].email }} ",
+        "table_url": "{{ currentRow }}를 사용하여 현재 행의 데이터에 액세스합니다. 예를 들어 \"appid\" 매개변수가 있는 URL을 입력합니다. {{ \"www.example.com/#\" + currentRow.appid }}",
         "text_value": "Markdown 모드 또는 일반 텍스트 모드에서 값을 입력하도록 선택할 수 있습니다. 링크는 Markdown 모드에서만 입력할 수 있습니다.",
         "timeline_direction": "시간 축의 방향을 전환합니다.",
         "timeline_pending": "보류 중인 노드를 표시할지 여부입니다.",
-        "tooltip": "사용자는 입력란에 프롬프트 내용을 입력할 수 있으며 마우스를 컴포넌트 위에 올려 놓으면 프롬프트 정보가 표시되며 Markdown 형식을 지원합니다."
+        "tooltip": "사용자는 입력란에 프롬프트 내용을 입력할 수 있으며 마우스를 컴포넌트 위에 올려 놓으면 프롬프트 정보가 표시되며 Markdown 형식을 지원합니다.",
+        "file_types": "업로드가 허용된 파일 확장자 목록입니다. 모든 파일 유형을 허용하는 값은 없습니다.",
+        "file_list": "업로더 아래에 선택한 파일 목록을 표시합니다. 업로더의 높이는 파일 목록의 길이에 따라 동적으로 변경됩니다.",
+        "parse_value": "JSON, CSV, TSV, Excel 및 TXT 파일을 지원하여 선택한 파일의 구문 분석을 시도합니다. 구문 분석된 데이터는 {{uploader1.parsedValue}}를 통해 액세스할 수 있습니다. 구문 분석할 수 없는 파일은 배열에서 null이 됩니다. 모든 파일은 이 옵션에 관계없이 값 배열에서 base64로 인코딩된 문자열로 사용할 수 있습니다.",
+        "file_url": "웹에서 PDF URL 또는 pdf 파일의 base64 인코딩 데이터를 지원합니다. 예: {{ data:application/pdf;base64, example-data }}",
+        "scale": "각 페이지의 크기를 조정하여 구성 요소의 너비 또는 높이를 채웁니다.",
+        "scroll": "스크롤 시 자동으로 각 페이지의 시작 부분으로 이동합니다.",
+        "video_url": "대부분의 비디오 서비스 또는 일반적인 비디오 파일 유형에 대한 직접 링크를 지원합니다 또는 비디오 파일의 base64 인코딩 데이터. 예: {{ data:audio/mp4;base64,exampleDate}}",
+        "collapse": {
+          "type": "접을 수 있는 목록: 목록에서 모든 항목은 첫 번째 항목의 스타일을 자동으로 복사합니다. {{ currentItem.columnName }}을 통해 각 항목의 구성 요소 데이터를 지정할 수 있습니다. 접을 수 있는 패널: 각 패널은 독립적이며 각 항목의 구성 요소 스타일과 데이터를 개별적으로 지정할 수 있습니다.",
+          "items": "아이템 갯수",
+          "accordin_mode": "아코디언 모드에서 항목이 확장되면 다른 항목이 축소됩니다."
+        },
+        "message": "To retrieve the content of the message from a specific field in the data source, such as the content field, you can set it as {{item.content}}.",
+        "message_type": "To set the type of the message based on a specific field in the data source, such as the type field, you can set it as {{item.type}}. We support these types: text, image, video, and audio. ",
+        "message_id": "각 메시지에 대한 고유 ID를 설정하려면 데이터 소스의 특정 필드에서 검색할 수 있습니다. id 필드에서 가져오려면 {{item.id}}로 설정할 수 있습니다.",
+        "replayMessageId": "지정된 메시지에 회신하는 경우 이 필드를 사용하여 회신할 메시지를 설정합니다.",
+        "expandAll": "모든 노드 확장 여부",
+        "sendTime": "Set the sending time. For example, in your data source, the sending time is the sendAt field and you can set the field to {{item.sendAt}}.",
+        "senderName": "Set the sender name. For example, in your data source, the sender name is the sendName field and you can set the field to {{item.sendName}}.",
+        "currentSenderId": "현재 발신자 ID를 설정합니다. 이 필드를 사용하여 오른쪽에 표시할 정보를 보내는 사용자를 결정합니다.",
+        "senderId": "Set the sender id. For example, in your data source, the sender id is the sendID field and you can set the field to {{item.sendID}}.",
+        "sendTimeFormat": "보내는 시간의 형식을 설정합니다. 예: hh:MM:ss.",
+        "showAvatar": "Set whether to show the avatar",
+        "showName": "Set whether to show the name",
+        "showSendTime": "Set whether to show the send time",
+        "showFooter": "Set whether to show the footer",
+        "senderAvatar": "Set the sender avatar. For example, in your data source, the sender avatar is the sendAvatar field and you can set the field to {{item.sendAvatar}}.",
+        "receiving": "Set whether to display loading when receiving messages. If your message is received from action1, you can set it to {{action1.isRunning}}, and the loading status will be displayed when action1 is running."
       },
       "tab_title": "속성",
       "unselected_tip1": "구성 요소가 선택되지 않았습니다.",
       "unselected_tip2": "구성 요소를 클릭하여 선택하십시오.",
       "setter": {
-        "click_mask_close": "Click mask to close modal"
+        "click_mask_close": "마스크를 클릭하여 모달을 닫습니다.",
+        "modal": {
+          "blank": "아이콘 없음"
+        }
+      },
+      "setter_tips": {
+        "chat": {
+          "data_source": "The data source of the chat component. Use {{actionName.data}} to use the data from your databases or APIs",
+          "enable_message_selec": "Set whether to allow a message to be selected",
+          "selection_type": "Set how to select a message, left-click or right-click. When used on a mobile device, it is clicked to trigger the selection. ",
+          "loading_when_sending": "Set whether to display loading when sending messages. If your message is sent to action1, you can set it to {{action1.isRunning}}, and the loading status will be displayed when action1 is running.",
+          "image_background": "Set a image background. Base64 and image URL are supported"
+        },
+        "carousel_tips": "{{ item }}을 사용하여 데이터 소스에서 값을 가져옵니다. 예를 들어, 데이터 소스에 두 개의 속성이 있습니다. 그들은 imageUrl과 url입니다. 이미지 클릭 시 다른 url로 이동하고 싶다면 {{ item.url }}을 이용하여 url을 설정하세요.",
+        "data_source": "매핑된 평가를 사용하여 이미지 항목을 정의하는 데이터 소스입니다. 값 배열 또는 배열에 매핑된 키 개체를 사용합니다. 예: {{[{ x:1, y:1 },{ x:2, y:2 },...]}} . 작업에서 데이터를 사용할 수도 있습니다. 예: {{ mysql1.data }}",
+        "img_url_array": "Use {{ currentItem }} to get image URL from the data source. ",
+        "carousel": {
+          "data_source": "매핑된 평가를 사용하여 이미지 항목을 정의하는 데이터 소스입니다. 값 배열 또는 배열에 매핑된 키 개체를 사용합니다. 예: {{[{ x:1, y:1 },{ x:2, y:2 },...]}} . 작업에서 데이터를 사용할 수도 있습니다. 예: {{ mysql1.data }}"
+        },
+        "file_download": {
+          "file_data": "base64 데이터, 원시 데이터, 테이블의 매핑된 데이터 지원"
+        },
+        "variable": {
+          "available_in_objects": "개체 및 배열에서 사용할 수 있습니다. 개체 형식으로 변수 값을 설정하려면 attributeName을 사용합니다. 예를 들어 {\"a\":1, \"b\":2}에서 \"b\" 값을 변경하려면 경로\n  b여야 합니다.\n\n변수의 값을 배열 형식으로 설정하려면 {{index}}를 사용하십시오. 예를 들어 \"d\"를 \"t\" [\"a\",\"b\",\"c\",\"d\"]로 변경하려면 경로는 {{ 3 }} 또는 {{globalData.state1.indexOf(\"d \")}}.",
+          "the_target_value": "목표값"
+        },
+        "slider": {
+          "default_value": "슬라이더의 초기 값입니다. {{}}에 JavaScript를 입력하여 초기 값을 동적으로 변경할 수 있습니다.",
+          "minimum": "슬라이더의 최소값",
+          "maximum": "슬라이더의 최대값",
+          "step_size": "슬라이드의 최소 변경 단위",
+          "label": "사용자에게 표시되는 필드의 이름",
+          "caption": "필드를 자세히 설명하는 데 사용되는 캡션",
+          "hide_label": "레이블 표시 여부 설정",
+          "allow_wrapping": "라벨 포장 허용 여부 설정",
+          "position": "구성 요소를 기준으로 레이블 위치 설정",
+          "alignment": "레이블 정렬 설정",
+          "width": "라벨이 구성 요소의 왼쪽에 있을 때 라벨의 너비 비율을 설정합니다.",
+          "prefix_icon": "구성 요소 앞에 표시되는 아이콘",
+          "suffix_icon": "구성 요소 뒤에 표시되는 아이콘",
+          "hide_output": "슬라이딩 시 값 숨기기 여부 설정"
+        },
+        "switch_group": {
+          "label": "옵션의 레이블",
+          "value": "{{로 묶인 선택된 옵션의 배열입니다. 예: {{ [\"Option 1\", \"Option 2\"] }}",
+          "value_error": "값이 중복됩니다. 오류를 방지하려면 고유한 값을 사용하십시오.",
+          "caption": "레이블 아래에 표시되는 캡션",
+          "disabled": "옵션 비활성화 여부",
+          "datasource": "스위치 그룹의 데이터 소스입니다. {{actionName.data}}를 사용하여 데이터베이스 또는 API의 데이터 사용",
+          "default_value": "{{ }}로 묶인 배열입니다. 예: {{ [\"value1\", \"value2\", \"value3\"] }}",
+          "choose_at_least": "선택할 수 있는 최소 항목",
+          "choose_up_to": "선택할 수 있는 최대 항목",
+          "option_label_alignment": "라벨의 위치"
+        },
+        "step": {
+          "default_step": "기본 단계",
+          "show_step_number": "단계 번호 표시",
+          "indicate_completed_steps": "완료된 단계 표시"
+        },
+        "range_slider": {
+          "start_value": "범위의 최소값 설정",
+          "end_value": "범위의 최대값 설정"
+        },
+        "audio": {
+          "audio_url": "일반적인 오디오 파일 유형에 대한 직접 링크 또는 일부 오디오 서비스에 대한 링크를 지원합니다 또는 오디오 파일의 base64 인코딩 데이터. 예: {{ data:audio/mp3;base64,exampleDate}}"
+        },
+        "map": {
+          "markers": "지도에 마커를 설정합니다. 마커는 기본 마커와 동일한 속성을 가진 객체의 배열이어야 합니다.",
+          "initial_location": "지도 초기화 시 기본 중앙 표시 위치",
+          "default_markers": "지도를 초기화할 때 표시되는 기본 마커입니다. {{}}에서 자바스크립트를 사용하여 동적으로 설정할 수 있습니다.",
+          "latitude_field_name": "위도는 초기 위치 및 기본 마커 개체의 속성에서 가져옵니다.",
+          "longitude_field_name": "경도는 초기 위치 및 기본 마커 개체의 속성에서 가져옵니다.",
+          "zoom": "지도 줌을 설정하려면",
+          "enable_add_markers": "사용자가 지도를 클릭하여 마커를 추가하도록 허용할지 여부",
+          "enable_search_locati": "사용자가 위치를 검색하도록 허용할지 여부",
+          "enable_clustering": "지도가 축소될 때 여러 마커가 집계되도록 허용할지 여부"
+        },
+        "time_picker": {
+          "format": "유효한 시간 형식 문자열입니다. 형식에 대한 자세한 정보: [dayJS](https://day.js.org/docs/en/parse/string-format)",
+          "the_span_of_the_valu": "값의 범위(분)",
+          "show_a_clear_button_": "마우스가 구성 요소 위에 있을 때 지우기 버튼을 표시합니다."
+        },
+        "time_range": {
+          "start_time": "구성 요소가 초기화될 때 채워지는 시작 시간",
+          "end_time": "구성 요소가 초기화될 때 채워지는 종료 시간",
+          "start_placeholder": "시작 시간을 입력하지 않았을 때 표시되는 정보입니다.",
+          "end_placeholder": "종료 시간을 입력하지 않은 경우 표시되는 정보입니다."
+        },
+        "eventCalendar": {
+          "event_value": "{{로 묶인 객체를 사용하여 이벤트 값을 설정합니다. 예: {{ {\"event_name\": \"name1\", \"event_id\":\"id1\",\"event_description\":\"description\"} }}",
+          "event_id": "이벤트를 식별하는 데 사용되는 고유 ID",
+          "title": "이벤트 제목",
+          "description": "이벤트 설명",
+          "start": "이벤트 시작 시간",
+          "end": "이벤트 종료 시간",
+          "resource_id": "리소스는 사람, 회의실 등이 될 수 있습니다. 리소스 ID를 설정하고 이벤트에 연결할 수 있습니다.",
+          "resource_title": "리소스 보기에 표시되는 리소스 이름",
+          "all_day": "종일 행사 여부",
+          "data_source": "이벤트의 데이터 소스. 데이터 소스는 객체의 배열이어야 합니다. 모든 개체는 이벤트입니다. 예: {{[{\"event_name\": \"name1\", \"event_id\":\"id1\",\"event_description\":\"description\"},\"event_name\": \"name2\", \"event_id\":\"id2\",\"event_description \":\"설명\"} ]}}",
+          "default_date": "앱 실행 시 기본 날짜",
+          "resource_grid": "리소스 그리드 표시 여부",
+          "default_view": "앱 실행 시 기본 보기",
+          "show_current_time": "현재 타임라인 표시 여부 설정",
+          "calendar_background": "달력 배경 설정",
+          "calendar_border": "테두리 색상 설정",
+          "calendar_text": "텍스트 색상 설정",
+          "event_background": "이벤트 카드 배경 설정",
+          "event_text": "이벤트 카드의 텍스트 색상 설정",
+          "couldnot_drag": "드래그하여 시간 범위를 조정하려면 작업 미리보기 페이지로 이동하십시오.",
+          "draggable": "사용자가 드래그하여 이벤트를 이동하여 이벤트 시간 범위를 업데이트하도록 허용할지 여부",
+          "resizable": "사용자가 이벤트 시간 범위를 업데이트하고 이벤트의 테두리를 드래그하여 시간 범위를 늘리거나 줄이는 방식으로 시간 범위를 변경할 수 있도록 허용할지 여부",
+          "custom_message_draggable": "끌기가 비활성화된 후 사용자가 이벤트를 끌 때 메시지가 표시됩니다.",
+          "custom_message_resizable": "크기 조정이 비활성화된 후 사용자가 이벤트 크기를 조정하면 메시지가 표시됩니다."
+        },
+        "table": {
+          "page_index": "선택하려는 페이지의 인덱스입니다.",
+          "index": "선택하려는 행의 인덱스입니다. 인덱스는 여러 행을 지정하는 데 사용할 수 있는 배열이어야 합니다.",
+          "scroll_to_the_select": "행으로 스크롤할지 여부입니다.",
+          "show_thousands_separ": "Whether to show the thousands separator",
+          "tag_label": "Set the label of tags. An array will be separated to multiple tags.",
+          "tag_color": "Set the color of tags. Use {{ write a conditional statement to set the color displayed by each tag under different conditions.",
+          "variant": "Variant of the button",
+          "icon": "테이블에 표시되는 아이콘",
+          "color": "Set the color.",
+          "sort_by_mapped_value": "Whether to sort by mapped value. If not, we will sort based on the original data.",
+          "background": "Set the background of column. Use {{ write a conditional statement to set the color displayed by each cell under different conditions.",
+          "alignment": "Set the alignment of the column.",
+          "column_width": "Set column width by numeric value. You can also adjust the column width by dragging in the frame. After adjustment, the value of this configuration item will also change accordingly",
+          "width": "Set the adaptation method of column width.",
+          "disable_user_selecti": "사용자 선택을 비활성화할지 여부입니다. 비활성화하면 이벤트 핸들러로 테이블 구성 요소를 제어하여 행을 선택할 수 있습니다.",
+          "default_selected_row": "The row selected by default.  ",
+          "refresh": "Whether to show the refresh icon. ",
+          "download_row_data": "원시 데이터 다운로드 아이콘 표시 여부입니다.",
+          "column_setting": "열 설정을 표시할지 여부입니다. 열 설정을 통해 사용자는 표시할 열과 열 정렬을 설정할 수 있습니다. 이 설정은 테이블 데이터를 변경하지 않습니다.",
+          "cell_overflow": "How to display when cell overflow. ",
+          "enable_server_side_p": "Whether to enable server pagination",
+          "pagination_type": "The pagination type. ",
+          "total_row_count": "The number of rows used to count the page number.",
+          "next_cursor": "An identifier used to locate the next starting point of a set of data, in order to paginate and retrieve data in batches",
+          "has_next_page": "A boolean used to indicate whether there is another page of data available. It can help us better control data retrieval in paginated queries and optimize query performance",
+          "filters": "An array of object enclosed in {{ }}. For example, {{ [{\"**id**\":\"name of the column to filter\", \"**value**\":\"the value to match\", \"**filterFn**\":\"contains, equals, ...\"}] }}. We support these filterFn: \"equalTo\", \"notEqualTo\", \"contains\", \"doesNotContain\", \"lessThan\", \"notLessThan\", \"moreThan\", \"notMoreThan\", \"empty\", \"notEmpty\", \"before\", \"after\". ",
+          "filter_mode": "The filter mode. and / or.",
+          "currency_code": "USD",
+          "whether_allow_users_": "사용자가 셀을 선택하도록 허용할지 여부",
+          "supported_in_the_row": "행 단일 선택 모드에서 지원됩니다. 활성화 후 표 이외의 영역을 클릭하면 행 선택이 해제됩니다."
+        },
+        "previous_cursor": "액션 데이터를 사용하여 이전 커서를 설정합니다. 예: {{ pageInfo.startCursor }}",
+        "input": {
+          "type": "입력 유형을 설정하려면",
+          "show_visible_button": "보이는 버튼 표시"
+        },
+        "recording": {
+          "start_button_text": "녹음이 시작되지 않았을 때 버튼에 표시되는 텍스트",
+          "stop_button_text": "녹화 시 버튼에 표시되는 텍스트",
+          "clear_button_text": "녹음이 완료되면 버튼에 표시되는 텍스트",
+          "min_duration": "최소 녹화 시간",
+          "max_duration": "최대 녹화 시간"
+        },
+        "leftMessageColor": "Set the color of the messages on the left",
+        "rightMessageColor": "Set the color of the messages on the right",
+        "toolbar-replay": "Set whether to show a reply button when select a message.",
+        "toolbar-delete": "Set whether to show a delete button when select a message.",
+        "tabs": {
+          "variant": "To set the variant of tabs"
+        },
+        "drive_builder": {
+          "allow_public_use": "Set whether to use in public app. When used in a public app, in order to protect your file security, it will only be able to access the PublicAccess folder",
+          "illa_drive_folder": "To specify a folder, users can only select files from this folder when using this component",
+          "generate_signed_url": "To set whether to generate a signed URL. All users can reach the file via a signed URL. This is usually used when you need to display content on your website or allow users to download it. ",
+          "expired_time": "To set the expired time. When expired, the signed URL will be unaccessiable.",
+          "time": "Use the number type in seconds to set the expiration time. For example, {{300}} (which means 300 seconds or 5 minutes)",
+          "turn_on_hotlink": "To set whether turn on the hotlink protect. If you turned on it, the file will only be accessed via the website on illacloud.com",
+          "button_text": "To set the text on the button",
+          "selection_type": "Set whether to allow the user to select a single file or multiple files",
+          "allowed_file_types": "Use a string array to set the allowed file types, such as allowing jpg and png, fill in {{[\".jpg\", \".png\"]}}. Leave blank to allow all file types. ",
+          "file_list": "To set whether to show the selected file list. ",
+          "min_size": "To set the allowed minimum file size",
+          "max_size": "To set the allowed maximum file size",
+          "min_file_num": "To set the minimum number of files allowed to be selected",
+          "max_file_num": "To set the maximum number of files allowed to be selected",
+          "file_name_duplicatio": "To set how to handle duplicate filenames. In the case of keep both, a random string will be added to the file name uploaded.",
+          "fileData": "Set the file data using an object array, the format of the object is {\"fileName\":\"the name\", \"FileID\":\"the ID\"}. You can use the Drive file picker component to select files and set this value directly through {{filePciker1.value}}.",
+          "downloadZIP": "To set whether to download the files as one ZIP. "
+        },
+        "list": {
+          "table_disallowed": "Table can't be put in a list"
+        },
+        "menu": {
+          "logo": "Set your logo with a URL",
+          "title": "Set a title such as company name here",
+          "only_show_icon": "TO hidden the label and only show icon"
+        },
+        "statistics": {
+          "title": "Set the title to display"
+        },
+        "page": {
+          "default_view": "When users enter an error path, we will automatically redirect to the default path. When there is no default path, we will treat the first path in the list as the default path"
+        },
+        "chart": {
+          "direction": "Set the chart direction. ",
+          "y-axis_value": "Set the value of Y-axis",
+          "stack_grouped_data": "Values from different groups with the same X-axis value will be stacked in a stacked chart. Stacked charts can be used to compare the overall size of different categories or groups, as well as the relative sizes of individual subcategories or subgroups.",
+          "x-axis_type": "Setting the chart type can enhance data readability.",
+          "format": "A valid date format string. See [dayJS](https://day.js.org/docs/en/parse/string-format).",
+          "legend_position": "To set the position of legent. ",
+          "grid_line": "To set the color of grid line. ",
+          "y-axis_type": "Setting the chart type can enhance data readability."
+        },
+        "grid_list": {
+          "column_adaptation": "In Auto mode, the number of columns remains fixed while the column width is adjustable. Resizing the browser window will change the column width accordingly.\r\nIn Fixed mode, the number of columns is not fixed while the column width remains constant. Resizing the browser window will alter the number of columns.",
+          "column_count": "Used to configure the number of columns, which determines how many grids are displayed per row.",
+          "row_height": "Used to configure the height of each row. In Auto mode, the height is adaptive, and the row height is determined by the tallest grid in the current row. In Fixed mode, the row height is fixed, and all grids have the same height.",
+          "item_radius": "Used to configure the corner radius of each grid",
+          "item_shadow": "Used to configure the shadow size of each grid",
+          "item_spacing": "Used to configure the spacing between grids"
+        }
+      },
+      "setter_option": {
+        "fixed": "고정 높이",
+        "auto_limited": "제한이 있는 자동 높이",
+        "auto_height": "자동 높이",
+        "text_ellipsis": "생략",
+        "text_scroll": "스크롤",
+        "text_clip": "클립",
+        "scale_height": "높은",
+        "scale_width": "너비",
+        "collapse": {
+          "collapsible_panel": "접을 수 있는 패널"
+        },
+        "file_download": {
+          "auto": "방문 허용",
+          "plain_text": "일반 텍스트",
+          "jpeg": "JPEG",
+          "png": "PNG",
+          "svg": "SVG",
+          "json": "JSON",
+          "csv": "CSV",
+          "tsv": "TSV",
+          "excel": "Excel(.xlsx)"
+        },
+        "shadow": {
+          "none": "없음",
+          "large": "크게",
+          "medium": "보통",
+          "small": "작음"
+        },
+        "eventCalendar": {
+          "sunday": "일요일",
+          "monday": "월요일",
+          "tuesday": "화요일",
+          "wednesday": "수요일",
+          "thursday": "목요일",
+          "friday": "금요일",
+          "saturday": "토요일",
+          "month": "월",
+          "week": "주",
+          "day": "낮",
+          "agenda": "의제"
+        },
+        "table": {
+          "set_sort": "Set sort",
+          "column": "Column",
+          "number": "Number",
+          "percent": "Percent",
+          "currency": "Currency",
+          "text": "Text",
+          "tag": "Tag",
+          "button_group": "Button group",
+          "date": "Date",
+          "time": "Time",
+          "date_time": "Date Time",
+          "link": "Link",
+          "rating": "Rating",
+          "markdown": "Markdown",
+          "html": "HTML",
+          "button": "Button",
+          "icon": "Icon",
+          "solid": "Solid",
+          "outline": "Outline",
+          "auto": "Auto",
+          "limited": "Limited",
+          "limit_offset_based": "Limit offset based",
+          "cursor_based": "Cursor based",
+          "graphql_relay_cursor": "GraphQL Relay cursor"
+        },
+        "input": {
+          "input": "입력",
+          "password": "비밀번호",
+          "search": "찾다"
+        },
+        "chat": {
+          "selection_type": {
+            "left-click": "Left-click",
+            "right-click": "Right-click"
+          }
+        },
+        "tab": {
+          "line": "Line",
+          "card": "Card"
+        },
+        "drive_builder": {
+          "expired_time": {
+            "never": "Persistent",
+            "customer": "Custom"
+          },
+          "single_file": "Single file",
+          "multiple_files": "Multiple files",
+          "anonymous_modal": {
+            "title": "Allow  public users to access ILLA Drive?",
+            "desc": "When turned on, only the Public apps access folder of this app can be accessed. When an APP is set as public, all users can access the folder.",
+            "cancelBtn": "Cancel",
+            "submitBtn": "Turn on"
+          },
+          "file_name_duplicatio": {
+            "replace": "Replace",
+            "keepboth": "Keep both"
+          }
+        },
+        "chart": {
+          "chart-type": {
+            "Doughnut": "Doughnut",
+            "Radar": "Radar"
+          },
+          "direction": {
+            "horizontal": "Horizontal",
+            "vertical": "Vertical"
+          },
+          "x-axis_type": {
+            "Default": "Default",
+            "Date": "Date"
+          }
+        }
+      },
+      "setter_placeholder": {
+        "min_max_size": "제한 없음",
+        "volume": "2",
+        "statistics": {
+          "decimal": "2",
+          "prefix_text": "US$",
+          "suffix_text": "%",
+          "positive_color": "긍정적인",
+          "negative_color": "부정적인"
+        },
+        "multiselect": {
+          "value": "{{ [\"x\",\"y\",...] }}"
+        },
+        "switch_group": {
+          "default_value": "{{[\"value1\",\"value2\"]}}"
+        },
+        "img_url_array": "{{ item.image_url }} ",
+        "alt_text_mapped": "{{ item.alt_text }} ",
+        "file_download": {
+          "file_data": "{{ mysql1.data }}",
+          "file_name": "{{ new_data.csv }}"
+        },
+        "variable": {
+          "abc": "{{abc.a}}"
+        },
+        "table": {
+          "currency_code": "The currency code defined in [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+        },
+        "jsonSchemaForm": {
+          "JSONSchema": "JSON Schema for the form.\n\nExample\n{{action1.data }}\n\nLearn more about how to write the JSON Schema [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form)",
+          "UISchema": "UI Schema for the form - see the uiSchema prop for the [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form)\n\nExample\n{{ action1.data }}",
+          "default_form_data": "Default Form data - see the formData prop for the [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form)\r\n\r\nExample\r\n{{ action1.data }}",
+          "hidden_submit_button": "Set whether to hide the submit button",
+          "submit_button_full_w": "Set whether the submit button is full width.",
+          "submit_button_text": "Set the text of the submit button"
+        }
+      },
+      "setter_tootip": {
+        "volume": "0 과 1 사이의 숫자"
+      },
+      "setter_message": {
+        "choose_at_least": "Please choose at lease {{ min }} options.",
+        "choose_up_to": "Please choose up to {{max}} options.",
+        "map": {
+          "zoom": "1에서 22 사이의 값을 설정하십시오."
+        },
+        "upload": {
+          "size_exceed": "Files over 500MB may fail to parse.",
+          "single_file": "단일 파일만 허용됩니다.",
+          "file": "지원되지 않는 파일 형식이 제거됨",
+          "directory": "디렉토리만 허용됩니다."
+        },
+        "recording": {
+          "recording_permission": "녹음 권한 필요",
+          "cannot_set_value_dur": "기록 중에는 값을 설정할 수 없습니다.",
+          "min_duration": "최소 {{minimum}}초 이상 녹음하세요.",
+          "max_duration": "{{maximum}}초 이내로 녹화하세요."
+        },
+        "drive_builder": {
+          "min_size": "Please select a file with a size greater than {{min}}",
+          "max_size": "Please select a file with a size smaller than {{max}}",
+          "min_files": "Please select at least {{min}} files",
+          "max_files": "Please select at most {{max}} files"
+        },
+        "uploadsuc": "Uploaded successfully",
+        "uploadfail": "Failed to upload",
+        "noStorage": "Failed to upload because of not enough storage.",
+        "noTraffic": "Failed to download because of not enough traffic."
+      },
+      "setter_description": {
+        "code": {
+          "write_code": "여기에 코드를 작성하십시오. {{ }} 내부에서 JavaScript 사용"
+        }
+      },
+      "setter_hover": {
+        "rich_text": {
+          "default_text": "The value will be shown when the input field is empty."
+        }
+      },
+      "widget": {
+        "reply": "Reply to: ",
+        "reply_image": "[Image]",
+        "reply_video": "[Video]",
+        "reply_audio": "[Audio]"
+      },
+      "page": {
+        "blank_view": "No sub-page"
       }
     },
     "page": {
@@ -859,7 +2295,7 @@
         "add": "새 빌드",
         "body": "본체",
         "default_view": "기본 보기",
-        "edit_view": "보기 편집",
+        "edit_view": "Edit path",
         "footer": "보행인",
         "header": "헤더",
         "key": "핵심 가치",
@@ -868,11 +2304,14 @@
         "right_panel": "오른쪽 패널",
         "set_as_homepage": "시작 페이지로 설정",
         "show_fold_icon": "축소 버튼 표시",
-        "view_path": "경로 보기",
+        "view_path": "Path",
         "views": "보다",
         "width": "너비",
         "height": "높은",
-        "columns": "Columns"
+        "columns": "열",
+        "set_as_default_subpage": "Set as default subpage",
+        "delete-page": "Delete page",
+        "delete-sub-page": "Delete sub-page"
       },
       "model_tips": {
         "cancel_button": "취소",
@@ -887,8 +2326,11 @@
       "tab_title": "페이지",
       "tooltips": {
         "show_fold_icon": "패널을 접거나 펼치는 버튼을 표시합니다.",
-        "view_path": "이 보기에 액세스하기 위한 문자열 철자 example.com/app/page/",
-        "auto_canvas_width": "The width of page as a percentage of the browser width."
+        "view_path": "To configure access to this page, you'll need to adjust the path. For instance, if you change the path to '**newPath**', and add it as a subpage of the homepage. This page can then be accessed via the following URL: cloud.illacloud.com/yourTeam/deploy/app/appid/homepage/**newPath**.",
+        "auto_canvas_width": "브라우저 너비의 백분율로 나타낸 페이지 너비입니다."
+      },
+      "message": {
+        "new_path": "No matching sub-page found. New sub-page has been added. "
       }
     },
     "validate_message": {
@@ -899,7 +2341,12 @@
       "min_value": "{{ number }} 이상의 값을 입력하세요.",
       "regex": "필요한 형식을 입력하세요.",
       "required": "필수의",
-      "url": "유효한 URL을 입력 해주세요"
+      "url": "유효한 URL을 입력 해주세요",
+      "max_size": "파일 크기는 {{maxSize }} {{ type }} 을(를) 초과할 수 없습니다.",
+      "min_files": "{{ minFiles }} 개 이상의 파일이 필요합니다.",
+      "max_files": "최대 {{ maxFiles }} 파일이 지원됩니다.",
+      "min_size": "파일 크기는 {{minSize }} {{ type }} 보다 작을 수 없습니다.",
+      "min_max_size": "가장 작은~최대 파일 크기"
     },
     "widget_picker": {
       "empty_tip": "죄송합니다, 검색 결과가 없습니다",
@@ -912,9 +2359,310 @@
         "inputs": "입력 클래스 구성요소",
         "navigation": "항해",
         "presentation": "디스플레이 클래스 구성요소",
-        "selects": "클래스 구성 요소 선택"
+        "selects": "클래스 구성 요소 선택",
+        "drive": "ILLA Drive"
       },
       "tab_title": "구성 요소"
+    },
+    "method": {
+      "set_hidden": "Set hidden",
+      "set_file_url": "Set file URL",
+      "play": "Play",
+      "pause": "Pause",
+      "seek_to": {
+        "time": "시간",
+        "unit": "(s)"
+      },
+      "set_video_url": {
+        "video": "비디오 소스"
+      },
+      "speed": {
+        "speed": "속도",
+        "placeholder": {
+          "speed": "1.5"
+        }
+      },
+      "stop": "Stop",
+      "mute": "음소거",
+      "loop": "반복",
+      "show_controls": "Show Controls",
+      "set_volumn": "Set Volumn",
+      "set_volume": {
+        "volume": "음량",
+        "placeholder": {
+          "volume": "2"
+        }
+      },
+      "statistics": {
+        "set_primary_value": "기본 값 설정",
+        "reset_primary_value": "기본 값 재설정",
+        "primary_value": "기본 값"
+      },
+      "collapse": {
+        "expand_all_items": "모든 스레드 펼치기",
+        "collapse_all_items": "Collapse all items"
+      },
+      "carousel": {
+        "showNext": "다음에 보이는 이미지 표시",
+        "showPrevious": "이전에 보이는 이미지 표시"
+      },
+      "file_download": {
+        "download": "다운로드",
+        "message": {
+          "suc": "다운로드 시작",
+          "fail": "요청 실패",
+          "download_failed": "불러 오는데 실패했습니다."
+        }
+      },
+      "setGlobalData": "전역 데이터 편집",
+      "setLocalStorage": "로컬 저장소",
+      "audio": {
+        "set_audio_url": "오디오 소스 설정"
+      },
+      "map": {
+        "marker_selected": "선택된 마커",
+        "marker_created": "마커 생성됨",
+        "markers_changed": "마커가 변경됨"
+      },
+      "time_range": {
+        "setstarttime": "시작 시간 설정",
+        "setendtime": "setEndTime"
+      },
+      "eventCalendar": {
+        "addevent": "addEvent",
+        "deleteevent": "deleteEvent"
+      },
+      "table": {
+        "clear_filters": "Clear filters",
+        "clear_column_setting": "열 설정 지우기",
+        "refresh": "새로 고치다",
+        "select_page": "페이지 선택",
+        "select_row": "Select row",
+        "clear_selection": "Clear selection",
+        "set_filters": "Set filters",
+        "onFreeTimeDragOrClick": "Click free time"
+      },
+      "clearReplyMessage": "Clear reply message"
+    },
+    "tutorial": {
+      "panel": {
+        "tutorial": {
+          "tab": {
+            "title": "지도 시간"
+          },
+          "title": {
+            "tutorial": "지도 시간",
+            "templates": "주형"
+          },
+          "onboarding_app": {
+            "name": "초보자 가이드",
+            "description": "ILLA의 튜토리얼을 따라 애플리케이션 구축 방법을 배우십시오",
+            "action": "시작"
+          },
+          "templates_action": {
+            "fork": "포크",
+            "fork_description": "이 템플릿을 사용하여 앱 만들기"
+          },
+          "templates_name": {
+            "table": "계기반",
+            "form": "설문지",
+            "list": "관리자 패널",
+            "table_guide": "Table guide",
+            "custom_login": "Custom login",
+            "run_script": "Run Script",
+            "calendar_guide": "Calendar guide",
+            "chat_guide": "Chat guide",
+            "custom_login_with_sc": "Custom login with Script"
+          },
+          "templates_description": {
+            "table": "테이블 및 기타 구성 요소를 사용하여 대시보드를 만듭니다.",
+            "form": "양식 및 입력 구성 요소를 사용하여 만족도 조사, 사전 판매 양식 등과 같은 양식을 만듭니다",
+            "list": "목록 구성 요소를 사용하여 정보 표시 및 관리",
+            "table_guide": "The features supported by Table and how to use them",
+            "custom_login": "To restrict only users in your database can access your public apps",
+            "run_script": "Flexible event handling with Run Script",
+            "calendar_guide": "Managing events and viewing events with Calendar component",
+            "custom_login_with_sc": "Use Script to restrict only users in your database can access your apps"
+          },
+          "modal": {
+            "title": "포크 & 배포",
+            "placeholder": "애플리케이션 이름",
+            "cancel": "취소",
+            "fork": "포크 & 배포"
+          }
+        },
+        "onboarding_app": {
+          "drag_input": "1단계: 입력 구성 요소를 여기로 드래그합니다.",
+          "drag_button": "2단계: 버튼 구성요소를 여기로 드래그합니다.",
+          "drag_table": "3단계: 표 구성요소를 여기로 드래그",
+          "exit": "종료",
+          "do_it": "자동 완성",
+          "drag_title": "구성 요소를 캔버스로 드래그",
+          "modify_action_title": "ACTION수정",
+          "modify_action_description_modify": "ACTION을 수정하여 데이터를 가져옵니다. {{input1.value}}를 사용하여 입력 구성 요소에 입력된 데이터를 가져올 수 있습니다.\n\nselect * from users\njoin orders\non users.id = orders.id\nwhere {{!input1.value}} or lower(users.name) like '% {{input1.value.toLowerCase()}}%'",
+          "modify_action_description_click": "저장을 클릭한 다음 실행을 클릭합니다.",
+          "display_data_title": "테이블에 데이터 표시",
+          "display_data_description_select": "캔버스에서 테이블 선택",
+          "display_data_description_modify": "오른쪽 패널에서 데이터 소스를 수정합니다. {{postgresql1.data}}를 사용하여 데이터를 가져올 수 있습니다.",
+          "event_handler_title": "버튼을 클릭하여 작업을 트리거합니다.",
+          "event_handler_description_1": "캔버스에서 버튼 선택",
+          "event_handler_description_2": "이벤트 핸들러 추가",
+          "event_handler_description_3": "클릭 이벤트 핸들러",
+          "event_handler_description_4": "액션 트리거 액션 변경",
+          "event_handler_description_5": "쿼리를 postgre1로 변경",
+          "test_it_title": "시험을 치다",
+          "test_it_description": "검색할 사용자 이름을 입력하고 버튼을 클릭합니다.",
+          "test_it_button": "다음 단계",
+          "congratulations_title": "축하해요",
+          "congratulations_description": "첫 번째 애플리케이션을 구축했습니다. 사용 중 궁금한 점이 있으면 <0>Discord<0>를 통해 문의하실 수 있습니다.",
+          "congratulations_button": "마치다",
+          "event_handler_description_all": "1. Add an event handler\r\n2. Click the event handler\r\n3. Change the action to trigger action\r\n4. Change the Query to postgresql1"
+        }
+      }
+    },
+    "global": {
+      "size_exceed": "데이터 크기가 한도를 초과합니다(현재 크기: {{current_size}} 바이트, 한도: {{limit_size}} 바이트)."
+    },
+    "general": {
+      "length_limit": "The current input content is too long, we have stopped automatically calculating data, you can still continue to input, this will not affect your use."
+    },
+    "history": {
+      "operation": {
+        "Added": "Added {{operationTargetName}}",
+        "Deleted": "Deleted {{operationTargetName}}",
+        "Updated": "Updated {{operationTargetName}}",
+        "Moved": "Moved {{operationTargetName}}",
+        "Reseted": "Reseted {{operationTargetName}}",
+        "Restored": "Restored from {{versionName}}"
+      },
+      "save": "Save as history",
+      "history": "History",
+      "more": "More",
+      "save_keyboard": {
+        "cmds": "⌘ S",
+        "ctrls": "Ctrl+S"
+      },
+      "history_list": {
+        "current": "Current",
+        "manual": "Manual",
+        "January": "January",
+        "February": "February",
+        "March": "March",
+        "April": "April",
+        "May": "May",
+        "June": "June",
+        "July": "July",
+        "August": "August",
+        "September": "September",
+        "October": "October",
+        "November": "November",
+        "December": "December",
+        "final_node": "No more history",
+        "label": "View only"
+      },
+      "restore": "Restore this version",
+      "message": {
+        "version_change": "The current app version has changed",
+        "suc": {
+          "save": "Current version is successfully saved as a history record",
+          "restore": "Successfully restored",
+          "preview": "The history record is successfully loaded."
+        },
+        "fail": {
+          "save": "Failed to save",
+          "restore": "Failed to restore",
+          "preview": "Failed to load the history record."
+        }
+      }
+    },
+    "ai-agent": {
+      "label": {
+        "name": "Name",
+        "desc": "Description",
+        "mode": "Mode",
+        "prompt": "Prompt",
+        "variable": "Variable",
+        "welcome": "Welcome message",
+        "model": "Model",
+        "temperature": "Temperature",
+        "max-token": "Max token",
+        "icon": "Icon"
+      },
+      "placeholder": {
+        "name": "Give a name to the agent",
+        "desc": "Provide a brief description of what this agent is intended to be used for.",
+        "prompt": "Enter / to select a variable",
+        "variable": {
+          "key": "Variable name",
+          "value": "Value"
+        },
+        "welcome": "Provide a welcome message displayed when users start use the agent.",
+        "icon": "Upload",
+        "send": "Send something to the Agent"
+      },
+      "tips": {
+        "mode": "In chat mode, each message sent includes the conversation history as part of the request, which can result in better outcomes but consumes more tokens; in text mode, each message sent does not include the conversation history, which may result in less optimal outcomes compared to chat mode but conserves tokens.",
+        "not-start": "Complete the Agent configure and click Start to run",
+        "not-start-run": "Please click the Start button on the left.",
+        "temperature": "A value between 0 and 1. The smaller the value, the better the effect may be",
+        "max-token": "Used to limit the maximum number of tokens consumed in a single run"
+      },
+      "option": {
+        "mode": {
+          "chat": "Chat",
+          "text": "Text generation"
+        },
+        "model": {
+          "gpt-3": {
+            "5-turbo": "gpt-3.5-turbo"
+          },
+          "gpt-4": "gpt-4"
+        }
+      },
+      "new": "New",
+      "save": "Save",
+      "start": "Start",
+      "restart": "Restart",
+      "contribute": "Contribute to marketplace",
+      "button": {
+        "send": "Send",
+        "generating": "Generating"
+      },
+      "tab": {
+        "prompt": "Prompt",
+        "chat": "Chat",
+        "text": "Generate text"
+      },
+      "message": {
+        "click-start": "Click the Start button to trigger.",
+        "insufficient_token": "Insufficient token",
+        "start-failed": "Failed to start. Please try again. ",
+        "reconnect": "Connection lost. Reconnecting...",
+        "token-not-enough": "Model limit reached. Please restart.",
+        "token": "The current value of Max tokens is low, which may cause incomplete returned results.",
+        "purchase-required": "Colla is not enough to run, please recharge.",
+        "leave": "There are unsaved content, are you sure you want to leave?",
+        "generating": "Please wait for the generation to complete or interrupt the process",
+        "model-unavailable": "The current model is not available"
+      },
+      "title": "Edit AI Agent",
+      "generate-desc": {
+        "button": "AI generate",
+        "tooltips": "Use AI to generate the description based on your prompt. ",
+        "failed": "Failed to generate. Please try again later. ",
+        "blank": "Please enter the prompt first"
+      },
+      "generate-icon": {
+        "tooltips": "Use AI to generate icon based on the agent name and description",
+        "blank": "Please fill in the name field first"
+      },
+      "title-preview": {
+        "chat": "Chat",
+        "text-generation": "Text generation"
+      }
+    },
+    "common": {
+      "required": "Required"
     }
   },
   "exit_preview": "미리보기 종료",
@@ -926,9 +2674,15 @@
   "not_online_tips": "네트워크 연결이 끊어졌습니다. 이 장치의 네트워크를 확인하십시오.",
   "preview": {
     "viewport": {
-      "size": "Size",
+      "size": "크기",
       "reset": "초기화",
-      "save": "저장"
+      "save": "저장",
+      "tooltip": {
+        "fluid_width": "유체 폭",
+        "desktop": "데스크톱(너비 = 1280px)",
+        "tablet": "태블릿(폭 = 1080px)",
+        "custom": "사용자 정의"
+      }
     },
     "button_text": "시사"
   },
@@ -978,12 +2732,15 @@
       "des": "요청에 실패했습니다. 나중에 다시 시도하십시오."
     },
     "back": "홈페이지로 돌아 가기",
-    "mobile_forbidden": "For the better editing experience, please visit this page on desktop"
+    "mobile_forbidden": "더 나은 편집 환경을 위해 데스크톱에서 이 페이지를 방문하세요.",
+    "back_to_cloud": "ILLA 클라우드 페이지로 돌아가기",
+    "no_permission_title": "Insufficient permissions",
+    "no_permission_description": "You don't have permissions to perform the requested operation. Please contact the administers in your team."
   },
   "title": "엘라 클라우드에 오신 것을 환영합니다",
   "unfreeze_tips": "캔버스를 고정한 후 구성 요소를 컨테이너 안팎으로 드래그할 수 있습니다. (디 또는 케이)",
   "user": {
-    "description": "개발자 전용 오픈 소스 로우 코드 플랫폼입니다.",
+    "description": "Build internal tools at lightning speed",
     "forgot_password": {
       "actions": {
         "reset": "초기화",
@@ -1104,9 +2861,14 @@
         "fail": "등록 실패",
         "fail_sent": "인증 코드를 보내지 못했습니다.",
         "success": "등록 성공",
-        "verification_code": "인증 코드 전송됨"
+        "verification_code": "인증 코드 전송됨",
+        "not_allow_register": "This team has disabled register. Please contact the team owner. "
       },
-      "title": "등록하다"
+      "title": "등록하다",
+      "agreement": {
+        "privacy_policy": "개인 정보 정책",
+        "terms_of_service": "서비스 이용약관"
+      }
     }
   },
   "widget": {
@@ -1130,9 +2892,10 @@
       "name": "원형 진행률 표시줄"
     },
     "container": {
-      "empty": "<keyPress> D </keyPress> 또는 <keyPress> K </keyPress> 를 누른 상태에서 구성 요소를 컨테이너로 드래그",
+      "empty": "구성요소를 여기로 드래그",
       "key_duplicated": "중복 키 값, 오류를 방지하기 위해 고유한 값을 사용하십시오.",
-      "name": "컨테이너"
+      "name": "컨테이너",
+      "value_duplicated": "중복 키 값, 오류를 방지하기 위해 고유한 값을 사용하십시오."
     },
     "date": {
       "name": "날짜 선택기"
@@ -1169,6 +2932,18 @@
     },
     "number_input": {
       "name": "숫자 입력 상자"
+    },
+    "rich_text_editor": {
+      "name": "서식 있는 텍스트 편집기"
+    },
+    "json_editor": {
+      "name": "JSON editor"
+    },
+    "json_viewer": {
+      "name": "JSON 뷰어"
+    },
+    "chat": {
+      "name": "Chat"
     },
     "public": {
       "left": "왼쪽",
@@ -1215,7 +2990,104 @@
       "vertical": "초상화"
     },
     "modal": {
-      "name": "Modal"
+      "name": "모달"
+    },
+    "textarea": {
+      "name": "긴 텍스트 입력"
+    },
+    "upload": {
+      "name": "업로드",
+      "default_button_text": "업로드",
+      "default_dropzone_text": "파일 선택 또는 드래그 앤 드롭"
+    },
+    "icon": {
+      "name": "상"
+    },
+    "pdf": {
+      "empty": "PDF 파일 없음",
+      "failed": "PDF를 로드할 수 없습니다."
+    },
+    "video": {
+      "name": "동영상",
+      "empty": "동영상 없음",
+      "fail": "불러 오는데 실패했습니다."
+    },
+    "statistics": {
+      "name": "통계"
+    },
+    "collapse": {
+      "name": "Collapse"
+    },
+    "multiselect": {
+      "name": "다중 선택"
+    },
+    "carousel": {
+      "name": "회전목마"
+    },
+    "step": {
+      "name": "걸음"
+    },
+    "slider": {
+      "name": "슬라이더"
+    },
+    "range_slider": {
+      "name": "범위 슬라이더"
+    },
+    "audio": {
+      "name": "오디오 플레이어",
+      "no_audio": "오디오 없음"
+    },
+    "collaborative": {
+      "no_name": "이름 없음"
+    },
+    "map": {
+      "name": "지도"
+    },
+    "time_picker": {
+      "name": "시간 선택기"
+    },
+    "time_range": {
+      "name": "시간 범위"
+    },
+    "eventCalendar": {
+      "name": {
+        "event_calendar": "이벤트 캘린더"
+      },
+      "name_duplicated": "이 이벤트에서 이 리소스 ID가 충돌합니다. 같은 이름이나 다른 ID를 사용하세요."
+    },
+    "switch_group": {
+      "name": "그룹 전환"
+    },
+    "recording": {
+      "name": "녹음"
+    },
+    "jsonEditor": {
+      "name": "JSON Editor"
+    },
+    "drive_picker": {
+      "name": "Drive file picker",
+      "modal": {
+        "files": "Files",
+        "confirm": "Confirm({{fileNum}} files)",
+        "cancel": "Cancel",
+        "no_file": "No file"
+      }
+    },
+    "jsonSchemaForm": {
+      "name": "JSON Schema Form"
+    },
+    "page": {
+      "path_duplicated": "The path is duplicated. Please use a unique path to avoid errors. ",
+      "tips": {
+        "blank_view": "This module has no child pages. Please add them first through the Page panel on the right."
+      },
+      "label": {
+        "rename_url": "Edit path",
+        "rename_page_url": "Edit page"
+      }
+    },
+    "grid_list": {
+      "name": "Grid list"
     }
   },
   "page": {
@@ -1224,11 +3096,1080 @@
         "fixed": "고정 너비",
         "auto": "적응성"
       }
+    },
+    "user": {
+      "forgot_password": {
+        "actions": {
+          "reset": "초기화",
+          "send": "코드 전송"
+        },
+        "error_message": {
+          "email": {
+            "invalid_pattern": "올바른 이메일 주소를 입력하십시오",
+            "registered": "이 이메일 주소는 등록되지 않았습니다.",
+            "require": "이메일은 비워둘 수 없습니다."
+          },
+          "newPassword": {
+            "require": "비밀번호를 입력해주세요"
+          },
+          "verification_code": {
+            "expired": "인증 코드가 만료되었습니다",
+            "invalid": "잘못된 검증 코드",
+            "require": "인증 코드를 입력하십시오."
+          }
+        },
+        "fields": {
+          "email": "이메일",
+          "newPassword": "새 비밀번호",
+          "verification_code": "인증 코드"
+        },
+        "placeholder": {
+          "email": "이메일을 입력해주세요",
+          "verification_code": "인증 코드를 입력하세요"
+        },
+        "subtitle": "다시 로그인",
+        "tips": {
+          "fail": "비밀번호 재설정 실패",
+          "fail_sent": "인증 코드를 보내지 못했습니다.",
+          "success": "비밀번호 재설정 성공",
+          "verification_code": "인증 코드 전송됨"
+        },
+        "title": "암호를 재설정"
+      },
+      "password": {
+        "placeholder": "비밀번호를 입력해주세요(6자 이상)"
+      },
+      "policy": "ILLA를 사용하면 <0>개인정보 보호정책</0> 및 <1>서비스 약관</1>에 동의하게 됩니다.",
+      "sign_in": {
+        "actions": {
+          "login": "로그인"
+        },
+        "description": {
+          "forgot_password": "비밀번호를 잊으 셨나요?",
+          "policy": "\"로그인\"을 클릭하여 < 0 > 서비스 약관 < /0 > 및 < 1 > 개인 정보 보호 계약 < /1 > 을 읽고 동의했음을 나타냅니다.",
+          "register": "새로운 사용자? < 0 > 계정 등록 < /0 >"
+        },
+        "error_message": {
+          "email": {
+            "invalid_pattern": "올바른 이메일 주소를 입력하십시오",
+            "registered": "이 이메일 주소는 등록되지 않았습니다.",
+            "require": "이메일은 비워둘 수 없습니다."
+          },
+          "password": {
+            "incorrect": "정확한 계정 비밀번호를 입력해주세요",
+            "locked": "5회 이상 잘못된 비밀번호를 입력하면 1시간 동안 계정이 잠깁니다.",
+            "min_length": "비밀번호는 6자 이상이어야 합니다.",
+            "require": "비밀번호는 비워둘 수 없습니다."
+          }
+        },
+        "fields": {
+          "email": "이메일",
+          "password": "비밀번호"
+        },
+        "placeholder": {
+          "email": "이메일을 입력해주세요"
+        },
+        "tips": {
+          "fail": "로그인 실패",
+          "success": "성공적 로그인",
+          "fail_account": "잘못된 이메일 또는 비밀번호"
+        },
+        "title": "다시 오신 것을 환영합니다",
+        "oauth": {
+          "message": {
+            "auth_suc_no_password": "성공적으로 가입하십시오. 나중에 이메일 계정의 비밀번호를 설정할 수 있습니다.",
+            "auth_failed": "인증 실패"
+          }
+        },
+        "option": {
+          "github": "GitHub로 로그인",
+          "google": "Google 계정으로 로그인",
+          "or": "OR"
+        }
+      },
+      "sign_up": {
+        "actions": {
+          "create": "계정 생성",
+          "send": "코드 전송"
+        },
+        "description": {
+          "login": "이미 계정이 있습니까? < 0 > 로그인 < /0 >",
+          "policy": "\"지금 등록\"을 클릭하여 <0>서비스 약관</0> 및 <1>개인정보 보호 계약</1>을 읽고 동의했음을 나타냅니다.",
+          "subscribe": "ILLA의 소식을 구독하세요"
+        },
+        "error_message": {
+          "email": {
+            "invalid_pattern": "올바른 이메일 주소를 입력하십시오",
+            "registered": "이미 등록된 이메일입니다. 로그인하세요.",
+            "require": "이메일은 비워둘 수 없습니다."
+          },
+          "password": {
+            "require": "비밀번호는 비워둘 수 없습니다."
+          },
+          "username": {
+            "length": "사용자 이름은 3~15자여야 합니다.",
+            "require": "사용자 이름은 비워둘 수 없습니다."
+          },
+          "verification_code": {
+            "expired": "인증 코드가 만료되었습니다",
+            "invalid": "잘못된 검증 코드",
+            "require": "인증 코드를 입력하십시오."
+          }
+        },
+        "fields": {
+          "email": "이메일",
+          "password": "비밀번호",
+          "username": "사용자 이름",
+          "verification_code": "인증 코드"
+        },
+        "placeholder": {
+          "email": "이메일을 입력해주세요",
+          "username": "사용자 이름을 입력하십시오",
+          "verification_code": "인증 코드를 입력하십시오."
+        },
+        "tips": {
+          "fail": "등록 실패",
+          "fail_sent": "인증 코드를 보내지 못했습니다.",
+          "success": "등록 성공",
+          "verification_code": "인증 코드 전송됨"
+        },
+        "title": "등록하다",
+        "option": {
+          "github": "GitHub 에 가입",
+          "google": "Google에 가입"
+        }
+      },
+      "description": "Build internal tools at lightning speed"
+    },
+    "left": {
+      "menu": {
+        "tutorial": {
+          "tutorial": "지도 시간"
+        }
+      }
     }
   },
   "frame_size": {
-    "invalid_tips": "Please enter a value not less than {{ size }}."
+    "invalid_tips": "{{ size }} 이상의 값을 입력하세요."
   },
   "failed_to_copy": "복사 실패",
-  "copied": "복사됨!"
+  "copied": "복사됨!",
+  "user_management": {
+    "role": {
+      "owner": "소유자",
+      "admin": "관리하다",
+      "editor": "편집자",
+      "viewer": "보기만",
+      "tips": {
+        "admin": "The member who can manage all members except Owner, edit APPs, and view APPs",
+        "editor": "The member who can manage editor and viewer members, edit APPs, and view APPs",
+        "viewer": "The member who can manage viewer members and view APPs"
+      }
+    },
+    "modal": {
+      "title": {
+        "invite_members": "멤버 초대",
+        "invite_to_use": "Invite to use",
+        "invite_to_edit": "Invite to edit",
+        "contribute": "Community"
+      },
+      "link": {
+        "invite_title": "초대 링크",
+        "copy": "복사",
+        "turn_off": "초대 링크 끄기",
+        "update": "초대 링크 업데이트",
+        "description": "사용자가 비공개 링크로 팀에 참여할 수 있도록 허용",
+        "turn_on": "초대 링크 켜기",
+        "fail": "링크를 가져오지 못했습니다. 나중에 다시 시도해 주세요.",
+        "copied_suc": "복사됨!",
+        "failed_to_copy": "복사 실패",
+        "turn_off_fail": "사용 중지하지 못했습니다",
+        "turn_on_fail": "사용 설정 실패",
+        "make_public_title": "앱을 공개",
+        "make_public_copy": "복사",
+        "marketplace": {
+          "label": "Share with link"
+        }
+      },
+      "email": {
+        "invite_title": "이메일로 초대",
+        "invite": "초대",
+        "placeholder": "이메일 주소를 입력하세요",
+        "invited": "초대했다",
+        "in_list": "이 사용자는 이미 팀에 있습니다.",
+        "duplicate": "{{ email }} 는 중복 이메일 주소입니다.",
+        "not_mail": "{{ email }}는 이메일이 아닙니다."
+      },
+      "invalid_email": "유효한 이메일 주소를 입력하세요",
+      "message": {
+        "make_public_suc": "성공적으로 설정",
+        "make_public_failed": "설정 실패",
+        "app_share_in_team": "{{ email }}는 이미 귀하의 팀에 속해 있습니다. 해당 링크를 그와 공유하십시오."
+      },
+      "tab": {
+        "invite": "멤버 초대",
+        "public": "공개",
+        "with_team": "Share with team members"
+      },
+      "custom_copy_text_app_invite": "{{userName}}님이 「{{teamName}}」에 초대합니다. 링크를 클릭하여 팀에 합류하세요: {{invite Link}}",
+      "custom_copy_text_public": "{{userName}}님이 「{{teamName}}」에서 나와 앱을 공유했습니다. 앱을 확인하려면 링크를 클릭하세요: {{inviteLink}}",
+      "custom_copy_text": "{{userName}}님이 당신을 「{{teamName}}」에 초대합니다. 링크를 클릭하여 팀에 합류하세요: {{inviteLink}}",
+      "tips": {
+        "license_insufficient": "Remaining licenses"
+      },
+      "custom-copy-ai-agent": "{{userName}} shared you an AI Agent of 「{{teamName}}」. Click the link to join the team and try the AI Agent: {{inviteLink}}",
+      "contribute": {
+        "label": "Contribute to community",
+        "default_text": {
+          "app": "I just discovered an impressive app called {{ appName }}. Check it: {{ appLink }}",
+          "agent": "I just discovered an impressive AI Agent called {{ agentName }}. Check it: {{ agentLink }}"
+        },
+        "desc": "After contributing to the community, all users can run, star, and fork your Agent. When users from other teams run this Agent, it will not consume your resources.",
+        "turn_off": "Cancel contribution",
+        "app": {
+          "desc": "After contributing your app to the community, other users can view its interface, run its actions, and fork it. When forking an app, the resource configuration information is not included, so there is no need to worry about the disclosure of resource configuration information."
+        }
+      },
+      "social_media": {
+        "label": "Share on",
+        "twitter": "Twitter",
+        "linkedin": "LinkedIn",
+        "reddit": "Reddit",
+        "facebook": "Facebook",
+        "whatsapp": "WhatsApp",
+        "hackernews": "Hacker News",
+        "default_text": {
+          "app": "I just discovered an impressive app called {{ appName }}",
+          "agent": "I just discovered an impressive AI Agent called {{ agentName }}"
+        }
+      },
+      "custom_copy_text_agent_invite": "{{ userName }} share you an AI Agent from 「{{ teamName }}」. Join team and check it: {{ inviteLink }}"
+    },
+    "mes": {
+      "invite_suc": "초대 성공",
+      "invite_fail": "초대 실패",
+      "update_suc": "업데이트 성공",
+      "update_fail": "업데이트하지 못했습니다",
+      "transfer_suc": "양도했습니다",
+      "transfer_fail": "전송 실패",
+      "remove_suc": "삭제 성공",
+      "remove_fail": "삭제하지 못했습니다",
+      "change_role_fail": "업데이트하지 못했습니다",
+      "change_role_suc": "업데이트 성공"
+    },
+    "page": {
+      "member": "당원",
+      "invite": "초대",
+      "permission": "권한",
+      "operation": "운영",
+      "transfer": "소유권 이전",
+      "remove": "제거",
+      "ai-agent": "AI Agents"
+    },
+    "transfer_modal": {
+      "title": "소유권을 이전하시겠습니까?",
+      "description": "전송 후 권한이 관리자로 변경됩니다.",
+      "transfer": "전송",
+      "cancel": "취소"
+    },
+    "remove_modal": {
+      "title": "{{ username }} 를 제거하시겠습니까?",
+      "description": "제거 후 사용자는 팀에 액세스할 수 없습니다.",
+      "remove": "제거",
+      "cancel": "취소"
+    },
+    "status": {
+      "pending": "보류 중",
+      "current-user": "You"
+    },
+    "settings": {
+      "allow_editors_invite": "편집자와 뷰어가 회원을 관리하도록 허용합니다",
+      "allow_register": "Allow users to register via link"
+    }
+  },
+  "copy_failed": "복사 실패",
+  "team_setting": {
+    "left_panel": {
+      "setting_title": "팀 설정",
+      "member": "회원",
+      "leave": "팀 탈퇴",
+      "delete": "팀 삭제"
+    },
+    "leave_modal": {
+      "title": "이 팀을 떠나시겠습니까?",
+      "description": "이 팀을 떠난 후에는 팀 리소스에 액세스할 수 없습니다.",
+      "leave": "떠나다",
+      "cancel": "취소"
+    },
+    "delete_modal": {
+      "title": "이 팀을 삭제하시겠습니까?",
+      "delete": "삭제",
+      "cancel": "취소",
+      "desctiption": "삭제 후에는 팀 식별자를 사용할 수 없으며 모든 구성원이 이 팀에서 제거됩니다."
+    },
+    "team_info": {
+      "title": "팀 정보",
+      "team_name": "이름",
+      "domain": ".illacloud.com",
+      "existed": "이름이 이미 존재합니다",
+      "available": "가능함",
+      "edit": "편집하다",
+      "save": "변경 사항을 저장하다",
+      "adjust_avater": "아바타 조정",
+      "avater_crop": "자르기",
+      "team_name_empty": "팀 이름을 입력하세요.",
+      "team_id_empty": "팀 ID를 입력하세요.",
+      "team_name_placeholder": "팀 이름을 입력하세요.",
+      "team_id_placeholder": "팀 아이디를 입력해주세요",
+      "leave_title": "팀 탈퇴",
+      "leave_button": "팀 탈퇴",
+      "delete_title": "팀 삭제",
+      "delete_button": "팀 삭제",
+      "team_domain": "팀 ID"
+    },
+    "message": {
+      "save_suc": "팀 아이디를 입력해주세요",
+      "save_fail": "저장 실패"
+    },
+    "mes": {
+      "domain_suc": "성공적으로 생성합니다.",
+      "delete_suc": "성공적으로 삭제",
+      "delete_fail": "삭제 실패",
+      "leave_suc": "팀 성공을 떠나",
+      "leave_fail": "팀 탈퇴 실패"
+    }
+  },
+  "members": "멤버",
+  "invite_new_member": "멤버 초대",
+  "launch": "시작",
+  "homepage": {
+    "message": {
+      "join_failed": "팀 가입 실패: 귀하의 이메일이 초대 이메일이 아닙니다."
+    }
+  },
+  "image_exceed": "이미지 크기는 500KB를 초과할 수 없습니다.",
+  "image": {
+    "crop": {
+      "modal": {
+        "title": "자르기",
+        "save": "저장",
+        "cancel": "취소"
+      }
+    }
+  },
+  "profile": {
+    "setting": {
+      "message": {
+        "save_suc": "팀 아이디를 입력해주세요",
+        "save_fail": "저장 실패"
+      },
+      "password": {
+        "title": "비밀번호"
+      },
+      "subscribe_illa_news": {
+        "label": "ILLA의 이메일 뉴스레터 구독",
+        "tips": "구독 후 ILLA는 이메일을 통해 ILLA Cloud와 관련된 최신 기능, 이벤트, 업계 동향 및 기타 뉴스를 알려드립니다."
+      }
+    }
+  },
+  "ditor": {
+    "inspect": {
+      "setter_option": {
+        "collapse": {
+          "collapsible_list": "접을 수 있는 목록"
+        }
+      },
+      "setter_content": {
+        "widget_action_type_name": {
+          "rowSelectChange": "행 선택 변경"
+        }
+      }
+    }
+  },
+  "message": {
+    "circular_dependency": "{{ nodeName }} 에서 순환 종속성이 발생합니다."
+  },
+  "policy": {
+    "privacy": {
+      "title": "개인 정보 보호 계약",
+      "description": "이 개인 정보 보호 정책은 당사 서비스를 통해 받는 정보의 수집, 사용 및 공개에 관한 당사의 관행을 설명합니다."
+    },
+    "terms": {
+      "description": "본 서비스 약관은 당사 사이트에 대한 액세스 및 사용과 다양한 서비스 제공에 적용됩니다.",
+      "title": "에 동의하게 됩니다"
+    }
+  },
+  "empty_copied_tips": "복사된 내용이 비어 있음",
+  "copy_empty": "The content to be copied is empty",
+  "tutorial": {
+    "modal": {
+      "tutorial": {
+        "first_time": {
+          "title": "5분 안에 앱을 빌드하는 방법 알아보기",
+          "description": "약 5분 정도 소요되는 앱 빌드 방법을 배우려면 ILLA의 튜토리얼을 따르세요.",
+          "cancel": "취소",
+          "take": "튜토리얼 시작"
+        },
+        "exit_confirm": {
+          "title": "튜토리얼 건너 뛰기？",
+          "description": "다음에 온보딩 앱에 들어가면 안내 단계가 재생됩니다.",
+          "cancel": "취소",
+          "exit": "종료"
+        }
+      }
+    }
+  },
+  "oauth_redirect_title": "이동",
+  "oauth_redirect_description": "<0>ILLA Cloud</0>(으)로 리디렉션 중...",
+  "language": {
+    "en-US": "English",
+    "zh-CN": "简体中文",
+    "ko-KR": "한국인",
+    "ja-JP": "日本語",
+    "af-ZA": "Afrikaans",
+    "cs-CZ": "čeština",
+    "de-DE": "Deutsch",
+    "da-DK": "dansk",
+    "el-GR": "ελληνικά",
+    "es-ES": "español",
+    "fi-FI": "suomi",
+    "fr-FR": "français",
+    "it-IT": "italiano",
+    "nl-NL": "Nederlands",
+    "no-NO": "norsk",
+    "pl-PL": "polski",
+    "pt-PT": "português",
+    "ro-RO": "română",
+    "ru-RU": "русский",
+    "sv-SE": "svenska",
+    "uk-UA": "українська"
+  },
+  "logout_failed": "로그아웃 실패",
+  "drive": {
+    "message": {
+      "start_upload": "Start upload",
+      "start_download": "Start download"
+    }
+  },
+  "frame": {
+    "paste_no_aimed": "Please click on the frame to specify the paste location.",
+    "message": {
+      "session": {
+        "error": "Operations involving multiple components are not allowed across canvases."
+      },
+      "undo": {
+        "suc": "Undo successful",
+        "failed": "Undo failed",
+        "nothing": "Nothing to undo"
+      },
+      "redo": {
+        "suc": "Redo successful",
+        "failed": "Redo failed",
+        "nothing": "Nothing to redo"
+      }
+    }
+  },
+  "bookFrom": {
+    "title": "Book a demo",
+    "form": {
+      "about": {
+        "label": "Tell us a little bit about your project",
+        "required": ".",
+        "pattern": ""
+      },
+      "wantTo": {
+        "label": "What do you want to do with ILLA?",
+        "required": ".",
+        "pattern": ""
+      }
+    },
+    "message": {},
+    "submit": "Submit"
+  },
+  "partnerFrom": {
+    "title": "Become a partner",
+    "form": {
+      "name": {
+        "label": "Name",
+        "placeholder-1": "First name",
+        "placeholder-2": "Last name"
+      },
+      "title": {
+        "label": "Your title"
+      },
+      "companyName": {
+        "label": "Company name"
+      },
+      "companyWebsite": {
+        "label": "Company website",
+        "pattern": "Please enter a valid URL"
+      },
+      "email": {
+        "label": "Email",
+        "pattern": "Please enter the correct email."
+      }
+    },
+    "message": {},
+    "submit": "Submit"
+  },
+  "billing": {
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "members": "Team",
+    "app": "apps",
+    "security-support": "Security & support",
+    "apps": {
+      "components": "All components",
+      "resources": "All resources",
+      "plugins": "Unlimited plugins",
+      "sql": "AI SQL Generation",
+      "watermark": "Remove watermark"
+    },
+    "security": {
+      "historic-7": "Historic version keep & recovery for 7 days",
+      "historic-30": "Historic version keep & recovery for 30 days",
+      "develop-environment": "Develop environment",
+      "app-public": "App public",
+      "restore-data": "Backup and restore",
+      "deployed": "Access to ILLA Support",
+      "dedicated": "Dedicated Solutions engineer"
+    },
+    "tips": {
+      "plugins": "Import plugins and make use of it within all the apps in your teams",
+      "sql": "Input natural language and generate SQL statement",
+      "staging": "Test your app against a staging environment",
+      "app-public": "Make the app public and anyone with the link can access it",
+      "restore-data": "Backup or restore data at any time you want",
+      "deployed": "Deployed engineers can help you onboard faster",
+      "dedicated": "Dedicated customer solutions engineer via Slack/email/phone",
+      "preview_insufficient": "The file cannot preview due to insufficient capacity, please expand the capacity first."
+    },
+    "deployment": {
+      "title": "Flexible deployment",
+      "title-1": "Flexible",
+      "title-2": "deployment",
+      "introduction": "ILLA provides two ways to deploy. Developers can use the ILLA Cloud to quickly start building their apps on any device. We also provide ILLA CLI for free with better security to ensure data safety.",
+      "illa-cloud": {
+        "title": "ILLA Cloud",
+        "des": "Try one-click deployment and enjoy the easiest deployment experience"
+      },
+      "illa-CLI": {
+        "title": "ILLA CLI",
+        "des": "The fastest and easiest way to self-host ILLA"
+      },
+      "kubernetes": {
+        "title": "Kubernetes",
+        "des": "Deploy ILLA into Kubernetes by using ILLA Helm chart"
+      },
+      "docker": {
+        "title": "Docker",
+        "des": "Deploy ILLA locally in 30s"
+      }
+    },
+    "user-month": "per user/month",
+    "editor-month": "per editor/month",
+    "start-at": "start at 100 users",
+    "free-members": "Only 1 member for personal use",
+    "unlimited-viewer": "FREE for unlimited viewers",
+    "unlimited-members": "Unlimited members",
+    "free-btn": "Build apps for free",
+    "plus-btn": "Try the free version",
+    "enterprise-btn": "Contact us",
+    "menu": {
+      "billing": "Billing",
+      "license": "License",
+      "drive": "Drive",
+      "colla": "Colla",
+      "appsumo": "Appsumo",
+      "colla_transaction": "Colla transaction history",
+      "billing_portal": "Billing portal"
+    },
+    "title": {
+      "billing": "Billing",
+      "license": "License",
+      "drive": "Drive",
+      "colla": "Colla",
+      "appsumo": "Appsumo"
+    },
+    "subscription_general": {
+      "plan": {
+        "free": "Free",
+        "plus": "Plus"
+      },
+      "sub_cycle": {
+        "yearly": "Yearly",
+        "monthly": "Monthly",
+        "lifetime": "Lifetime"
+      },
+      "billing_cyle": {
+        "year": "/ Year",
+        "month": "/ Month"
+      },
+      "table_title": {
+        "next_payment_date": "Next payment date",
+        "expiration_date": "Expiration date",
+        "licenses": "Licenses",
+        "storage": "Storage",
+        "traffic": "Traffic",
+        "colla": "Colla"
+      },
+      "period": {
+        "current": "Current",
+        "next": "Next"
+      }
+    },
+    "subscription_card": {
+      "title": {
+        "License": "License",
+        "Storage": "Storage",
+        "Traffic": "Traffic",
+        "balance": "Balance",
+        "colla": "Colla"
+      },
+      "button": {
+        "License": "Manage licenses",
+        "Storage": "Manage storage",
+        "Traffic": "Expand traffic",
+        "colla": "Manage Colla"
+      },
+      "capacity": {
+        "License": "{{used}} (total of {{total}} licenses) have been used.",
+        "Storage": "{{used}} (total of {{total}} GB) have been used.",
+        "Traffic": "{{used}} (total of {{total}} GB) have been used.",
+        "colla": "{{used}} Colla used (total of {{total}} Colla)"
+      },
+      "colla_usage": {
+        "token": "Token"
+      }
+    },
+    "colla_transaction": {
+      "table_title": {
+        "month": "Month",
+        "event": "Event",
+        "usage": "Colla usage"
+      },
+      "event": {
+        "increase_storage": "Increase storage",
+        "increase_colla": "Increase Colla",
+        "increase_traffic": "Increase traffic"
+      },
+      "usage": {
+        "change_num": "{{changeNum}} Colla"
+      }
+    },
+    "payment_sidebar": {
+      "title": {
+        "manage_storage": "Manage storage",
+        "manage_licenses": "Manage licenses",
+        "expand_traffic_capac": "Expand traffic capacity",
+        "colla": "Manage Colla"
+      },
+      "plan_label": {
+        "License": "Licenses",
+        "Storage": "Storage",
+        "Traffic": "Traffic",
+        "colla": "Colla"
+      },
+      "plan_number_input_label": {
+        "License": "Licenses",
+        "Storage_traffic": "GB",
+        "colla": "Colla"
+      },
+      "select_option": {
+        "Yearly": "Yearly",
+        "Monthly": "Monthly"
+      },
+      "price_label": {
+        "total": "Total"
+      },
+      "price_type": {
+        "this_period_remove": "This period",
+        "this_period": "This period",
+        "next_period": "Next period",
+        "next_period_remove": "Next period",
+        "payment": "Cost",
+        "this_period_storage": "This period",
+        "next_period_storage": "Next period",
+        "this_period_remove_storage": "This period",
+        "next_period_remove_storage": "Next period",
+        "payment_storage": "Cost",
+        "payment_traffic": "Cost",
+        "payment_description_traffic": "{{unitPrice}} × {{trafficNum}} GB"
+      },
+      "price_cal": {
+        "this_period": "{{unitPrice}} × {{licenseNum}} licenses × {{remainDays}} days / {{totalDays}} days",
+        "next_period_yearly": "{{unitPrice}} × {{licenseNum}} licenses",
+        "next_period_monthly": "{{unitPrice}} × {{licenseNum}} licenses",
+        "this_period_remove": "{{unitPrice}} × {{licenseNum}} licenses × {{remainDays}} days / {{totalDays}} days",
+        "next_period_yearly_remove": "{{unitPrice}} × {{licenseNum}} licenses",
+        "next_period_monthly_remove": "{{unitPrice}} × {{licenseNum}} licenses",
+        "payment_year": "{{unitPrice}} × {{licenseNum}} licenses",
+        "payment_month": "{{unitPrice}} × {{licenseNum}} licenses",
+        "this_period_storage": "{{unitPrice}} × {{storageNum}} GB × {{remainDays}} days / {{totalDays}} days",
+        "next_period_storage": "{{unitPrice}} × {{storageNum}} GB",
+        "next_period_monthly_storage": "{{unitPrice}} × {{storageNum}} GB",
+        "this_period_remove_storage": "{{unitPrice}} × {{storageNum}} GB × {{remainDays}} days / {{totalDays}} days",
+        "next_period_yearly_remove_storage": "{{unitPrice}} × {{storageNum}} GB",
+        "next_period_monthly_remove_storage": "{{unitPrice}} × {{storageNum}} GB",
+        "payment_year_storage": "{{unitPrice}} × {{storageNum}} GB",
+        "payment_month_storage": "{{unitPrice}} × {{storageNum}} GB",
+        "colla": "{{unitPrice}} × {{purchaseNum}} Colla"
+      },
+      "button": {
+        "unsubscribe": "Unsubscribe",
+        "subscribe": "Subscribe",
+        "change_plan": "Change plan",
+        "storage_traffic_increase": "Increase {{changeNum}} GB",
+        "storage_traffic_remove": "Remove {{changeNum}} GB",
+        "license_increase": "Increase {{changeNum}} licenses",
+        "license_remove": "Remove {{changeNum}} licenses",
+        "colla_increase": "Increase {{changeNum}} Colla",
+        "colla_remove": "Remove {{changeNum}} Colla"
+      },
+      "description_title": {
+        "add_storage": "You are going to add {{changeNum}} GB storage. Once confirmed, we will immediately deduct the payment for the new storage for this billing cycle. <0>Learn more</0>",
+        "remove_storage": "You are going to remove {{changeNum}} GB storage. Once confirmed, the changes will take effect in the next billing cycle. <0>Learn more</0>",
+        "update_plan_year": "You are going to update to a yearly payment plan. Once confirmed, the change will take effect from the start of the next billing cycle. <0>Learn more</0>",
+        "update_plan_monthly": "You are going to update to a monthly payment plan. Once confirmed, the change will take effect from the start of the next billing cycle. <0>Learn more</0>",
+        "add_license": "You are going to add {{changeNum}} licenses. Once confirmed, we will immediately deduct the payment for the new licenses for this billing cycle. <0>Learn more</0>",
+        "remove_license": "You are going to remove {{changeNum}} licenses. Once confirmed, the changes will take effect in the next billing cycle. <0>Learn more</0>",
+        "add_traffic": "You are going to add {{changeNum}}GB traffic. Once confirmed, we will deduct the cost of the additional traffic immediately. <0>Learn more</0>",
+        "subscribe_storage": "You are going to subscribe to ILLA Cloud Plus. We will automatically deduct the fees from your account at the beginning of each payment cycle. <0>Learn more</0>",
+        "subscribe_license": "You are going to subscribe to ILLA Drive. We will automatically deduct the fees from your account at the beginning of each payment cycle. <0>Learn more</0>",
+        "update_plan_increase_license": "You are going to add {{changeNum}} licenses and update your subscription period. <0>Learn more</0>",
+        "update_plan_remove_license": "You are going to remove {{changeNum}} licenses and update your subscription period. <0>Learn more</0>",
+        "update_plan_increase_storage": "You are going to add {{changeNum}} GB storage and update your subscription period. <0>Learn more</0>",
+        "update_plan_remove_storage": "You are going to remove {{changeNum}} GB storage and update your subscription period. <0>Learn more</0>",
+        "unsubscribe_license": "You are going to unsubscribe ILLA Cloud Plus. After cancellation, starting from the next billing cycle, the Plus features will no longer be accessible. <0>Learn more</0>",
+        "unsubscribe_storage": "You are going to unsubscribe ILLA Drive storage. After cancellation, starting from the next billing cycle, the storage capacity will be restored to 100MB. <0>Learn more</0>",
+        "subscribe_license_monthly": "You are going to subscribe to ILLA Cloud Plus monthly subscription. <0>Learn more</0>",
+        "subscribe_license_yearly": "You are going to subscribe to ILLA Cloud Plus yearly subscription. <0>Learn more</0>",
+        "subscribe_storage_monthly": "You are going to add {{changeNum}}GB storage. Once confirmed, we will deduct the cost of the storage immediately. <0>Learn more</0>",
+        "subscribe_storage_yearly": "You are going to add {{changeNum}}GB storage. Once confirmed, we will deduct the cost of the storage immediately. <0>Learn more</0>",
+        "colla_sub": "You are going to subscribe to Colla. Once confirmed, we will automatically deduct the fees at the beginning of each billing cycle and upgrade your subscription automatically when you require more Colla. <0>Learn more</0>",
+        "colla_increase": "You are going to add {{changeNum}} Colla. Once confirmed, we will immediately deduct the remaining amount due for this billing cycle. <0>Learn more</0>",
+        "colla_remove": "You are going to remove {{changeNum}} Colla. Once confirmed, it will take effect from the next billing cycle. <0>Learn more</0>",
+        "colla_unsubscribe": "You are going to cancel your Colla subscription. Once confirmed, it will take effect from the next billing cycle. Please note that after cancellation, you may experience issues with your ILLA Drive and AI Agent usage. <0>Learn more</0>",
+        "colla_update": "You are going to modify your Colla subscription. Once confirmed, the changes will take effect from the next billing cycle. <0>Learn more</0>"
+      },
+      "description": {
+        "remove_storage": "If the storage capacity occupied by your files exceeds the subscribed storage capacity at the start of the next billing cycle, all files will be disabled until you delete files or increase the storage capacity within the available range. For more information, please refer to our  <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "update_plan_year": "Starting from the next period, the subscription will be changed to an annual subscription, and the fees will be automatically deducted based on the annual subscription pricing. If you wish to reduce licenses or make other changes to the subscription, please update it before the start of the next period. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "update_plan_monthly": "Starting from the next period, the subscription will be changed to a monthly subscription, and the fees will be automatically deducted based on the monthly subscription pricing. If you wish to reduce licenses or make other changes to the subscription, please update it before the start of the next period. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "add_license": "Calculation rules using a monthly seat subscription as an example: Let's consider a scenario where you initially subscribed to 5 seats starting from March 14th, and the billing cycle spans from the 14th of this month to the 13th of next month. On May 10th, you decide to add 1 additional seats. At that point, there were 4 days remaining until the end of the current cycle on May 13th (which totals 30 days from April 14th to May 13th). To calculate the adjusted payment, we will deduct the cost of 1 seat, which amounts to approximately $10, proportionate to the duration of 4 days within the 30-day cycle. Therefore, the deduction is estimated as 1 seat * $10 / 30 days * 4 days, resulting in approximately $1.33. Starting from the next billing cycle, all seat fees will be consolidated and paid together. If you wish to reduce seats or make other changes to the subscription, please update it before the start of the next period. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "remove_license": "If the number of users with editing permissions exceeds the number of licenses at the start of the next billing cycle, all users except the owner will be disabled until you remove members or increase the number of licenses within the available range. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "add_traffic": "After successful deduction, your traffic will increase in real-time. Once the traffic is used, the fees cannot be refunded. Unused traffic can be refunded in units of GB. For example, if you purchase 10GB of traffic and use 4.5GB, you can apply for a refund of 5GB. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "subscribe_storage_yearly": "You are going to subscribe to the annual subscription of ILLA Drive storage. We will automatically deduct the fees from your account at the beginning of each payment cycle. The actual amount deducted depends on how much storage capacity you have subscribed in GB. For example, if you start your first subscription on February 25, 2023, with an annual subscription fee of $9.9 per GB, and you have a total of 3 GB, we will deduct $29.7 on February 25, 2023. If you add 2 GB on March 25, 2023, we will first deduct the remaining 11 months' payment on March 25, 2023. Then, by February 25, 2024, we will deduct the payment for 5 GB, which is (2+3)*$9.9=$49.5. If you wish to reduce storage or make other changes to the subscription, please update it before the start of the next period. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "subscribe_license_monthly": "You are going to subscribe to the monthly subscription of ILLA Cloud Plus. We will automatically deduct the fees from your account at the beginning of each payment cycle. The actual amount deducted depends on the number of licenses you have. For example, if you start your first subscription on February 25, 2023, with an monthly subscription fee of $12 per license, and you have a total of 3 licenses, we will deduct $36 on February 25, 2023. If you add 2 more licenses on March 21, 2023, we will first deduct the remaining 5 days' payment on March 21, 2023. Then, by March 25, 2023, we will deduct the payment for 5 licenses, which is (2+3)*$12=$60. If you wish to reduce licenses or make other changes to the subscription, please update it before the start of the next period. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "update_plan_increase_license": "The fees will be automatically deducted based on the updated number of seats and the pricing of new billing cycle from the next period. This time, we will deduct the payment for the increased seats according to the current billing cycle. Calculation rules of increasing seats using a monthly seat subscription as an example: Let's consider a scenario where you initially subscribed to 5 seats starting from March 14th, and the billing cycle spans from the 14th of this month to the 13th of next month. On May 10th, you decide to add 1 additional seat. At that point, there were 4 days remaining until the end of the current cycle on May 13th (which totals 30 days from April 14th to May 13th). To calculate the adjusted payment, we will deduct the cost of 1 seat, which amounts to approximately $10, proportionate to the duration of 4 days within the 30-day cycle. Therefore, the deduction is estimated as 1 seat * $10 / 30 days * 4 days, resulting in approximately $1.33. Starting from the next billing cycle, all seat fees will be consolidated and paid together. If you wish to reduce seats or make other changes to the subscription, please update it before the start of the next period. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "update_plan_remove_license": "The fees will be automatically deducted based on the updated number of licenses and the pricing of new billing cycle from the next period. If the number of users with editing permissions exceeds the number of licenses at the start of the next billing cycle, all users except the owner will be disabled until you remove members or increase the number of licenses within the available range. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>",
+        "update_plan_remove_storage": "The fees will be automatically deducted based on the updated storage and the pricing of new billing cycle from the next period. If the storage capacity occupied by your files exceeds the subscribed storage capacity at the start of the next billing cycle, all files will be disabled until you delete files or increase the storage capacity within the available range. For more information, please refer to our <0>Privacy Policy</0> and <1>Terms of Service</1>"
+      },
+      "colla_redeem": {
+        "title": "With {{changeNum}} Colla, you can purchase: ",
+        "storage": "Storage",
+        "traffic": "Traffic",
+        "token": "Token"
+      }
+    },
+    "message": {
+      "failed_to_subscribe": "Failed to subscribe. Please try again.",
+      "failed_to_add_traffic": "Failed to add traffic. Please try again. ",
+      "failed_to_add_storage": "Failed to add storage. Please try again. ",
+      "failed_to_remove_storage": "Failed to remove storage. Please try again. ",
+      "failed_to_add_licens": "Failed to add licenses. Please try again. ",
+      "failed_to_remove_lic": "Failed to remove licenses. Please try again. ",
+      "failed_to_change_pla": "Failed to change plan. Please try again. ",
+      "failed_to_unsubscrib": "Failed to unsubscribe. Please try again. ",
+      "successfully_removed": "Successfully removed.  The change will take effect from {{nextPaymentDate}}.",
+      "unsubscription_succe": "Unsubscription successful.  The change will take effect from {{nextPaymentDate}}",
+      "cancel_subscribe": "Subscription not completed, please try again or contact billing@illasoft.com",
+      "cancel_purchase": "Purchase not completed, please try again or contact billing@illasoft.com",
+      "successfully_changed": "Subscription changed successfully. It will take effect in a few minutes",
+      "failed_to_change": "Subscription change failed",
+      "unsubscription_suc": "The subscription has been canceled successfully and will take effect from the next period",
+      "failed_to_join_no_license": "Unable to join due to insufficient licenses ",
+      "storage_insufficient_modal": "The storage or traffic of this team is not enough. Please contact your admin.",
+      "appsumo": {
+        "suc": "Successfully redeemed",
+        "fail": "Failed to redeem. Please try again later.",
+        "transfer": "Operate failed. This user is bound to the lifetime subscription. ",
+        "leave": "Operate failed. This user is bound to the lifetime subscription. "
+      },
+      "no_license_operate_failed": "Due to subscription exception, operation failed.",
+      "failed_to_invite_no_license": "Due to insufficient licensing, some member invitations have failed.",
+      "error_subscribe": "Failed to change plan. Please try again later.",
+      "unsubscription_fail": "Failed to cancel the subscription. Please try again later.",
+      "failed_to_update": "Failed to update the subscription. Please try again. ",
+      "update_suc": "Subscription updated successfully"
+    },
+    "modal": {
+      "storage_insufficient_modal": {
+        "owner_title_drive": "Insufficient capacity",
+        "owner_description_drive": "The storage or traffic is not enough. Please upgrade and try again.",
+        "owner_button_drive": "Upgrade",
+        "not_owner_title_drive": "Failed to operate",
+        "not_owner_description_drive": "The storage or traffic of this team is not enough. Please contact your admin.",
+        "not_owner_button_drive": "Got it",
+        "out_title_drive": "Failed to download",
+        "out_description_drive": "Failed to download, please contact the file owner",
+        "out_button_drive": "Got it"
+      },
+      "sub_suc": {
+        "subscription_success": "Subscription successful",
+        "you_can_now_invite_m": "It will take effect in a few minutes. You can invite members and start using the advanced features later. Go ahead and give it a try!",
+        "you_can_now_upload_m": "It will take effect in a few minutes.  You can now upload more files.",
+        "payment_successful": "Payment successful",
+        "we_have_added_the_li": "It will take effect in a few minutes. We have added the licenses for you. Any changes to the subscription period will take effect from the next billing cycle.",
+        "we_have_added_the_st": "It will take effect in a few minutes. We have added the storage for you. Any changes to the subscription period will take effect from the next billing cycle.",
+        "we_have_added_the_tr": "It will take effect in a few minutes. We will add the traffic for you later. You can now download more files.",
+        "successfully_updated": "Successfully updated",
+        "the_change_to_the_su": "The change to the subscription period will take effect from the next billing cycle.",
+        "got_it": "Got it"
+      },
+      "upgrade_now_admin": {
+        "upgrade_to_plus": "Upgrade to Plus",
+        "this_feature_is_avai": "This feature is available for Plus users only. To use it, please upgrade to Plus. By upgrading to Plus, you will also have access to the following features. ",
+        "add_unlimited_viewer": "Add unlimited viewer members for FREE",
+        "publish_public_appli": "Publish public applications",
+        "ai_sql_generation": "AI SQL Generation",
+        "audit_logs": "Audit logs",
+        "learn_more": "Learn more",
+        "upgrade": "Upgrade",
+        "insufficient_license_title": "Insufficient licenses",
+        "insufficient_license_description": "To invite more editors, please increase licenses first. All members of your team could use the features for ILLA Cloud Plus. The specific access to each feature depends on the role of each member. ",
+        "insufficient_license_button": "Add licenses",
+        "pricing": "editor/month, yearly (monthly $10/editor)"
+      },
+      "expired": {
+        "owner": "Your subscription has expired. To continue using, please renew it.",
+        "others": "Your account has been disabled because the team's subscription has expired.",
+        "your_subscription_ha_not_owner": "Not enough licenses",
+        "all_members_except_f_not_owner": "Your team's subscription has an exception, please contact the team owner.",
+        "upgrade_not_owner": "Got it",
+        "your_subscription_ha": "Subscription expired",
+        "all_members_except_f": "Your team's subscription is expired. Please renew it in-time",
+        "upgrade": "Upgrade"
+      },
+      "blank_page": {
+        "insufficient_license_disable": "Your account has been disabled due to insufficient team licenses. Please contact the team Owner for assistance."
+      },
+      "upgrade_not_admin": {
+        "insufficient_license_title": "Insufficient licenses",
+        "insufficient_license_description": "To invite more editors, please connect your admin to increase licenses first.",
+        "insufficient_license_button": "OK"
+      },
+      "storage_insufficient": {
+        "owner_title": "Insufficient storage capacity",
+        "owner_description": "In order to store files normally, please increase the storage  in time. ",
+        "owner_button": "Increase capacity",
+        "not_owner_title": "Insufficient storage capacity",
+        "not_owner_description": "In order to store files normally, please contact your administrator to increase storage capacity in time.",
+        "not_owner_button": "OK",
+        "owner_pricing": "GB/Monthly"
+      },
+      "traffic_insufficient": {
+        "owner_title": "Insufficient traffic capacity",
+        "owner_description": "In order to access files normally, please increase the traffic capacity in time. ",
+        "owner_button": "Increase capacity",
+        "not_owner_title": "Insufficient storage capacity",
+        "not_owner_description": "In order to access files normally, please contact your administrator to increase traffic capacity in time.",
+        "not_owner_button": "OK",
+        "owner_pricing": "GB/Monthly"
+      },
+      "cancel_confirm": {
+        "description": "After cancellation, your team will revert to the free plan starting from the next billing cycle. The features included in the subscription plans will no longer be accessible.",
+        "title": "Cancel the subscription?",
+        "button_cancel": "Cancel",
+        "button_confirm": "Confirm"
+      },
+      "change_confirm": {
+        "description": "Once reduced, the changes will take effect in the next billing cycle. If there are resources that exceed the newly allocated capacity, all resources may become inaccessible.",
+        "title": "Change plan?",
+        "button_cancel": "Cancel",
+        "button_confirm": "Confirm"
+      },
+      "ai-agent": {
+        "string1": "GPT-4 is for Premium team. ",
+        "string2": "To use it, please upgrade to Premium. By upgrading to Premium, you will also have access to the following features. "
+      }
+    },
+    "homepage": {
+      "get_access_to_advanc": "Get access to advanced features",
+      "upgrade": "Upgrade",
+      "cancel": "Cancel"
+    },
+    "appsumo": {
+      "button": {
+        "redeem_appsumo": "Redeem AppSumo"
+      },
+      "modal": {
+        "title": "Redeem AppSumo",
+        "description": "Are you sure you want to redeem AppSumo in {{teamName}} team? ",
+        "cancel": "Cancel",
+        "confirm": "Redeem",
+        "select_team": {
+          "title": "Select a team to redeem",
+          "create_button": "Create new team",
+          "redeem_button": "Redeem"
+        }
+      },
+      "landingpage": {
+        "button": "Validate AppSumo email"
+      },
+      "forget_password": {
+        "button": "Create Account"
+      },
+      "update": "Update AppSumo plan"
+    },
+    "alert": {
+      "expired": {
+        "owner": "Insufficient seat or expired subscription, please upgrade in-time. ",
+        "others": "Due to insufficient seat, you have been disabled. Please contact team owner"
+      }
+    },
+    "yearly_discount": "(Save nearly 16.7%)",
+    "license_price_new": {
+      "monthly": "{{ price }}/editor/month",
+      "yearly": "{{ price }}/editor/year"
+    },
+    "redirect_page": {
+      "title": "Payment successful",
+      "desc1": "Thank you for your purchase. ILLA Cloud will continue to provide you with more features.",
+      "desc2": "Redirecting to ILLA Cloud in {{time}} seconds...",
+      "button": "Back to ILLA Cloud"
+    },
+    "redirect_to_stripe": "Redirecting to Stripe",
+    "featureList": {
+      "free": {
+        "drive": {
+          "storage": "100 MB storage per month to store any files in ILLA Drive",
+          "traffic": "100 MB traffic to download files from ILLA Drive"
+        }
+      },
+      "drive": {
+        "title": "ILLA Drive",
+        "storage": "5 GB storage per month to store any files in ILLA Drive",
+        "traffic": "5 GB traffic to download files from ILLA Drive"
+      },
+      "enterprise": {
+        "drive": {
+          "storage": "Custom storage per month to store any files in ILLA Drive",
+          "traffic": "Custom traffic to download files from ILLA Drive"
+        }
+      }
+    },
+    "advanced": {
+      "feature": "Remove watermark"
+    }
+  },
+  "network": {
+    "error": "Network error, please try again later"
+  },
+  "new_dashboard": {
+    "status": {
+      "deployed": "Deployed",
+      "undeploy": "Undeploy"
+    },
+    "desc": {
+      "no_description": "No description",
+      "blank": "No application",
+      "blank-agent": "No AI Agent here"
+    },
+    "app_setting": {
+      "app_setting": "App setting",
+      "app_name": "App name",
+      "description": "Description",
+      "save": "Save",
+      "placeholder": {
+        "description": "Enter the description for the app",
+        "app_name": "Enter a name for the app"
+      }
+    },
+    "access": {
+      "public": "Public",
+      "private": "Private"
+    },
+    "message": {
+      "update_failed": "Failed to update",
+      "update_suc": "Successfully updated"
+    },
+    "button": {
+      "blank": "Create your first app",
+      "blank-agent": "Create AI Agent"
+    }
+  },
+  "new_deploy": {
+    "title": {
+      "private_app": "Private app",
+      "public_app": "Public app"
+    },
+    "desc": {
+      "private_app": "Only the team members can access the deployed app",
+      "public_app": "Anyone with the app link can access the deployed app"
+    },
+    "button": {
+      "public": "Public"
+    }
+  },
+  "new_share": {
+    "title": {
+      "share-with-team": "Share with team"
+    },
+    "desc": {
+      "undeploy": "The app hasn't been deployed. Public access and viewer access may encounter errors. "
+    },
+    "label": {
+      "contribute": "Contribute to marketplace"
+    },
+    "default-text": {
+      "social-media": {
+        "reddit": "Check out this amazing AI Agent [{{promptName}}]",
+        "linkedin": "Attention all AI enthusiasts and professionals looking to increase their productivity! I came across an AI Agent platform that offers cutting-edge solutions for simplifying complex tasks and integrating with your internal tools. I personally tried out [{{promptName}}] and was blown away by its capabilities. It's a game-changer for anyone looking to stay ahead of the curve. Check it out for yourself at {{promptLink}} and let me know what you think!",
+        "facebook": "Attention all AI enthusiasts and professionals looking to increase their productivity! I came across an AI Agent platform that offers cutting-edge solutions for simplifying complex tasks and integrating with your internal tools. I personally tried out [{{promptName}}] and was blown away by its capabilities. It's a game-changer for anyone looking to stay ahead of the curve. Check it out for yourself at {{promptLink}} and let me know what you think!",
+        "whatsapp": "I came across an AI Agent platform that offers cutting-edge solutions for simplifying complex tasks and integrating with your internal tools. I personally tried out [{{promptName}}] and was blown away by its capabilities. It's a game-changer for anyone looking to stay ahead of the curve. Check it out for yourself at {{promptLink}} and let me know what you think!",
+        "hackernews": "Simplify Your Workload with [{{promptName}}] - The AI Agent That Gets the Job Done"
+      },
+      "contribute": "I came across an AI Agent platform that offers cutting-edge solutions for simplifying complex tasks and integrating with your internal tools. I personally tried out [{{promptName}}] and was blown away by its capabilities. It's a game-changer for anyone looking to stay ahead of the curve. Check it out for yourself at {{promptLink}} and let me know what you think!"
+    },
+    "button": {
+      "share_contribute": "Copy & Share",
+      "uncontribute": "Cancel contribution"
+    },
+    "default-text-apps": {
+      "social-media": {
+        "twitter": "I just found an interesting app. Check it out! {{appName}}:{{appLink}}",
+        "reddit": "Check out this amazing app [{{appName}}]",
+        "linkedin": "I just found an interesting app. Check it out! {{appName}}:{{appLink}}",
+        "facebook": "I just found an interesting app. Check it out! {{appName}}:{{appLink}}",
+        "whatsapp": "I just found an interesting app. Check it out! {{appName}}:{{appLink}}"
+      },
+      "social-mediak": {
+        "hackernews": "Easy-to-use web app template [{{appName}}]"
+      },
+      "contribute": "I just found an interesting app. Check it out! {{appName}}:{{appLink}}"
+    }
+  },
+  "ai-agents": "AI Agents",
+  "marketplace": {
+    "star": "Star",
+    "fork": "Fork"
+  },
+  "load": {
+    "before": "Load more"
+  },
+  "size_exceed_copied_tips": "The content is too long to copy.  (current size: {{current_size}} bytes, limit: {{limit_size}} bytes)",
+  "contribute": "Contribute",
+  "error_page": {
+    "fobidden": "No access permission"
+  },
+  "Click item: editor": {
+    "inspect": {
+      "setter_content": {
+        "widget_action_type_name": {
+          "clickItem": "Click item"
+        }
+      }
+    }
+  }
 }

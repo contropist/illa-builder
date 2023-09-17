@@ -1,6 +1,6 @@
 import { createIcon } from "@illa-design/react"
 
-export const ClickhouseIcon = createIcon({
+const ClickhouseIcon = createIcon({
   title: "ClickhouseIcon",
   viewBox: "0 0 24 24 ",
   path: (
@@ -16,3 +16,6 @@ export const ClickhouseIcon = createIcon({
     </>
   ),
 })
+
+ClickhouseIcon.displayName = "ClickhouseIcon"
+export default ClickhouseIcon

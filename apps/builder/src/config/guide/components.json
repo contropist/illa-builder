@@ -1,0 +1,163 @@
+[
+  {
+    "displayName": "input1",
+    "parentNode": "bodySection1-bodySectionContainer1",
+    "showName": "input",
+    "childrenNode": null,
+    "type": "INPUT_WIDGET",
+    "containerType": "EDITOR_SCALE_SQUARE",
+
+    "h": 6,
+    "w": 8,
+    "minH": 3,
+    "minW": 1,
+
+    "x": 9,
+    "y": 17,
+    "z": 0,
+    "props": {
+      "$dynamicAttrPaths": ["formDataKey", "labelWidth"],
+      "colorScheme": "blue",
+      "formDataKey": "{{input1.displayName}}",
+      "hidden": false,
+      "label": "Label",
+      "labelAlign": "left",
+      "labelPosition": "left",
+      "labelWidth": "{{33}}",
+      "placeholder": "input sth",
+      "value": ""
+    }
+  },
+  {
+    "displayName": "button1",
+    "parentNode": "bodySection1-bodySectionContainer1",
+    "showName": "button",
+
+    "childrenNode": null,
+    "type": "BUTTON_WIDGET",
+    "containerType": "EDITOR_SCALE_SQUARE",
+
+    "h": 5,
+    "w": 6,
+    "minH": 3,
+    "minW": 1,
+
+    "x": 17,
+    "y": 17,
+    "z": 0,
+    "props": {
+      "$dynamicAttrPaths": [],
+      "colorScheme": "blue",
+      "hidden": false,
+      "text": "Button",
+      "variant": "fill"
+    }
+  },
+  {
+    "displayName": "table1",
+    "parentNode": "bodySection1-bodySectionContainer1",
+    "showName": "table",
+
+    "childrenNode": null,
+    "type": "TABLE_WIDGET",
+    "containerType": "EDITOR_SCALE_SQUARE",
+
+    "h": 38,
+    "w": 14,
+    "minH": 3,
+    "minW": 1,
+
+    "x": 9,
+    "y": 25,
+    "z": 0,
+    "props": {
+      "$dynamicAttrPaths": ["dataSourceJS", "pageSize"],
+      "columnMapper": {
+        "incomes": {
+          "accessorKey": "incomes",
+          "columnIndex": 2,
+          "enableSorting": true,
+          "format": "YYYY-MM-DD",
+          "header": "incomes",
+          "id": "incomes",
+          "type": "text",
+          "visible": true
+        },
+        "month": {
+          "accessorKey": "month",
+          "columnIndex": 0,
+          "enableSorting": true,
+          "format": "YYYY-MM-DD",
+          "header": "month",
+          "id": "month",
+          "type": "text",
+          "visible": true
+        },
+        "users": {
+          "accessorKey": "users",
+          "columnIndex": 1,
+          "enableSorting": true,
+          "format": "YYYY-MM-DD",
+          "header": "users",
+          "id": "users",
+          "type": "text",
+          "visible": true
+        }
+      },
+      "columnNameIndices": {
+        "0": "month",
+        "1": "users",
+        "2": "incomes"
+      },
+      "columnVisibility": {
+        "incomes": true,
+        "month": true,
+        "users": true
+      },
+      "columns": [
+        {
+          "accessorKey": "month",
+          "columnIndex": 0,
+          "enableSorting": true,
+          "format": "YYYY-MM-DD",
+          "header": "month",
+          "id": "month",
+          "type": "text",
+          "visible": true
+        },
+        {
+          "accessorKey": "users",
+          "columnIndex": 1,
+          "enableSorting": true,
+          "format": "YYYY-MM-DD",
+          "header": "users",
+          "id": "users",
+          "type": "text",
+          "visible": true
+        },
+        {
+          "accessorKey": "incomes",
+          "columnIndex": 2,
+          "enableSorting": true,
+          "format": "YYYY-MM-DD",
+          "header": "incomes",
+          "id": "incomes",
+          "type": "text",
+          "visible": true
+        }
+      ],
+      "customColumnIndices": {},
+      "dataSourceJS": "{{[\n  {\n    \"month\": \"April\",\n    \"users\": 3700,\n    \"incomes\": 4000\n  },\n  {\n    \"month\": \"May\",\n    \"users\": 5400,\n    \"incomes\": 8700\n  },\n  {\n    \"month\": \"June\",\n    \"users\": 6000,\n    \"incomes\": 12000\n  },\n  {\n    \"month\": \"July\",\n    \"users\": 8000,\n    \"incomes\": 14000\n  }\n]}}",
+      "dataSourceMode": "dynamic",
+      "defaultSortKey": "default",
+      "defaultSortOrder": "ascend",
+      "download": false,
+      "emptyState": "No rows found",
+      "filter": false,
+      "overFlow": "pagination",
+      "pageSize": "{{10}}",
+      "renamedColumnNames": {},
+      "rowEvents": {}
+    }
+  }
+]

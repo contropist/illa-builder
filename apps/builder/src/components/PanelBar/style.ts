@@ -48,6 +48,7 @@ export const applyPanelBarHeaderStyle = (
     ${heightCss};
     ${borderCss};
     ${publicPaddingStyle};
+    padding-right: 10px;
   `
 }
 
@@ -109,7 +110,7 @@ export function applyPanelBarOpenedIconStyle(
   return css`
     transition: transform 200ms;
     transform-origin: center;
-    font-size: 12px;
+    font-size: 16px;
     ${fontColorStyle};
     ${rotate}
   `
@@ -119,18 +120,26 @@ export const panelBarItemContentStyle = css`
   font-size: 14px;
   color: ${globalColor(`--${illaPrefix}-grayBlue-02`)};
   position: relative;
-  overflow: hidden;
+  height: auto;
 `
 
-export const panelBarItemAnimation: Variants = {
-  enter: { height: "auto", opacity: 1 },
-  exit: { height: 0, opacity: 0 },
+export const panelBarItemContainerAnimationVariants: Variants = {
+  enter: {
+    height: "auto",
+    overflowY: "hidden",
+    transitionEnd: { overflowY: "visible" },
+  },
+  exit: {
+    height: 0,
+    overflowY: "hidden",
+    transitionEnd: { overflowY: "hidden" },
+  },
 }
 
-export const addIconHotpotStyle = css`
-  font-size: 12px;
-  width: 16px;
-  height: 16px;
+export const customIconHotpotStyle = css`
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;

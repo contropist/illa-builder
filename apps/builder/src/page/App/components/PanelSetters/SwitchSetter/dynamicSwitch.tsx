@@ -1,10 +1,11 @@
+import { ILLA_MIXPANEL_EVENT_TYPE } from "@illa-public/mixpanel-utils"
 import { get } from "lodash"
 import { FC, useCallback } from "react"
 import { Switch } from "@illa-design/react"
 import { PanelLabel } from "@/page/App/components/InspectPanel/label"
 import { DynamicIcon } from "@/page/App/components/PanelSetters/PublicComponent/DynamicIcon"
-import { VALIDATION_TYPES } from "@/utils/validationFactory"
-import { BaseInput } from "../InputSetter/baseInput"
+import { trackInEditor } from "@/utils/mixpanelHelper"
+import BaseInput from "../InputSetter/baseInput"
 import { DynamicSwitchProps } from "./interface"
 import {
   applyLabelWrapperStyle,
@@ -13,31 +14,47 @@ import {
   dynamicSwitchWrapperStyle,
 } from "./style"
 
-export const DynamicSwitchSetter: FC<DynamicSwitchProps> = (props) => {
+const DynamicSwitchSetter: FC<DynamicSwitchProps> = (props) => {
   const {
     attrName,
     labelName,
     labelDesc,
     panelConfig,
     handleUpdateDsl,
+    handleUpdateMultiAttrDSL,
     value,
-    widgetDisplayName,
-    expectedType,
-    widgetOrAction,
     openDynamic,
+    detailedDescription,
+    widgetType,
   } = props
 
-  const dynamicAttrPath = get(panelConfig, "$dynamicAttrPaths", [])
-
-  const customSelected = dynamicAttrPath.includes(attrName)
+  const customSelected = get(panelConfig, `${attrName}Dynamic`, false)
 
   const handleClickDynamicIcon = useCallback(() => {
     if (customSelected) {
-      handleUpdateDsl(attrName, false)
+      handleUpdateMultiAttrDSL?.({
+        [attrName]: undefined,
+        [`${attrName}Dynamic`]: false,
+      })
+      trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+        element: "fx",
+        parameter1: widgetType,
+        parameter2: attrName,
+        parameter3: "off",
+      })
     } else {
-      handleUpdateDsl(attrName, `{{false}}`)
+      handleUpdateMultiAttrDSL?.({
+        [attrName]: undefined,
+        [`${attrName}Dynamic`]: true,
+      })
+      trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+        element: "fx",
+        parameter1: widgetType,
+        parameter2: attrName,
+        parameter3: "on",
+      })
     }
-  }, [attrName, customSelected, handleUpdateDsl])
+  }, [attrName, customSelected, handleUpdateMultiAttrDSL, widgetType])
 
   return (
     <div css={applyLabelWrapperStyle(customSelected)}>
@@ -55,8 +72,13 @@ export const DynamicSwitchSetter: FC<DynamicSwitchProps> = (props) => {
             <Switch
               onChange={(value) => {
                 handleUpdateDsl(attrName, value)
+                trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+                  element: "component_inspect_radio",
+                  parameter1: widgetType,
+                  parameter2: attrName,
+                })
               }}
-              checked={value}
+              checked={value as boolean}
               colorScheme="techPurple"
             />
           )}
@@ -65,15 +87,10 @@ export const DynamicSwitchSetter: FC<DynamicSwitchProps> = (props) => {
       {customSelected && (
         <div css={dynamicSwitchInputStyle}>
           <BaseInput
-            attrName={attrName}
-            value={value}
-            handleUpdateDsl={handleUpdateDsl}
-            panelConfig={panelConfig}
-            expectedType={expectedType}
+            {...props}
+            value={value as string}
             isSetterSingleRow
-            widgetDisplayName={widgetDisplayName}
-            widgetType={VALIDATION_TYPES.BOOLEAN}
-            widgetOrAction={widgetOrAction}
+            detailedDescription={detailedDescription ?? labelDesc}
           />
         </div>
       )}
@@ -82,3 +99,5 @@ export const DynamicSwitchSetter: FC<DynamicSwitchProps> = (props) => {
 }
 
 DynamicSwitchSetter.displayName = "DynamicSwitchSetter"
+
+export default DynamicSwitchSetter

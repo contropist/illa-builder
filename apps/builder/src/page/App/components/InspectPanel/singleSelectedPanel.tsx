@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo } from "react"
+import { FC, memo, useCallback, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { Divider } from "@illa-design/react"
 import { SelectedProvider } from "@/page/App/components/InspectPanel/context/selectedContext"
@@ -9,13 +9,15 @@ import {
 } from "@/page/App/components/InspectPanel/style"
 import { getComponentNodeBySingleSelected } from "@/redux/currentApp/editor/components/componentsSelector"
 import { componentsActions } from "@/redux/currentApp/editor/components/componentsSlice"
+import { getGuideInfo } from "@/redux/guide/guideSelector"
 import { isObject } from "@/utils/typeHelper"
-import { panelBuilder } from "@/widgetLibrary/panelBuilder"
-import { fieldFactory } from "./utils/fieldFactory"
+import FieldFactory from "./components/FieldFactory"
+import { panelBuilder } from "./utils/panelBuilder"
 
-export const SingleSelectedPanel: FC = () => {
+const SingleSelectedPanel: FC = () => {
   const dispatch = useDispatch()
 
+  const guideInfo = useSelector(getGuideInfo)
   const singleSelectedComponentNode = useSelector(
     getComponentNodeBySingleSelected,
   )
@@ -29,7 +31,7 @@ export const SingleSelectedPanel: FC = () => {
   const widgetProps = singleSelectedComponentNode?.props || {}
 
   const handleUpdateDsl = useCallback(
-    (attrPath: string, value: any) => {
+    (attrPath: string, value: unknown) => {
       const updateSlice = { [attrPath]: value }
       dispatch(
         componentsActions.updateComponentPropsReducer({
@@ -42,7 +44,7 @@ export const SingleSelectedPanel: FC = () => {
   )
 
   const handleUpdateMultiAttrDSL = useCallback(
-    (updateSlice: Record<string, any>) => {
+    (updateSlice: Record<string, unknown>) => {
       if (!isObject(updateSlice)) return
       dispatch(
         componentsActions.updateComponentPropsReducer({
@@ -87,7 +89,12 @@ export const SingleSelectedPanel: FC = () => {
           <PanelHeader />
           <Divider />
           <div css={singleSelectedPanelSetterWrapperStyle}>
-            {fieldFactory(builderPanelConfig, widgetDisplayName)}
+            <FieldFactory
+              panelConfig={builderPanelConfig}
+              displayName={widgetDisplayName}
+              widgetProps={widgetProps}
+              guideInfo={guideInfo}
+            />
           </div>
         </div>
       </SelectedProvider>
@@ -96,3 +103,4 @@ export const SingleSelectedPanel: FC = () => {
 }
 
 SingleSelectedPanel.displayName = "SingleSelectedPanel"
+export default memo(SingleSelectedPanel)

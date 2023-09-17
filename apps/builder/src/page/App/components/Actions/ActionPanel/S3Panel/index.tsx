@@ -1,9 +1,9 @@
 import { FC, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
-import { Select } from "@illa-design/react"
 import { ActionEventHandler } from "@/page/App/components/Actions/ActionPanel/ActionEventHandler"
 import { ResourceChoose } from "@/page/App/components/Actions/ActionPanel/ResourceChoose"
+import { SingleTypeComponent } from "@/page/App/components/Actions/ActionPanel/SingleTypeComponent"
 import { TransformerComponent } from "@/page/App/components/Actions/ActionPanel/TransformerComponent"
 import {
   getCachedAction,
@@ -31,16 +31,10 @@ import { ListAllPart } from "./ListAllPart"
 import { ReadOnePart } from "./ReadOnePart"
 import { UploadMultiplePart } from "./UploadMultiplePart"
 import { UploadPart } from "./UploadPart"
-import {
-  actionItemContainer,
-  s3ContainerStyle,
-  s3ItemLabelStyle,
-  s3ItemStyle,
-} from "./style"
+import { actionItemContainer, s3ContainerStyle } from "./style"
 
-export const S3Panel: FC = () => {
+const S3Panel: FC = () => {
   const { t } = useTranslation()
-
   const cachedAction = useSelector(getCachedAction) as ActionItem<
     S3Action<S3ActionTypeContent>
   >
@@ -72,7 +66,7 @@ export const S3Panel: FC = () => {
   const handleActionChange = (value: S3ActionRequestType) => {
     let newCommandArgs: S3ActionTypeContent = ListAllContentInitial
     if (
-      cachedAction.resourceId === selectedAction.resourceId &&
+      cachedAction.resourceID === selectedAction.resourceID &&
       (selectedAction.content as S3Action<S3ActionTypeContent>).commands ===
         value
     ) {
@@ -119,21 +113,14 @@ export const S3Panel: FC = () => {
     <div css={s3ContainerStyle}>
       <ResourceChoose />
       <div css={actionItemContainer}>
-        <div css={s3ItemStyle}>
-          <span css={s3ItemLabelStyle}>
-            {t("editor.action.panel.s3.action_type")}
-          </span>
-          <Select
-            colorScheme="techPurple"
-            showSearch={true}
-            defaultValue={content.commands}
-            value={content.commands}
-            ml="16px"
-            width="100%"
-            onChange={handleActionChange}
-            options={S3ActionList}
-          />
-        </div>
+        <SingleTypeComponent
+          title={t("editor.action.panel.s3.action_type")}
+          componentType="select"
+          value={content.commands}
+          showSearch
+          onChange={handleActionChange}
+          options={S3ActionList}
+        />
         {renderInputBody}
         <TransformerComponent />
       </div>
@@ -143,3 +130,4 @@ export const S3Panel: FC = () => {
 }
 
 S3Panel.displayName = "S3Panel"
+export default S3Panel

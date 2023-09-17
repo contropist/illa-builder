@@ -5,12 +5,13 @@ import {
   Input,
   InputNumber,
   Password,
+  RadioGroup,
   Select,
   Switch,
   TextArea,
   getColor,
 } from "@illa-design/react"
-import { ContrilledElementProps } from "./interface"
+import { ControlledElementProps, DefaultValueType } from "./interface"
 import {
   applyConfigItemContainer,
   applyConfigItemLabelText,
@@ -20,9 +21,9 @@ import {
   sslStyle,
 } from "./style"
 
-export const ControlledElement: FC<ContrilledElementProps> = (props) => {
+export const ControlledElement: FC<ControlledElementProps> = (props) => {
   const {
-    title = "",
+    title,
     contentLabel,
     isRequired = false,
     defaultValue,
@@ -36,6 +37,8 @@ export const ControlledElement: FC<ContrilledElementProps> = (props) => {
     options = [],
     rules = [],
     tipsStyle,
+    allowClear = false,
+    forceEqualWidth,
     labelStyle,
     onValueChange,
   } = props
@@ -53,10 +56,10 @@ export const ControlledElement: FC<ContrilledElementProps> = (props) => {
     (
       type: string,
       name: string,
-      defaultValue: string | boolean,
+      defaultValue: DefaultValueType,
       placeholder: string,
       rules: RegisterOptions,
-      style: Record<string, string> | undefined = {},
+      style: Record<string, string | number> | undefined = {},
     ) => {
       switch (type) {
         case "input":
@@ -73,7 +76,7 @@ export const ControlledElement: FC<ContrilledElementProps> = (props) => {
                   onChange={onChange}
                   value={value}
                   error={error}
-                  borderColor="techPurple"
+                  colorScheme="techPurple"
                   placeholder={placeholder}
                 />
               )}
@@ -115,8 +118,9 @@ export const ControlledElement: FC<ContrilledElementProps> = (props) => {
                 <Select
                   value={value}
                   onBlur={onBlur}
+                  allowClear={allowClear}
                   onChange={(value) => {
-                    onValueChange?.(value)
+                    onValueChange?.(value as string)
                     onChange(value)
                   }}
                   colorScheme="techPurple"
@@ -161,7 +165,7 @@ export const ControlledElement: FC<ContrilledElementProps> = (props) => {
                   onBlur={onBlur}
                   onChange={onChange}
                   value={value}
-                  borderColor="techPurple"
+                  colorScheme="techPurple"
                   w="100%"
                   placeholder={placeholder}
                   {...style}
@@ -179,12 +183,57 @@ export const ControlledElement: FC<ContrilledElementProps> = (props) => {
               render={({ field: { value, onChange, onBlur } }) => (
                 <Password
                   autoComplete="new-password"
-                  borderColor="techPurple"
+                  colorScheme="techPurple"
                   w="100%"
                   onBlur={onBlur}
                   onChange={onChange}
                   value={value}
                   placeholder={placeholder}
+                  {...style}
+                />
+              )}
+              name={name}
+            />
+          )
+        case "radio":
+          return (
+            <Controller
+              control={control}
+              defaultValue={defaultValue}
+              rules={rules}
+              render={({ field: { value, onChange, onBlur } }) => (
+                <RadioGroup
+                  colorScheme="techPurple"
+                  w="100%"
+                  type="radio"
+                  onBlur={onBlur}
+                  onChange={onChange}
+                  value={value}
+                  placeholder={placeholder}
+                  options={options}
+                  {...style}
+                />
+              )}
+              name={name}
+            />
+          )
+        case "radio-group":
+          return (
+            <Controller
+              control={control}
+              defaultValue={defaultValue}
+              rules={rules}
+              render={({ field: { value, onChange, onBlur } }) => (
+                <RadioGroup
+                  colorScheme="gray"
+                  w="100%"
+                  type="button"
+                  onBlur={onBlur}
+                  onChange={onChange}
+                  value={value}
+                  placeholder={placeholder}
+                  forceEqualWidth={forceEqualWidth}
+                  options={options}
                   {...style}
                 />
               )}
@@ -199,10 +248,15 @@ export const ControlledElement: FC<ContrilledElementProps> = (props) => {
               rules={rules}
               render={({ field: { value, onChange, onBlur } }) => (
                 <TextArea
+                  w="100%"
+                  h="100%"
+                  pb="16px"
+                  minH="240px"
+                  colorScheme="techPurple"
                   onBlur={onBlur}
                   onChange={onChange}
                   value={value}
-                  autoSize
+                  autoSize={false}
                   placeholder={placeholder}
                   {...style}
                 />
@@ -212,7 +266,15 @@ export const ControlledElement: FC<ContrilledElementProps> = (props) => {
           )
       }
     },
-    [contentLabel, control, error, onValueChange],
+    [
+      allowClear,
+      contentLabel,
+      control,
+      error,
+      forceEqualWidth,
+      onValueChange,
+      options,
+    ],
   )
 
   return (

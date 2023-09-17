@@ -1,29 +1,22 @@
-import { FC, useState } from "react"
+import {
+  ILLA_MIXPANEL_BUILDER_PAGE_NAME,
+  ILLA_MIXPANEL_EVENT_TYPE,
+} from "@illa-public/mixpanel-utils"
+import { FC, Suspense, useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import {
   AddIcon,
   Button,
   ButtonGroup,
   List,
-  PaginationPreIcon,
-  useMessage,
+  PreviousIcon,
 } from "@illa-design/react"
-import { Api } from "@/api/base"
 import { getIconFromActionType } from "@/page/App/components/Actions/getIcon"
-import { configActions } from "@/redux/config/configSlice"
-import { actionActions } from "@/redux/currentApp/action/actionSlice"
-import {
-  ActionContent,
-  ActionItem,
-  actionItemInitial,
-} from "@/redux/currentApp/action/actionState"
-import { getInitialContent } from "@/redux/currentApp/action/getInitialContent"
-import { getAppInfo } from "@/redux/currentApp/appInfo/appInfoSelector"
 import { getAllResources } from "@/redux/resource/resourceSelector"
 import { getResourceTypeFromActionType } from "@/utils/actionResourceTransformer"
 import { fromNow } from "@/utils/dayjs"
-import { DisplayNameGenerator } from "@/utils/generators/generateDisplayName"
+import { track } from "@/utils/mixpanelHelper"
 import { ActionResourceSelectorProps } from "./interface"
 import {
   applyResourceItemStyle,
@@ -36,11 +29,15 @@ import {
 export const ActionResourceSelector: FC<ActionResourceSelectorProps> = (
   props,
 ) => {
-  const { actionType, onBack, onCreateAction, onCreateResource } = props
+  const {
+    actionType,
+    onBack,
+    onCreateAction,
+    onCreateResource,
+    handleCreateAction,
+  } = props
 
   const { t } = useTranslation()
-
-  const appInfo = useSelector(getAppInfo)
 
   const resourceList = useSelector(getAllResources)
     .filter((r) => r.resourceType == getResourceTypeFromActionType(actionType))
@@ -50,14 +47,37 @@ export const ActionResourceSelector: FC<ActionResourceSelectorProps> = (
     )
 
   const [selectedResourceId, setSelectedResourceId] = useState<string>(
-    resourceList[0]?.resourceId,
+    resourceList[0]?.resourceID,
   )
 
   const [loading, setLoading] = useState(false)
 
-  const message = useMessage()
+  const handleClickCreateAction = useCallback(() => {
+    handleCreateAction(
+      selectedResourceId,
+      () => onCreateAction?.(actionType, selectedResourceId),
+      setLoading,
+    )
+    track(
+      ILLA_MIXPANEL_EVENT_TYPE.CLICK,
+      ILLA_MIXPANEL_BUILDER_PAGE_NAME.EDITOR,
+      {
+        element: "resource_list_create_action",
+        parameter1: actionType,
+      },
+    )
+  }, [actionType, handleCreateAction, onCreateAction, selectedResourceId])
 
-  const dispatch = useDispatch()
+  useEffect(() => {
+    track(
+      ILLA_MIXPANEL_EVENT_TYPE.SHOW,
+      ILLA_MIXPANEL_BUILDER_PAGE_NAME.EDITOR,
+      {
+        element: "resource_list_show",
+        parameter1: actionType,
+      },
+    )
+  }, [actionType])
 
   return (
     <div css={containerStyle}>
@@ -65,19 +85,24 @@ export const ActionResourceSelector: FC<ActionResourceSelectorProps> = (
         bordered={false}
         height={550}
         data={resourceList}
+        split={false}
+        itemHeight={48}
         renderKey={(data) => {
-          return data.resourceId
+          return data.resourceID
         }}
+        h="550px"
         renderRaw
         render={(r) => {
           return (
             <div
-              css={applyResourceItemStyle(r.resourceId === selectedResourceId)}
+              css={applyResourceItemStyle(r.resourceID === selectedResourceId)}
               onClick={() => {
-                setSelectedResourceId(r.resourceId)
+                setSelectedResourceId(r.resourceID)
               }}
             >
-              {getIconFromActionType(r.resourceType, "24px")}
+              <Suspense>
+                {getIconFromActionType(r.resourceType, "24px")}
+              </Suspense>
               <span css={resourceItemTitleStyle}>{r.resourceName}</span>
               <span css={resourceItemTimeStyle}>
                 {t("created_at") + " " + fromNow(r.createdAt)}
@@ -88,7 +113,7 @@ export const ActionResourceSelector: FC<ActionResourceSelectorProps> = (
       />
       <div css={footerStyle}>
         <Button
-          leftIcon={<PaginationPreIcon />}
+          leftIcon={<PreviousIcon />}
           variant="text"
           colorScheme="gray"
           onClick={() => {
@@ -102,6 +127,14 @@ export const ActionResourceSelector: FC<ActionResourceSelectorProps> = (
             leftIcon={<AddIcon />}
             colorScheme="gray"
             onClick={() => {
+              track(
+                ILLA_MIXPANEL_EVENT_TYPE.CLICK,
+                ILLA_MIXPANEL_BUILDER_PAGE_NAME.EDITOR,
+                {
+                  element: "resource_list_new",
+                  parameter1: actionType,
+                },
+              )
               onCreateResource?.(getResourceTypeFromActionType(actionType)!!)
             }}
           >
@@ -109,47 +142,7 @@ export const ActionResourceSelector: FC<ActionResourceSelectorProps> = (
           </Button>
           <Button
             colorScheme="techPurple"
-            onClick={() => {
-              const displayName =
-                DisplayNameGenerator.generateDisplayName(actionType)
-              const initialContent = getInitialContent(actionType)
-              const data: Partial<ActionItem<ActionContent>> = {
-                actionType,
-                displayName,
-                resourceId: selectedResourceId,
-                content: initialContent,
-                ...actionItemInitial,
-              }
-              Api.request(
-                {
-                  url: `/apps/${appInfo.appId}/actions`,
-                  method: "POST",
-                  data,
-                },
-                ({ data }: { data: ActionItem<ActionContent> }) => {
-                  message.success({
-                    content: t(
-                      "editor.action.action_list.message.success_created",
-                    ),
-                  })
-                  dispatch(actionActions.addActionItemReducer(data))
-                  dispatch(configActions.changeSelectedAction(data))
-                  onCreateAction?.(actionType, selectedResourceId)
-                },
-                () => {
-                  message.error({
-                    content: t("editor.action.action_list.message.failed"),
-                  })
-                  DisplayNameGenerator.removeDisplayName(displayName)
-                },
-                () => {
-                  DisplayNameGenerator.removeDisplayName(displayName)
-                },
-                (loading) => {
-                  setLoading(loading)
-                },
-              )
-            }}
+            onClick={handleClickCreateAction}
             loading={loading}
             disabled={resourceList.length <= 0}
           >

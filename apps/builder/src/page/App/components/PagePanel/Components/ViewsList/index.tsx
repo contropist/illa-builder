@@ -10,6 +10,7 @@ import {
 } from "@/redux/currentApp/executionTree/executionSelector"
 import { RootState } from "@/store"
 import { ListBody } from "./body"
+import { EmptyState } from "./emptyState"
 import { ViewListHeader } from "./header"
 import { ViewListProps } from "./interface"
 import { viewsListWrapperStyle } from "./style"
@@ -36,9 +37,20 @@ export const ViewList: FC<ViewListProps> = (props) => {
     <div css={viewsListWrapperStyle}>
       <ViewListHeader
         sectionName={sectionName}
-        sectionNodeExecutionResult={sectionNodeExecutionResult}
+        parentNodeDisplayName={sectionNodeExecutionResult.displayName}
       />
-      <ListBody sectionNodeExecutionResult={sectionNodeExecutionResult} />
+      {Array.isArray(sectionNodeExecutionResult.sectionViewConfigs) &&
+      sectionNodeExecutionResult.sectionViewConfigs.length > 0 ? (
+        <ListBody
+          sectionName={sectionName}
+          parentNodeDisplayName={sectionNodeExecutionResult.displayName}
+          currentViewIndex={sectionNodeExecutionResult.currentViewIndex}
+          viewSortedKey={sectionNodeExecutionResult.viewSortedKey}
+          sectionViewConfigs={sectionNodeExecutionResult.sectionViewConfigs}
+        />
+      ) : (
+        <EmptyState />
+      )}
     </div>
   )
 }

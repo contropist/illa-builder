@@ -2,6 +2,7 @@ import { AnimatePresence, Reorder } from "framer-motion"
 import { isEqual } from "lodash"
 import { FC, useContext, useEffect, useState } from "react"
 import { removeNativeStyle } from "@/page/App/components/PanelSetters/TableSetter/ColumnSetter/style"
+import { ColumnItemShape } from "@/widgetLibrary/TableWidget/interface"
 import { ColumnItem } from "./columnItem"
 import { ColumnListSetterContext } from "./context/columnListContext"
 import { EmptyBody } from "./empty"
@@ -16,7 +17,13 @@ export const ListBody: FC = () => {
     if (!isEqual(columnItems, items)) {
       setItems(columnItems)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnItems])
+
+  const updateItem = (values: ColumnItemShape[]) => {
+    if (isEqual(values, items)) return
+    setItems(values)
+  }
 
   if (!columnItems || !Array.isArray(columnItems) || columnItems.length === 0)
     return <EmptyBody />
@@ -27,12 +34,11 @@ export const ListBody: FC = () => {
         axis="y"
         initial={false}
         values={items}
-        onReorder={setItems}
+        onReorder={updateItem}
         css={removeNativeStyle}
       >
         {items.map((item, index) => {
-          const { label, value, header, accessorKey, visible, custom, id } =
-            item
+          const { value, header, accessorKey, visible, custom, id } = item
           return (
             <Reorder.Item
               initial={false}

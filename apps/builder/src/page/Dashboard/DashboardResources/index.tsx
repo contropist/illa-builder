@@ -1,138 +1,78 @@
-import { CellContext, ColumnDef } from "@tanstack/react-table"
-import { FC, useMemo, useState } from "react"
+import {
+  ILLA_MIXPANEL_BUILDER_PAGE_NAME,
+  ILLA_MIXPANEL_EVENT_TYPE,
+  MixpanelTrackProvider,
+} from "@illa-public/mixpanel-utils"
+import {
+  USER_ROLE,
+  getCurrentTeamInfo,
+  getPlanUtils,
+} from "@illa-public/user-data"
+import {
+  ACTION_ACCESS,
+  ATTRIBUTE_GROUP,
+  canAccess,
+} from "@illa-public/user-role-utils"
+import { FC, Suspense, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useSelector } from "react-redux"
-import { Button, Empty, Space, Table } from "@illa-design/react"
-import { getIconFromResourceType } from "@/page/App/components/Actions/getIcon"
+import { Await, useBeforeUnload, useLoaderData } from "react-router-dom"
+import { Button } from "@illa-design/react"
+import { FullPageLoading } from "@/components/FullPageLoading"
+import { useGoogleAuthStatus } from "@/hooks/useGoogleAuthStatus"
+import { ResourcesContent } from "@/page/Dashboard/DashboardResources/ResourceContent"
+import { ResourceGenerator } from "@/page/Dashboard/components/ResourceGenerator"
+import { ResourceListState } from "@/redux/resource/resourceState"
+import {
+  resourceContextHelper,
+  track,
+  trackPageDurationEnd,
+  trackPageDurationStart,
+} from "@/utils/mixpanelHelper"
+import { DashboardErrorElement } from "../components/ErrorElement"
 import {
   appsContainerStyle,
   listTitleContainerStyle,
   listTitleStyle,
-} from "@/page/Dashboard/DashboardApps/style"
-import { ResourceTableData } from "@/page/Dashboard/DashboardResources/interface"
-import {
-  applyTableTextStyle,
-  hoverStyle,
-} from "@/page/Dashboard/DashboardResources/style"
-import { DashboardResourceItemMenu } from "@/page/Dashboard/components/DashboardResourceItemMenu"
-import { ResourceGenerator } from "@/page/Dashboard/components/ResourceGenerator"
-import {
-  MongoDbConfig,
-  MongoDbGuiConfigContent,
-  MongoDbResource,
-} from "@/redux/resource/mongodbResource"
-import { MysqlLikeResource } from "@/redux/resource/mysqlLikeResource"
-import { RedisResource } from "@/redux/resource/redisResource"
-import { getAllResources } from "@/redux/resource/resourceSelector"
-import {
-  Resource,
-  ResourceContent,
-  ResourceListState,
-} from "@/redux/resource/resourceState"
-import { getResourceNameFromResourceType } from "@/utils/actionResourceTransformer"
-import { fromNow } from "@/utils/dayjs"
+} from "./style"
 
 export const DashboardResources: FC = () => {
   const { t } = useTranslation()
 
-  const resourcesList: ResourceListState = useSelector(getAllResources)
+  const teamInfo = useSelector(getCurrentTeamInfo)
+  const { resourceList } = useLoaderData() as {
+    resourceList: Promise<ResourceListState>
+  }
 
   const [newResourceVisible, setNewResourceVisible] = useState(false)
 
-  const resourceData: ResourceTableData[] = useMemo(() => {
-    return resourcesList.map((resource: Resource<ResourceContent>) => {
-      let dbName = "Null"
-      switch (resource.resourceType) {
-        case "firebase":
-        case "smtp":
-        case "restapi":
-        case "elasticsearch":
-        case "s3":
-        case "huggingface":
-          break
-        case "clickhouse":
-        case "supabasedb":
-        case "postgresql":
-        case "mysql":
-        case "tidb":
-        case "mariadb":
-          dbName = (resource as Resource<MysqlLikeResource>).content
-            .databaseName
-          break
-        case "redis":
-          dbName = (
-            resource as Resource<RedisResource>
-          ).content.databaseIndex.toString()
-          break
-        case "mongodb":
-          const mongoRes = resource as Resource<MongoDbResource<MongoDbConfig>>
-          if (mongoRes.content.configType == "gui") {
-            dbName = (mongoRes.content.configContent as MongoDbGuiConfigContent)
-              .databaseName
-          }
-          break
-      }
-      return {
-        id: resource.resourceId,
-        name: resource.resourceName,
-        resourceType: resource.resourceType,
-        type: getResourceNameFromResourceType(resource.resourceType),
-        databaseName: dbName,
-        created: resource.createdAt,
-      } as ResourceTableData
-    })
-  }, [resourcesList])
+  const canAccessResourcesView = canAccess(
+    teamInfo?.myRole ?? USER_ROLE.VIEWER,
+    ATTRIBUTE_GROUP.RESOURCE,
+    getPlanUtils(teamInfo),
+    ACTION_ACCESS.VIEW,
+  )
 
-  const columns: ColumnDef<ResourceTableData, string>[] = useMemo(() => {
-    return [
-      {
-        header: t("dashboard.resource.resource_name"),
-        accessorKey: "name",
-        cell: (props: CellContext<ResourceTableData, string>) => {
-          const type = props.row.original.resourceType
-          return (
-            <Space size="8px" alignItems="center" direction="horizontal">
-              {getIconFromResourceType(type, "24px")}
-              <span css={applyTableTextStyle(true)}>{props.getValue()}</span>
-            </Space>
-          )
-        },
-      },
-      {
-        header: t("dashboard.resource.resource_type"),
-        accessorKey: "type",
-        cell: (props: CellContext<ResourceTableData, string>) => (
-          <span css={applyTableTextStyle(false)}>{props.getValue()}</span>
-        ),
-      },
-      {
-        header: t("dashboard.resource.dbname"),
-        accessorKey: "databaseName",
-        cell: (props: CellContext<ResourceTableData, string>) => (
-          <span css={applyTableTextStyle(props.getValue() !== "Null")}>
-            {props.getValue()}
-          </span>
-        ),
-      },
-      {
-        header: t("dashboard.resource.created"),
-        accessorKey: "created",
-        cell: (props: CellContext<ResourceTableData, string>) => (
-          <span css={applyTableTextStyle(true)}>
-            {fromNow(props.getValue())}
-          </span>
-        ),
-      },
-      {
-        header: "",
-        enableSorting: false,
-        accessorKey: "id",
-        cell: (props: CellContext<ResourceTableData, string>) => (
-          <DashboardResourceItemMenu resourceId={props.getValue()} />
-        ),
-      },
-    ]
-  }, [t])
+  useGoogleAuthStatus()
+
+  useEffect(() => {
+    track(
+      ILLA_MIXPANEL_EVENT_TYPE.VISIT,
+      ILLA_MIXPANEL_BUILDER_PAGE_NAME.RESOURCE,
+    )
+    trackPageDurationStart()
+    return () => {
+      trackPageDurationEnd(ILLA_MIXPANEL_BUILDER_PAGE_NAME.RESOURCE)
+    }
+  }, [])
+
+  useBeforeUnload(() => {
+    trackPageDurationEnd(ILLA_MIXPANEL_BUILDER_PAGE_NAME.RESOURCE)
+  })
+
+  if (teamInfo && !canAccessResourcesView) {
+    throw Error(`can not access resources view`)
+  }
 
   return (
     <>
@@ -143,32 +83,40 @@ export const DashboardResources: FC = () => {
             colorScheme="techPurple"
             onClick={() => {
               setNewResourceVisible(true)
+              track(
+                ILLA_MIXPANEL_EVENT_TYPE.CLICK,
+                ILLA_MIXPANEL_BUILDER_PAGE_NAME.RESOURCE,
+                { element: "create_new_resource" },
+              )
             }}
           >
             {t("dashboard.resource.create_resource")}
           </Button>
         </div>
-        {resourcesList?.length ? (
-          <Table
-            _css={hoverStyle}
-            pinedHeader
-            striped
-            hoverable
-            size="large"
-            data={resourceData}
-            columns={columns}
-          />
-        ) : null}
-        {!resourcesList?.length ? <Empty paddingVertical="120px" /> : null}
+        <Suspense fallback={<FullPageLoading />}>
+          <Await
+            resolve={resourceList}
+            errorElement={<DashboardErrorElement />}
+          >
+            <ResourcesContent />
+          </Await>
+        </Suspense>
       </div>
-      <ResourceGenerator
-        visible={newResourceVisible}
-        onClose={() => {
-          setNewResourceVisible(false)
-        }}
-      />
+      <MixpanelTrackProvider
+        basicTrack={resourceContextHelper("resource_new")}
+        pageName={ILLA_MIXPANEL_BUILDER_PAGE_NAME.RESOURCE}
+      >
+        <ResourceGenerator
+          visible={newResourceVisible}
+          onClose={() => {
+            setNewResourceVisible(false)
+          }}
+        />
+      </MixpanelTrackProvider>
     </>
   )
 }
+
+export default DashboardResources
 
 DashboardResources.displayName = "DashboardResources"

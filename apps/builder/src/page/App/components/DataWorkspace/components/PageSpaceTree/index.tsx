@@ -1,102 +1,81 @@
-import { FC, useCallback } from "react"
+import { ILLA_MIXPANEL_EVENT_TYPE } from "@illa-public/mixpanel-utils"
+import { FC, MouseEvent, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
-import { Dropdown } from "@illa-design/react"
-import { ReactComponent as HomepageIcon } from "@/assets/dataWorkspace/homepage.svg"
+import { PlusIcon } from "@illa-design/react"
 import { PanelBar } from "@/components/PanelBar"
-import { ActionMenu } from "@/page/App/components/PagePanel/Components/PanelHeader/actionMenu"
+import { customIconHotpotStyle } from "@/components/PanelBar/style"
+import { getPageDisplayNameMapViewDisplayName } from "@/redux/currentApp/editor/components/componentsSelector"
 import { componentsActions } from "@/redux/currentApp/editor/components/componentsSlice"
 import { RootComponentNodeProps } from "@/redux/currentApp/editor/components/componentsState"
 import { getRootNodeExecutionResult } from "@/redux/currentApp/executionTree/executionSelector"
-import { executionActions } from "@/redux/currentApp/executionTree/executionSlice"
+import { FocusManager } from "@/utils/focusManager"
 import { generatePageConfig } from "@/utils/generators/generatePageOrSectionConfig"
-import { PageItemProps } from "./interface"
-import {
-  homePageIconHotSpot,
-  homePageIconStyle,
-  pageItemWrapperStyle,
-  pageNameStyle,
-} from "./style"
-
-export const PageItem: FC<PageItemProps> = (props) => {
-  const {
-    isHomePage = false,
-    isSelected = false,
-    pageName,
-    index,
-    changeCurrentPageIndex,
-    allKeys,
-  } = props
-  return (
-    <Dropdown
-      position="bottom-start"
-      trigger="contextmenu"
-      dropList={<ActionMenu pageDisplayName={pageName} pageKeys={allKeys} />}
-    >
-      <div
-        css={pageItemWrapperStyle(isSelected)}
-        onClick={() => {
-          changeCurrentPageIndex(index)
-        }}
-      >
-        <span css={pageNameStyle}>{pageName}</span>
-        <div css={homePageIconHotSpot}>
-          {isHomePage && <HomepageIcon css={homePageIconStyle} />}
-        </div>
-      </div>
-    </Dropdown>
-  )
-}
+import { trackInEditor } from "@/utils/mixpanelHelper"
+import PageItem from "./components/PageItem"
+import { pageSpaceTreeStyle } from "./style"
 
 export const PageSpaceTree: FC = () => {
   const { t } = useTranslation()
   const rootNodeProps = useSelector(
     getRootNodeExecutionResult,
   ) as RootComponentNodeProps
-  const { pageSortedKey, currentPageIndex, homepageDisplayName } = rootNodeProps
+  const {
+    currentPageIndex,
+    homepageDisplayName,
+    pageSortedKey = [],
+    currentSubPagePath,
+  } = rootNodeProps
+  const currentPageDisplayName = pageSortedKey[currentPageIndex]
   const dispatch = useDispatch()
-  const handleClickAddButton = useCallback(() => {
-    const newPageConfig = generatePageConfig()
-    dispatch(componentsActions.addPageNodeWithSortOrderReducer([newPageConfig]))
-  }, [dispatch])
-  const changeCurrentPage = useCallback(
-    (index: number) => {
-      if (index === currentPageIndex) return
-      dispatch(
-        executionActions.updateExecutionByDisplayNameReducer({
-          displayName: "root",
-          value: {
-            currentPageIndex: index,
-          },
-        }),
-      )
+
+  const handleClickAddButton = useCallback(
+    (e: MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation()
+      trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+        element: "add_page",
+      })
+      const newPageConfig = generatePageConfig()
+      dispatch(componentsActions.addPageNodeWithSortOrderReducer(newPageConfig))
     },
-    [currentPageIndex, dispatch],
+    [dispatch],
   )
+
+  const pageDisplayNameMapSubPageDisplayName = useSelector(
+    getPageDisplayNameMapViewDisplayName,
+  )
+
   return (
     <PanelBar
       title={t("editor.data_work_space.pages_title")}
-      isAddIcon
-      addAction={handleClickAddButton}
+      destroyChildrenWhenClose
+      customIcon={
+        <div css={customIconHotpotStyle} onClick={handleClickAddButton}>
+          <PlusIcon />
+        </div>
+      }
+      onIllaFocus={() => {
+        FocusManager.switchFocus("data_page")
+      }}
     >
-      {Array.isArray(pageSortedKey) &&
-        pageSortedKey.map((key: string, index: number) => {
-          const isSelected = currentPageIndex === index
+      <div css={pageSpaceTreeStyle}>
+        {Object.keys(pageDisplayNameMapSubPageDisplayName).map((key, index) => {
           const isHomePage = homepageDisplayName
             ? homepageDisplayName === key
             : index === 0
           return (
             <PageItem
-              isSelected={isSelected}
               isHomePage={isHomePage}
-              index={index}
               pageName={key}
               key={key}
-              changeCurrentPageIndex={changeCurrentPage}
-              allKeys={pageSortedKey}
+              level={1}
+              subPagePaths={pageDisplayNameMapSubPageDisplayName[key]}
+              currentPagePath={currentPageDisplayName}
+              currentSubPagePath={currentSubPagePath}
             />
           )
         })}
+      </div>
     </PanelBar>
   )
 }

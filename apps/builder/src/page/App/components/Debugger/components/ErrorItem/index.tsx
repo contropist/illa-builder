@@ -2,7 +2,7 @@ import { motion } from "framer-motion"
 import { get } from "lodash"
 import { FC, useCallback, useMemo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { CaretRightIcon, ErrorIcon } from "@illa-design/react"
+import { CaretRightIcon, ErrorCircleIcon } from "@illa-design/react"
 import { JsonView } from "@/page/App/components/Debugger/components/JsonView"
 import { configActions } from "@/redux/config/configSlice"
 import {
@@ -16,6 +16,8 @@ import {
   errorContainerStyle,
   errorExpandStyle,
   errorIconStyle,
+  errorInfoStyle,
+  errorItemContentStyle,
   errorItemStyle,
   errorMessageStyle,
   jsonContentAnimation,
@@ -44,17 +46,18 @@ export const ErrorItem: FC<ErrorItemProps> = (props) => {
 
   const handleComponentSelect = useCallback(() => {
     const selectedComponent = searchDsl(root, displayName)
-    selectedComponent &&
+    if (selectedComponent) {
       dispatch(
         configActions.updateSelectedComponent([selectedComponent.displayName]),
       )
-  }, [dispatch, root, displayName])
+    }
+  }, [root, displayName, dispatch])
 
   return (
     <div css={errorContainerStyle}>
       <div css={errorItemStyle}>
-        <div>
-          <ErrorIcon size={"16px"} css={errorIconStyle} />
+        <div css={errorItemContentStyle}>
+          <ErrorCircleIcon size={"16px"} css={errorIconStyle} />
           <span
             css={[errorExpandStyle, applyExpandIconStyle(isExpanded)]}
             onClick={() => {
@@ -66,7 +69,7 @@ export const ErrorItem: FC<ErrorItemProps> = (props) => {
           <span css={nameStyle} onClick={handleComponentSelect}>
             [{displayName}]
           </span>
-          <span>The value at {attrPath} is invalid</span>
+          <span css={errorInfoStyle}>The value at {attrPath} is invalid</span>
         </div>
         <div css={sourceStyle} onClick={handleComponentSelect}>
           {pathName}
@@ -83,12 +86,7 @@ export const ErrorItem: FC<ErrorItemProps> = (props) => {
         <div css={errorMessageStyle}>
           {item?.errorName}: {item?.errorMessage}
         </div>
-        <JsonView
-          key={attrPath}
-          name={attrPath}
-          value={attrValue}
-          // value={{"a": "bbbb"}}
-        />
+        <JsonView key={attrPath} name={attrPath} value={attrValue} />
       </motion.div>
     </div>
   )

@@ -1,8 +1,9 @@
 import { FC, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
+import { CODE_LANG } from "@/components/CodeEditor/CodeMirror/extensions/interface"
+import { RecordEditor } from "@/components/RecordEditor"
 import { ActionEventHandler } from "@/page/App/components/Actions/ActionPanel/ActionEventHandler"
-import { RecordEditor } from "@/page/App/components/Actions/ActionPanel/RecordEditor"
 import { redisContainerStyle } from "@/page/App/components/Actions/ActionPanel/RedisPanel/style"
 import { ResourceChoose } from "@/page/App/components/Actions/ActionPanel/ResourceChoose"
 import { TransformerComponent } from "@/page/App/components/Actions/ActionPanel/TransformerComponent"
@@ -15,7 +16,7 @@ import { Params } from "@/redux/resource/restapiResource"
 import { VALIDATION_TYPES } from "@/utils/validationFactory"
 import { actionItemContainer } from "./style"
 
-export const GraphQLPanel: FC = () => {
+const GraphQLPanel: FC = () => {
   const { t } = useTranslation()
 
   const cachedAction = useSelector(getCachedAction) as ActionItem<GraphQLAction>
@@ -48,7 +49,7 @@ export const GraphQLPanel: FC = () => {
             ...cachedAction,
             content: {
               ...content,
-              variables: newList,
+              [name]: newList,
             },
           }),
         )
@@ -71,7 +72,7 @@ export const GraphQLPanel: FC = () => {
             ...cachedAction,
             content: {
               ...content,
-              variables: newList,
+              [name]: newList,
             },
           }),
         )
@@ -91,7 +92,7 @@ export const GraphQLPanel: FC = () => {
             ...cachedAction,
             content: {
               ...content,
-              variables: newList,
+              [name]: newList,
             },
           }),
         )
@@ -110,11 +111,12 @@ export const GraphQLPanel: FC = () => {
           placeholder={t("editor.action.panel.graphql.placeholder.query")}
           value={content.query}
           onChange={(value) => handleValueChange(value, "query")}
-          mode="GRAPHQL"
+          mode={CODE_LANG.SQL}
           style={{ height: "88px" }}
           expectedType={VALIDATION_TYPES.STRING}
         />
         <RecordEditor
+          key="variables"
           label={t("editor.action.panel.graphql.variables")}
           records={content.variables}
           name="variables"
@@ -122,8 +124,10 @@ export const GraphQLPanel: FC = () => {
           onDelete={handleOnDeleteKeyValue}
           onChangeKey={handleOnChangeKeyOrValue}
           onChangeValue={handleOnChangeKeyOrValue}
+          valueInputType={VALIDATION_TYPES.ANY}
         />
         <RecordEditor
+          key="headers"
           label={t("editor.action.panel.graphql.headers")}
           name="headers"
           records={content.headers}
@@ -140,3 +144,4 @@ export const GraphQLPanel: FC = () => {
 }
 
 GraphQLPanel.displayName = "GraphQLPanel"
+export default GraphQLPanel

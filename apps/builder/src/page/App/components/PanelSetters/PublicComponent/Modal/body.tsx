@@ -1,19 +1,27 @@
 import { FC } from "react"
-import { renderFieldAndLabel } from "@/page/App/components/InspectPanel/utils/fieldFactory"
+import { useSelector } from "react-redux"
+import RenderFieldAndLabel from "@/page/App/components/InspectPanel/components/FieldAndLabel"
+import { getGuideInfo } from "@/redux/guide/guideSelector"
 import { BodyProps } from "./interface"
 import { listWrapperStyle } from "./style"
 
 export const ModalBody: FC<BodyProps> = (props) => {
   const { childrenSetter, widgetDisplayName, attrPath } = props
+  const guideInfo = useSelector(getGuideInfo)
 
   return (
     <div css={listWrapperStyle}>
       {childrenSetter?.map((child) => {
-        return renderFieldAndLabel(
-          child,
-          widgetDisplayName ?? "",
-          false,
-          attrPath,
+        const { id } = child
+        return (
+          <RenderFieldAndLabel
+            key={`${id}-${widgetDisplayName}`}
+            config={child}
+            displayName={widgetDisplayName ?? ""}
+            isInList={false}
+            parentAttrName={attrPath}
+            guideInfo={guideInfo}
+          />
         )
       })}
     </div>

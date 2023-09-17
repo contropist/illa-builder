@@ -1,9 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit"
 import {
   addActionItemReducer,
+  batchUpdateMultiActionSlicePropsReducer,
+  initActionListReducer,
   removeActionItemReducer,
+  resetActionReducer,
+  updateActionDisplayNameReducer,
   updateActionItemReducer,
-  updateActionListReducer,
 } from "@/redux/currentApp/action/actionReducer"
 import { actionInitialState } from "@/redux/currentApp/action/actionState"
 
@@ -11,10 +14,13 @@ const actionSlice = createSlice({
   name: "action",
   initialState: actionInitialState,
   reducers: {
-    updateActionListReducer,
+    initActionListReducer,
     addActionItemReducer,
     updateActionItemReducer,
     removeActionItemReducer,
+    resetActionReducer,
+    updateActionDisplayNameReducer,
+    batchUpdateMultiActionSlicePropsReducer,
   },
 })
 

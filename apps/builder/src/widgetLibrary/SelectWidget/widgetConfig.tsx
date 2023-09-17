@@ -10,9 +10,10 @@ export const SELECT_WIDGET_CONFIG: WidgetConfig = {
   icon: <SelectWidgetIcon />,
   keywords: ["Select", "选择器"],
   sessionType: "SELECT",
-  w: 12,
+  w: 6,
   h: 5,
   resizeDirection: RESIZE_DIRECTION.HORIZONTAL,
+  version: 0,
   defaults: {
     optionConfigureMode: "static",
     label: "Label",

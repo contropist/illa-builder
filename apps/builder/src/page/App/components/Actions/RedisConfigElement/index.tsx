@@ -1,197 +1,154 @@
-import { FC, useState } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { useTranslation } from "react-i18next"
-import { useDispatch, useSelector } from "react-redux"
 import {
+  ILLA_MIXPANEL_EVENT_TYPE,
+  MixpanelTrackContext,
+} from "@illa-public/mixpanel-utils"
+import { isCloudVersion } from "@illa-public/utils"
+import { FC, useCallback, useContext, useMemo, useState } from "react"
+import { useForm } from "react-hook-form"
+import { Trans, useTranslation } from "react-i18next"
+import { useSelector } from "react-redux"
+import {
+  Alert,
   Button,
   ButtonGroup,
   Divider,
-  Input,
-  InputNumber,
-  PaginationPreIcon,
-  Password,
-  Switch,
+  PreviousIcon,
   getColor,
-  useMessage,
 } from "@illa-design/react"
-import { Api } from "@/api/base"
 import {
-  configItem,
+  onActionConfigElementSubmit,
+  onActionConfigElementTest,
+} from "@/page/App/components/Actions/api"
+import { RedisLikeConfigElementProps } from "@/page/App/components/Actions/interface"
+import {
+  applyConfigItemLabelText,
   configItemTip,
   connectType,
   connectTypeStyle,
+  container,
+  divider,
+  footerStyle,
   labelContainer,
   optionLabelStyle,
 } from "@/page/App/components/Actions/styles"
+import { ControlledElement } from "@/page/App/components/ControlledElement"
+import { ControlledType } from "@/page/App/components/ControlledElement/interface"
+import { TextLink } from "@/page/User/components/TextLink"
 import {
   RedisResource,
   RedisResourceInitial,
 } from "@/redux/resource/redisResource"
-import { resourceActions } from "@/redux/resource/resourceSlice"
 import { Resource } from "@/redux/resource/resourceState"
+import { DATABASE_INDEX, DEFAULT_NAME } from "@/redux/resource/upstashResource"
 import { RootState } from "@/store"
-import { isCloudVersion } from "@/utils/typeHelper"
-import { RedisConfigElementProps } from "./interface"
-import {
-  applyConfigItemLabelText,
-  container,
-  divider,
-  footerStyle,
-  hostInputContainer,
-  sslStyle,
-} from "./style"
+import { isContainLocalPath, validate } from "@/utils/form"
 
-export const RedisConfigElement: FC<RedisConfigElementProps> = (props) => {
-  const { onBack, resourceId, onFinished } = props
-
+export const RedisConfigElement: FC<RedisLikeConfigElementProps> = (props) => {
+  const { onBack, resourceID, onFinished, type } = props
   const { t } = useTranslation()
-
-  const dispatch = useDispatch()
-
-  const message = useMessage()
-
-  const { control, handleSubmit, getValues, formState } = useForm({
+  const { control, handleSubmit, getValues, formState, watch } = useForm({
     mode: "onChange",
     shouldUnregister: true,
   })
-
   const findResource = useSelector((state: RootState) => {
-    return state.resource.find((r) => r.resourceId === resourceId)
+    return state.resource.find((r) => r.resourceID === resourceID)
   })
 
   let content: RedisResource
-
   if (findResource === undefined) {
     content = RedisResourceInitial
   } else {
     content = (findResource as Resource<RedisResource>).content
   }
 
-  const [sslOpen, setSSLOpen] = useState(content.ssl ?? false)
-
+  const [showAlert, setShowAlert] = useState<boolean>(false)
   const [testLoading, setTestLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const { track } = useContext(MixpanelTrackContext)
+
+  const sslOpenWatch = watch("ssl", content.ssl ?? false)
+  const userNameOrPassword = useMemo(() => {
+    if (type === "redis") {
+      return {
+        title: t("editor.action.resource.db.label.username_password"),
+        controlledType: ["input", "password"] as ControlledType[],
+        name: ["databaseUsername", "databasePassword"],
+        defaultValue: [content.databaseUsername, content.databasePassword],
+        placeholders: [
+          t("editor.action.resource.db.placeholder.username"),
+          t("editor.action.resource.db.placeholder.password"),
+        ],
+      }
+    } else {
+      return {
+        title: t("editor.action.resource.db.label.password"),
+        controlledType: "password" as ControlledType,
+        name: "databasePassword",
+        defaultValue: content.databasePassword,
+        placeholders: [t("editor.action.resource.db.placeholder.password")],
+      }
+    }
+  }, [content.databasePassword, content.databaseUsername, t, type])
+
+  const handleHostValidate = useCallback(
+    (value: string) => {
+      const isShowAlert = isContainLocalPath(value ?? "")
+      if (isShowAlert !== showAlert) {
+        setShowAlert(isShowAlert)
+      }
+      return true
+    },
+    [showAlert],
+  )
+
+  const handleConnectionTest = useCallback(() => {
+    track?.(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+      element: "resource_configure_test",
+      parameter5: type,
+    })
+    const data = getValues()
+    onActionConfigElementTest(
+      data,
+      {
+        host: data.host.trim(),
+        port: data.port.toString(),
+        databaseIndex: DATABASE_INDEX,
+        databaseUsername: DEFAULT_NAME,
+        databasePassword: data.databasePassword,
+        ssl: sslOpenWatch,
+      },
+      type,
+      setTestLoading,
+    )
+  }, [getValues, sslOpenWatch, track, type])
 
   return (
     <form
-      onSubmit={handleSubmit((data, event) => {
-        if (resourceId != undefined) {
-          Api.request<Resource<RedisResource>>(
-            {
-              method: "PUT",
-              url: `/resources/${resourceId}`,
-              data: {
-                resourceId: data.resourceId,
-                resourceName: data.resourceName,
-                resourceType: "redis",
-                content: {
-                  host: data.host,
-                  port: data.port.toString(),
-                  databaseIndex: data.databaseIndex ?? 0,
-                  databaseUsername: data.databaseUsername,
-                  databasePassword: data.databasePassword,
-                  ssl: sslOpen,
-                },
-              },
-            },
-            (response) => {
-              dispatch(resourceActions.updateResourceItemReducer(response.data))
-              message.success({
-                content: t("dashboard.resource.save_success"),
-              })
-              onFinished(response.data.resourceId)
-            },
-            (error) => {
-              message.error({
-                content: error.data.errorMessage,
-              })
-            },
-            () => {
-              message.error({
-                content: t("dashboard.resource.save_fail"),
-              })
-            },
-            (loading) => {
-              setSaving(loading)
-            },
-          )
-        } else {
-          Api.request<Resource<RedisResource>>(
-            {
-              method: "POST",
-              url: `/resources`,
-              data: {
-                resourceName: data.resourceName,
-                resourceType: "redis",
-                content: {
-                  host: data.host,
-                  port: data.port.toString(),
-                  databaseIndex: data.databaseIndex ?? 0,
-                  databaseUsername: data.databaseUsername,
-                  databasePassword: data.databasePassword,
-                  ssl: sslOpen,
-                },
-              },
-            },
-            (response) => {
-              dispatch(resourceActions.addResourceItemReducer(response.data))
-              message.success({
-                content: t("dashboard.resource.save_success"),
-              })
-              onFinished(response.data.resourceId)
-            },
-            (error) => {
-              message.error({
-                content: error.data.errorMessage,
-              })
-            },
-            () => {
-              message.error({
-                content: t("dashboard.resource.save_fail"),
-              })
-            },
-            (loading) => {
-              setSaving(loading)
-            },
-          )
-        }
-      })}
+      onSubmit={onActionConfigElementSubmit(
+        handleSubmit,
+        resourceID,
+        type,
+        onFinished,
+        setSaving,
+      )}
     >
       <div css={container}>
         <div css={divider} />
-        <div css={configItem}>
-          <div css={labelContainer}>
-            <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-            <span
-              css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-            >
-              {t("editor.action.resource.db.label.name")}
-            </span>
-          </div>
-          <Controller
-            control={control}
-            defaultValue={findResource?.resourceName ?? ""}
-            rules={{
-              required: true,
-            }}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Input
-                w="100%"
-                ml="16px"
-                mr="24px"
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-                borderColor="techPurple"
-                placeholder={t("editor.action.resource.db.placeholder.name")}
-              />
-            )}
-            name="resourceName"
-          />
-        </div>
-        <div css={configItemTip}>
-          {t("editor.action.resource.restapi.tip.name")}
-        </div>
+        <ControlledElement
+          controlledType="input"
+          isRequired
+          title={t("editor.action.resource.db.label.name")}
+          control={control}
+          defaultValue={findResource?.resourceName ?? ""}
+          rules={[
+            {
+              validate,
+            },
+          ]}
+          placeholders={[t("editor.action.resource.db.placeholder.name")]}
+          name="resourceName"
+          tips={t("editor.action.resource.restapi.tip.name")}
+        />
         <Divider
           direction="horizontal"
           ml="24px"
@@ -200,131 +157,95 @@ export const RedisConfigElement: FC<RedisConfigElementProps> = (props) => {
           mb="8px"
           w="unset"
         />
-        <div css={configItem}>
-          <div css={labelContainer}>
-            <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-            <span
-              css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-            >
-              {t("editor.action.resource.db.label.hostname_port")}
-            </span>
-          </div>
-          <div css={hostInputContainer}>
-            <Controller
-              defaultValue={content.host}
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field: { value, onChange, onBlur } }) => (
-                <Input
-                  w="100%"
-                  onBlur={onBlur}
-                  onChange={onChange}
-                  value={value}
-                  borderColor="techPurple"
-                  placeholder={t(
-                    "editor.action.resource.db.placeholder.hostname",
-                  )}
-                />
-              )}
-              name="host"
-            />
-            <Controller
-              defaultValue={content.port}
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field: { value, onChange, onBlur } }) => (
-                <InputNumber
-                  onBlur={onBlur}
-                  onChange={onChange}
-                  value={value}
-                  borderColor="techPurple"
-                  w="142px"
-                  ml="8px"
-                  placeholder="6379"
-                />
-              )}
-              name="port"
-            />
-          </div>
+        <div css={optionLabelStyle}>
+          {t("editor.action.resource.db.title.general_option")}
         </div>
-        <div css={configItem}>
-          <div css={labelContainer}>
-            <span
-              css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-            >
-              {t("editor.action.resource.db.label.database_index")}
-            </span>
-          </div>
-          <Controller
-            defaultValue={content.databaseIndex}
+
+        <ControlledElement
+          defaultValue={[content.host, content.port]}
+          title={t("editor.action.resource.db.label.hostname_port")}
+          control={control}
+          rules={[
+            {
+              required: true,
+              validate: handleHostValidate,
+            },
+            {
+              required: true,
+            },
+          ]}
+          isRequired
+          controlledType={["input", "number"]}
+          name={["host", "port"]}
+          placeholders={[
+            t("editor.action.resource.db.placeholder.hostname"),
+            "6379",
+          ]}
+          styles={[
+            {
+              flex: 4,
+            },
+            {
+              flex: 1,
+            },
+          ]}
+        />
+        {showAlert && (
+          <ControlledElement
+            defaultValue=""
+            name=""
+            title=""
+            controlledType="none"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <InputNumber
-                w="100%"
-                ml="16px"
-                mr="24px"
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-                borderColor="techPurple"
-                placeholder={t(
-                  "editor.action.resource.db.placeholder.database_index",
-                )}
+            tips={
+              <Alert
+                title={t("editor.action.form.tips.connect_to_local.title.tips")}
+                closable={false}
+                content={
+                  isCloudVersion ? (
+                    <Trans
+                      i18nKey="editor.action.form.tips.connect_to_local.cloud"
+                      t={t}
+                      components={[
+                        <TextLink
+                          key="editor.action.form.tips.connect_to_local.cloud"
+                          onClick={() => {
+                            window.open(
+                              "https://www.illacloud.com/docs/illa-cli",
+                              "_blank",
+                            )
+                          }}
+                        />,
+                      ]}
+                    />
+                  ) : (
+                    t("editor.action.form.tips.connect_to_local.selfhost")
+                  )
+                }
               />
-            )}
-            name="databaseIndex"
+            }
           />
-        </div>
-        <div css={configItem}>
-          <div css={labelContainer}>
-            <span
-              css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-            >
-              {t("editor.action.resource.db.label.username_password")}
-            </span>
-          </div>
-          <div css={hostInputContainer}>
-            <Controller
-              defaultValue={content.databaseUsername}
-              control={control}
-              render={({ field: { value, onChange, onBlur } }) => (
-                <Input
-                  w="100%"
-                  onBlur={onBlur}
-                  onChange={onChange}
-                  value={value}
-                  borderColor="techPurple"
-                  placeholder={t(
-                    "editor.action.resource.db.placeholder.username",
-                  )}
-                />
-              )}
-              name="databaseUsername"
-            />
-            <Controller
-              control={control}
-              defaultValue={content.databasePassword}
-              render={({ field: { value, onChange, onBlur } }) => (
-                <Password
-                  borderColor="techPurple"
-                  w="100%"
-                  onBlur={onBlur}
-                  onChange={onChange}
-                  value={value}
-                  ml="8px"
-                  placeholder={t(
-                    "editor.action.resource.db.placeholder.password",
-                  )}
-                />
-              )}
-              name="databasePassword"
-            />
-          </div>
-        </div>
+        )}
+        {type === "redis" && (
+          <ControlledElement
+            title={t("editor.action.resource.db.label.database_index")}
+            defaultValue={content.databaseIndex}
+            name="databaseIndex"
+            placeholders={[
+              t("editor.action.resource.db.placeholder.database_index"),
+            ]}
+            controlledType="number"
+            control={control}
+          />
+        )}
+        <ControlledElement
+          title={userNameOrPassword.title}
+          controlledType={userNameOrPassword.controlledType}
+          control={control}
+          defaultValue={userNameOrPassword.defaultValue}
+          name={userNameOrPassword.name}
+          placeholders={userNameOrPassword.placeholders}
+        />
         {isCloudVersion && (
           <>
             <div css={configItemTip}>
@@ -344,7 +265,6 @@ export const RedisConfigElement: FC<RedisConfigElementProps> = (props) => {
             </div>
           </>
         )}
-
         <Divider
           direction="horizontal"
           ml="24px"
@@ -356,43 +276,22 @@ export const RedisConfigElement: FC<RedisConfigElementProps> = (props) => {
         <div css={optionLabelStyle}>
           {t("editor.action.resource.db.title.advanced_option")}
         </div>
-        <div css={configItem}>
-          <div css={labelContainer}>
-            <span css={applyConfigItemLabelText(getColor("grayBlue", "02"))}>
-              {t("editor.action.resource.db.label.ssl_options")}
-            </span>
-          </div>
-          <Controller
-            control={control}
-            defaultValue={content.ssl}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Switch
-                checked={value}
-                ml="16px"
-                colorScheme="techPurple"
-                onChange={(open) => {
-                  onChange(open)
-                  setSSLOpen(open)
-                }}
-                onBlur={onBlur}
-              />
-            )}
-            name="ssl"
-          />
-          <span css={sslStyle}>
-            {t("editor.action.resource.db.tip.ssl_options")}
-          </span>
-        </div>
+        <ControlledElement
+          title={t("editor.action.resource.db.label.ssl_options")}
+          control={control}
+          defaultValue={content.ssl}
+          controlledType="switch"
+          name="ssl"
+          contentLabel={t("editor.action.resource.db.tip.ssl_options")}
+        />
       </div>
       <div css={footerStyle}>
         <Button
-          leftIcon={<PaginationPreIcon />}
+          leftIcon={<PreviousIcon />}
           variant="text"
           colorScheme="gray"
           type="button"
-          onClick={() => {
-            onBack()
-          }}
+          onClick={onBack}
         >
           {t("back")}
         </Button>
@@ -402,46 +301,7 @@ export const RedisConfigElement: FC<RedisConfigElementProps> = (props) => {
             loading={testLoading}
             disabled={!formState.isValid}
             type="button"
-            onClick={() => {
-              const data = getValues()
-              Api.request<Resource<RedisResource>>(
-                {
-                  method: "POST",
-                  url: `/resources/testConnection`,
-                  data: {
-                    resourceId: data.resourceId,
-                    resourceName: data.resourceName,
-                    resourceType: "redis",
-                    content: {
-                      host: data.host,
-                      port: data.port.toString(),
-                      databaseIndex: data.databaseIndex ?? 0,
-                      databaseUsername: data.databaseUsername,
-                      databasePassword: data.databasePassword,
-                      ssl: sslOpen,
-                    },
-                  },
-                },
-                (response) => {
-                  message.success({
-                    content: t("dashboard.resource.test_success"),
-                  })
-                },
-                (error) => {
-                  message.error({
-                    content: error.data.errorMessage,
-                  })
-                },
-                () => {
-                  message.error({
-                    content: t("dashboard.resource.test_fail"),
-                  })
-                },
-                (loading) => {
-                  setTestLoading(loading)
-                },
-              )
-            }}
+            onClick={handleConnectionTest}
           >
             {t("editor.action.form.btn.test_connection")}
           </Button>

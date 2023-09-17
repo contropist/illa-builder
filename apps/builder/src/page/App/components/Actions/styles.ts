@@ -1,5 +1,5 @@
-import { css } from "@emotion/react"
-import { getColor, globalColor, illaPrefix } from "@illa-design/react"
+import { SerializedStyles, css } from "@emotion/react"
+import { getColor } from "@illa-design/react"
 
 export function applyActionEditorStyle(h: number) {
   return css`
@@ -8,19 +8,6 @@ export function applyActionEditorStyle(h: number) {
     height: ${h}px;
   `
 }
-
-export const actionEditorDragBarStyle = css`
-  top: -5px;
-  cursor: row-resize;
-  width: 100%;
-  position: absolute;
-  transition: all 0.2s;
-  height: 5px;
-
-  &:hover {
-    background: ${globalColor(`--${illaPrefix}-grayBlue-08`)};
-  }
-`
 
 export const contentContainerStyle = css`
   width: 100%;
@@ -62,13 +49,11 @@ export const connectType = css`
   display: flex;
   height: 38px;
   align-items: center;
-  flex-direction: row;
   padding-left: 24px;
 `
 
 export const labelContainer = css`
   display: flex;
-  flex-direction: row;
   justify-content: end;
   min-width: 176px;
 `
@@ -80,4 +65,95 @@ export const connectTypeStyle = css`
   align-items: center;
   color: ${getColor("grayBlue", "02")};
   margin-left: 16px;
+`
+
+export const container = css`
+  width: 100%;
+  max-height: 685px;
+  overflow-y: auto;
+`
+
+export const footerStyle = css`
+  height: 80px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`
+
+export const divider = css`
+  height: 16px;
+`
+
+export function applyConfigItemLabelText(
+  color: string,
+  margin?: boolean,
+): SerializedStyles {
+  let marginLeft = css``
+  if (margin) {
+    marginLeft = css`
+      margin-left: 4px;
+    `
+  }
+  return css`
+    font-size: 14px;
+    color: ${color};
+    font-weight: 500;
+    ${marginLeft};
+  `
+}
+
+export const errorMsgStyle: SerializedStyles = css`
+  position: relative;
+  font-size: 14px;
+  padding-left: 24px;
+  line-height: 22px;
+  color: ${getColor("orange", "03")};
+`
+
+export const errorIconStyle: SerializedStyles = css`
+  position: absolute;
+  font-size: 16px;
+  line-height: 0;
+  top: 3px;
+  left: 0;
+`
+
+export const privateKeyItem = css`
+  display: flex;
+  width: 100%;
+  padding-top: 8px;
+  padding-left: 24px;
+  align-items: flex-start;
+`
+
+export const getOAuthStatusContentStyle = (isSuccess: boolean) => {
+  return css`
+    width: 100%;
+    padding: 9px 16px;
+    display: flex;
+    gap: 8px;
+    height: 40px;
+    background: ${isSuccess
+      ? getColor("green", "07")
+      : getColor("orange", "07")};
+    border-radius: 4px;
+    align-items: center;
+  `
+}
+
+export const oAuthStatusContainerStyle = css`
+  width: 100%;
+  padding: 8px 24px;
+`
+
+export const oAuthErrorIconStyle: SerializedStyles = css`
+  font-size: 16px;
+  color: ${getColor("orange", "03")};
+`
+
+export const agentActionStyle = (size: string) => css`
+  width: ${size};
+  height: ${size};
+  flex-shrink: 0;
 `

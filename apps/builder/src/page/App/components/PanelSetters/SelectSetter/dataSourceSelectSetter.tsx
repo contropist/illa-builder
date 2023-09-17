@@ -1,16 +1,16 @@
-import { debounce, get } from "lodash"
+import { get } from "lodash"
 import { FC, useCallback, useMemo } from "react"
 import { useSelector } from "react-redux"
 import { publicPaddingStyle } from "@/page/App/components/InspectPanel/style"
 import { ChartDataSourceSetterProps } from "@/page/App/components/PanelSetters/ChartSetter/interface"
-import { BaseDynamicSelect } from "@/page/App/components/PanelSetters/SelectSetter/baseDynamicSelect"
+import BaseDynamicSelect from "@/page/App/components/PanelSetters/SelectSetter/baseDynamicSelect"
 import { getActionList } from "@/redux/currentApp/action/actionSelector"
 import { searchDSLByDisplayName } from "@/redux/currentApp/editor/components/componentsSelector"
 import { getExecutionError } from "@/redux/currentApp/executionTree/executionSelector"
 import { RootState } from "@/store"
 import { VALIDATION_TYPES } from "@/utils/validationFactory"
 
-export const DataSourceSetter: FC<ChartDataSourceSetterProps> = (props) => {
+const DataSourceSetter: FC<ChartDataSourceSetterProps> = (props) => {
   const { handleUpdateDsl, widgetDisplayName, labelName, labelDesc } = props
   const actions = useSelector(getActionList)
   const isError = useSelector<RootState, boolean>((state) => {
@@ -70,8 +70,6 @@ export const DataSourceSetter: FC<ChartDataSourceSetterProps> = (props) => {
     [handleUpdateDsl],
   )
 
-  const debounceHandleChangeInput = debounce(handleChangeInput, 300)
-
   const handleChangeSelect = useCallback(
     (value: any) => {
       handleUpdateDsl("dataSource", value)
@@ -82,14 +80,15 @@ export const DataSourceSetter: FC<ChartDataSourceSetterProps> = (props) => {
   return (
     <div css={publicPaddingStyle}>
       <BaseDynamicSelect
+        {...props}
         isDynamic={isDynamic}
         onClickFxButton={handleClickFxButton}
         selectPlaceholder="Select a query or transformer"
         inputPlaceholder="{{}}"
-        onChangeInput={debounceHandleChangeInput}
+        onChangeInput={handleChangeInput}
         path={`${widgetDisplayName}.dataSourceJS`}
         options={selectedOptions}
-        expectedType={VALIDATION_TYPES.OBJECT}
+        expectedType={VALIDATION_TYPES.ARRAY}
         onChangeSelect={handleChangeSelect}
         value={finalValue}
         labelName={labelName}
@@ -101,3 +100,4 @@ export const DataSourceSetter: FC<ChartDataSourceSetterProps> = (props) => {
 }
 
 DataSourceSetter.displayName = "DataSourceSetter"
+export default DataSourceSetter

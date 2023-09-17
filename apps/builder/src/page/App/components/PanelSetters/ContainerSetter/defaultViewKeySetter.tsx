@@ -3,21 +3,17 @@ import { FC, useCallback, useMemo } from "react"
 import { useSelector } from "react-redux"
 import { ViewItemShape } from "@/page/App/components/PanelSetters/ContainerSetter/ViewsSetter/interface"
 import { ContainerDefaultViewKeySetterProps } from "@/page/App/components/PanelSetters/ContainerSetter/interface"
-import { BaseInput } from "@/page/App/components/PanelSetters/InputSetter/baseInput"
+import BaseInput from "@/page/App/components/PanelSetters/InputSetter/baseInput"
 import { getExecutionResult } from "@/redux/currentApp/executionTree/executionSelector"
 import { RootState } from "@/store"
 
-export const ContainerDefaultViewKeySetter: FC<
-  ContainerDefaultViewKeySetterProps
-> = (props) => {
+const ContainerDefaultViewKeySetter: FC<ContainerDefaultViewKeySetterProps> = (
+  props,
+) => {
   const {
-    attrName,
     handleUpdateMultiAttrDSL,
-    expectedType,
+    handleUpdateOtherMultiAttrDSL,
     widgetDisplayName,
-    widgetType,
-    widgetOrAction,
-    value,
   } = props
 
   const targetComponentProps = useSelector<RootState, Record<string, any>>(
@@ -29,6 +25,10 @@ export const ContainerDefaultViewKeySetter: FC<
 
   const realViews = useMemo(() => {
     return get(targetComponentProps, "viewList", []) as ViewItemShape[]
+  }, [targetComponentProps])
+
+  const linkWidgetDisplayName = useMemo(() => {
+    return get(targetComponentProps, "linkWidgetDisplayName")
   }, [targetComponentProps])
 
   const handleUpdateDefaultView = useCallback(
@@ -45,21 +45,23 @@ export const ContainerDefaultViewKeySetter: FC<
         currentIndex,
         currentKey,
       })
+      if (linkWidgetDisplayName) {
+        handleUpdateOtherMultiAttrDSL?.(linkWidgetDisplayName, {
+          currentIndex,
+          currentKey,
+        })
+      }
     },
-    [handleUpdateMultiAttrDSL, realViews],
+    [
+      realViews,
+      linkWidgetDisplayName,
+      handleUpdateMultiAttrDSL,
+      handleUpdateOtherMultiAttrDSL,
+    ],
   )
 
-  return (
-    <BaseInput
-      attrName={attrName}
-      handleUpdateDsl={handleUpdateDefaultView}
-      expectedType={expectedType}
-      widgetDisplayName={widgetDisplayName}
-      widgetType={widgetType}
-      widgetOrAction={widgetOrAction}
-      value={value}
-    />
-  )
+  return <BaseInput {...props} handleUpdateDsl={handleUpdateDefaultView} />
 }
 
 ContainerDefaultViewKeySetter.displayName = "ContainerDefaultViewKeySetter"
+export default ContainerDefaultViewKeySetter

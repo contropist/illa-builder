@@ -16,6 +16,14 @@ export const Databases: ResourceDataItem[] = [
     isDraft: false,
   },
   {
+    resourceType: "mssql",
+    isDraft: false,
+  },
+  {
+    resourceType: "oracle",
+    isDraft: false,
+  },
+  {
     resourceType: "mariadb",
     isDraft: false,
   },
@@ -24,7 +32,15 @@ export const Databases: ResourceDataItem[] = [
     isDraft: false,
   },
   {
+    resourceType: "neon",
+    isDraft: false,
+  },
+  {
     resourceType: "redis",
+    isDraft: false,
+  },
+  {
+    resourceType: "upstash",
     isDraft: false,
   },
   {
@@ -36,11 +52,31 @@ export const Databases: ResourceDataItem[] = [
     isDraft: false,
   },
   {
+    resourceType: "dynamodb",
+    isDraft: false,
+  },
+  {
+    resourceType: "snowflake",
+    isDraft: false,
+  },
+  {
     resourceType: "supabasedb",
     isDraft: false,
   },
   {
     resourceType: "clickhouse",
+    isDraft: false,
+  },
+  {
+    resourceType: "couchdb",
+    isDraft: false,
+  },
+  {
+    resourceType: "appwrite",
+    isDraft: false,
+  },
+  {
+    resourceType: "hydra",
     isDraft: false,
   },
 ]
@@ -67,7 +103,19 @@ export const Apis: ResourceDataItem[] = [
     isDraft: false,
   },
   {
+    resourceType: "googlesheets",
+    isDraft: false,
+  },
+  {
+    resourceType: "airtable",
+    isDraft: false,
+  },
+  {
     resourceType: "huggingface",
+    isDraft: false,
+  },
+  {
+    resourceType: "hfendpoint",
     isDraft: false,
   },
 ]

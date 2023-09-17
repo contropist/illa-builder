@@ -1,4 +1,4 @@
-import { FC, forwardRef, useEffect, useMemo, useRef } from "react"
+import { FC, forwardRef, useCallback, useEffect, useMemo } from "react"
 import { Image } from "@illa-design/react"
 import { isValidUrlScheme } from "@/utils/typeHelper"
 import { ImageWrapperStyle } from "@/widgetLibrary/ImageWidget/style"
@@ -31,42 +31,36 @@ WrappedImage.displayName = "WrappedImage"
 export const ImageWidget: FC<ImageWidgetProps> = (props) => {
   const {
     imageSrc,
-    altText,
     radius,
     objectFit,
     handleUpdateDsl,
-    handleDeleteGlobalData,
-    handleUpdateGlobalData,
-    displayName,
+    updateComponentRuntimeProps,
+    deleteComponentRuntimeProps,
     tooltipText,
+    triggerEventHandler,
   } = props
 
   useEffect(() => {
-    handleUpdateGlobalData(displayName, {
-      imageSrc,
-      altText,
-      radius,
+    updateComponentRuntimeProps({
       setImageUrl: (url: string) => {
         handleUpdateDsl({ imageSrc: url })
       },
     })
     return () => {
-      handleDeleteGlobalData(displayName)
+      deleteComponentRuntimeProps()
     }
   }, [
-    displayName,
-    imageSrc,
-    altText,
-    radius,
-    handleUpdateGlobalData,
+    deleteComponentRuntimeProps,
     handleUpdateDsl,
-    handleDeleteGlobalData,
+    updateComponentRuntimeProps,
   ])
 
   const finalSrc = useMemo(() => {
     let finalURL = imageSrc
     if (finalURL && !isValidUrlScheme(finalURL)) {
-      finalURL = `https://${finalURL}`
+      if (!finalURL.startsWith("data:")) {
+        finalURL = `https://${finalURL}`
+      }
     }
     return finalURL
   }, [imageSrc])
@@ -80,6 +74,10 @@ export const ImageWidget: FC<ImageWidgetProps> = (props) => {
     return radius
   }, [radius])
 
+  const handleOnClick = useCallback(() => {
+    triggerEventHandler("click")
+  }, [triggerEventHandler])
+
   return (
     <TooltipWrapper tooltipText={tooltipText} tooltipDisabled={!tooltipText}>
       <div css={ImageWrapperStyle}>
@@ -88,9 +86,11 @@ export const ImageWidget: FC<ImageWidgetProps> = (props) => {
           imageSrc={finalSrc}
           radius={finalRadius}
           objectFit={objectFit}
+          handleOnClick={handleOnClick}
         />
       </div>
     </TooltipWrapper>
   )
 }
 ImageWidget.displayName = "ImageWidget"
+export default ImageWidget

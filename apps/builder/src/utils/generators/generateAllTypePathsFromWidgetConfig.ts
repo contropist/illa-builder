@@ -1,10 +1,11 @@
-import { get } from "lodash"
+import { get, toPath } from "lodash"
 import {
   PanelConfig,
   PanelFieldGroupConfig,
 } from "@/page/App/components/InspectPanel/interface"
 import { isObject } from "@/utils/typeHelper"
 import { VALIDATION_TYPES } from "@/utils/validationFactory"
+import { convertPathToString } from "../executionTreeHelper/utils"
 
 export const generateAllTypePathsFromWidgetConfig = (
   panelConfig: PanelConfig[],
@@ -16,11 +17,29 @@ export const generateAllTypePathsFromWidgetConfig = (
       const filedConfigs = (config as PanelFieldGroupConfig).children
       filedConfigs.forEach((filedConfig) => {
         const attrPath = filedConfig.attrName
-
         const configValidationPaths: Record<string, VALIDATION_TYPES> = {}
-        if (filedConfig.expectedType) {
-          configValidationPaths[attrPath] = filedConfig.expectedType
-          validationPaths = { ...validationPaths, ...configValidationPaths }
+
+        if (Array.isArray(attrPath)) {
+          const expectedType = filedConfig.expectedType
+          if (Array.isArray(expectedType)) {
+            attrPath.forEach((path, i) => {
+              configValidationPaths[path] = expectedType[i]
+            })
+          } else if (expectedType) {
+            attrPath.forEach((path) => {
+              configValidationPaths[path] = expectedType
+            })
+          }
+        } else {
+          if (filedConfig.expectedType) {
+            const expectedType = filedConfig.expectedType
+
+            if (Array.isArray(expectedType)) {
+              configValidationPaths[attrPath] = expectedType[0]
+            } else if (expectedType) {
+              configValidationPaths[attrPath] = expectedType
+            }
+          }
         }
 
         if (filedConfig.childrenSetter) {
@@ -28,24 +47,59 @@ export const generateAllTypePathsFromWidgetConfig = (
           const widgetPropertyValue = get(widgetOrAction, basePropertyPath, [])
           if (Array.isArray(widgetPropertyValue)) {
             Object.keys(widgetPropertyValue).forEach((key) => {
-              const objectIndexPropertyPath = `${basePropertyPath}.${key}`
+              const objectIndexPropertyPath = convertPathToString(
+                toPath(`${basePropertyPath}.${key}`),
+              )
               filedConfig.childrenSetter?.forEach((childConfig) => {
                 const childAttrPath = childConfig.attrName
-                if (childConfig.expectedType) {
-                  configValidationPaths[
-                    `${objectIndexPropertyPath}.${childAttrPath}`
-                  ] = childConfig.expectedType
+                const expectedType = childConfig.expectedType
+                if (Array.isArray(childAttrPath)) {
+                  if (Array.isArray(expectedType)) {
+                    childAttrPath.forEach((path, i) => {
+                      configValidationPaths[
+                        convertPathToString(
+                          toPath(`${objectIndexPropertyPath}.${path}`),
+                        )
+                      ] = expectedType[i]
+                    })
+                  } else if (expectedType) {
+                    childAttrPath.forEach((path) => {
+                      configValidationPaths[
+                        convertPathToString(
+                          toPath(`${objectIndexPropertyPath}.${path}`),
+                        )
+                      ] = expectedType
+                    })
+                  }
+                } else {
+                  if (expectedType) {
+                    if (Array.isArray(expectedType)) {
+                      configValidationPaths[
+                        convertPathToString(
+                          toPath(`${objectIndexPropertyPath}.${childAttrPath}`),
+                        )
+                      ] = expectedType[0]
+                    } else if (expectedType) {
+                      configValidationPaths[
+                        convertPathToString(
+                          toPath(`${objectIndexPropertyPath}.${childAttrPath}`),
+                        )
+                      ] = expectedType
+                    }
+                  }
                 }
               })
             })
           }
           if (isObject(widgetPropertyValue)) {
             Object.keys(widgetPropertyValue).forEach((key) => {
-              const objectIndexPropertyPath = `${basePropertyPath}.${key}`
+              const objectIndexPropertyPath = convertPathToString(
+                toPath(`${basePropertyPath}.${key}`),
+              )
               filedConfig.childrenSetter?.forEach((childConfig) => {
-                if (childConfig.expectedType) {
-                  configValidationPaths[`${objectIndexPropertyPath}`] =
-                    childConfig.expectedType
+                const expectedType = childConfig.expectedType
+                if (!Array.isArray(expectedType) && expectedType) {
+                  configValidationPaths[objectIndexPropertyPath] = expectedType
                 }
               })
             })

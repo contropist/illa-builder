@@ -1,4 +1,4 @@
-import { get, set } from "lodash"
+import { get, isEqual, set } from "lodash"
 import { Resizable, ResizeCallback, ResizeStartCallback } from "re-resizable"
 import {
   FC,
@@ -14,24 +14,23 @@ import { useDispatch, useSelector } from "react-redux"
 import useMeasure from "react-use-measure"
 import { useMessage } from "@illa-design/react"
 import { ReactComponent as ResizeBar } from "@/assets/resizeBar.svg"
-import {
-  DragInfo,
-  DropResultInfo,
-} from "@/page/App/components/DotPanel/interface"
+import { DropResultInfo } from "@/page/App/components/DotPanel/components/Canvas/interface"
+import { UNIT_HEIGHT } from "@/page/App/components/DotPanel/constant/canvas"
+import { DragInfo } from "@/page/App/components/ScaleSquare/components/DragContainer/interface"
 import {
   applyDashedLineStyle,
   applyXDirectionDashedLineStyle,
 } from "@/page/App/components/ScaleSquare/style"
-import { BUILDER_CALC_CONTEXT } from "@/page/App/context/globalDataProvider"
-import { getIllaMode } from "@/redux/config/configSelector"
+import { getIsILLAEditMode } from "@/redux/config/configSelector"
 import { componentsActions } from "@/redux/currentApp/editor/components/componentsSlice"
 import { ComponentNode } from "@/redux/currentApp/editor/components/componentsState"
 import { getExecutionResult } from "@/redux/currentApp/executionTree/executionSelector"
 import { executionActions } from "@/redux/currentApp/executionTree/executionSlice"
 import { evaluateDynamicString } from "@/utils/evaluateDynamicString"
+import { ILLAEditorRuntimePropsCollectorInstance } from "@/utils/executionTreeHelper/runtimePropsCollector"
 import { isObject } from "@/utils/typeHelper"
-import { BasicContainer } from "../BasicContainer/BasicContainer"
-import { FormWIdgetProps } from "./interface"
+import { RenderChildrenCanvas } from "../PublicSector/RenderChildrenCanvas"
+import { FormWidgetProps } from "./interface"
 import {
   formBodyStyle,
   formContainerStyle,
@@ -72,61 +71,59 @@ function getLikeInputChildrenNode(
   }
 }
 
-function getAllChildrenNode(
-  componentNode: ComponentNode,
-  displayNames: string[],
-) {
-  if (componentNode.containerType !== "EDITOR_DOT_PANEL") {
-    displayNames.push(componentNode.displayName)
-    if (Array.isArray(componentNode.childrenNode)) {
-      componentNode.childrenNode.forEach((node) => {
-        getAllChildrenNode(node, displayNames)
-      })
-    }
-  } else {
-    if (Array.isArray(componentNode.childrenNode)) {
-      componentNode.childrenNode.forEach((node) => {
-        getAllChildrenNode(node, displayNames)
-      })
-    }
-  }
-}
+// function getAllChildrenNode(
+//   componentNode: ComponentNode,
+//   displayNames: string[],
+// ) {
+//   if (componentNode.containerType !== "EDITOR_DOT_PANEL") {
+//     displayNames.push(componentNode.displayName)
+//     if (Array.isArray(componentNode.childrenNode)) {
+//       componentNode.childrenNode.forEach((node) => {
+//         getAllChildrenNode(node, displayNames)
+//       })
+//     }
+//   } else {
+//     if (Array.isArray(componentNode.childrenNode)) {
+//       componentNode.childrenNode.forEach((node) => {
+//         getAllChildrenNode(node, displayNames)
+//       })
+//     }
+//   }
+// }
 interface DragCollection {
   isDraggingActive: boolean
 }
 
-export const FormWidget: FC<FormWIdgetProps> = (props) => {
+export const FormWidget: FC<FormWidgetProps> = (props) => {
   const {
     childrenNode,
     showFooter,
     showHeader,
     headerHeight,
     footerHeight,
-    unitH,
     disabled,
     displayName,
     disabledSubmit,
     resetAfterSuccessful,
     validateInputsOnSubmit,
-    blockColumns,
+    columnNumber,
+    formData: propsFormData,
+    dynamicHeight = "fixed",
     handleUpdateOriginalDSLMultiAttr,
-    handleUpdateGlobalData,
-    handleDeleteGlobalData,
-    handleOnFormInvalid,
-    handleOnFormSubmit,
+    updateComponentRuntimeProps,
+    deleteComponentRuntimeProps,
+    handleUpdateMultiExecutionResult,
+    triggerEventHandler,
   } = props
 
   const message = useMessage()
-  const [bodyRef, bodyBounds] = useMeasure()
-  const [headerRef, headerBounds] = useMeasure()
-  const [footerRef, footerBounds] = useMeasure()
   const [containerRef, containerBounds] = useMeasure()
   const prevDisabled = useRef<boolean>(disabled)
   const containerNodeRef = useRef<HTMLDivElement>(
     null,
   ) as MutableRefObject<HTMLDivElement | null>
   const [isMouseHover, setIsMouseHover] = useState(false)
-  const illaMode = useSelector(getIllaMode)
+  const isEditMode = useSelector(getIsILLAEditMode)
   const executionResult = useSelector(getExecutionResult)
 
   const dispatch = useDispatch()
@@ -182,15 +179,23 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
   }, [allLikeInputChildrenNodeRealProps])
 
   useEffect(() => {
-    dispatch(
-      componentsActions.updateComponentPropsReducer({
-        displayName,
-        updateSlice: {
-          data: formData,
+    if (!isEqual(formData, propsFormData)) {
+      handleUpdateMultiExecutionResult?.([
+        {
+          displayName,
+          value: {
+            formData: formData,
+          },
         },
-      }),
-    )
-  }, [dispatch, displayName, formData])
+      ])
+    }
+  }, [
+    dispatch,
+    displayName,
+    formData,
+    handleUpdateMultiExecutionResult,
+    propsFormData,
+  ])
 
   useEffect(() => {
     if (prevDisabled.current !== disabled) {
@@ -216,16 +221,18 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
   ])
 
   const handleOnInvalid = useCallback(() => {
-    handleOnFormInvalid()
-  }, [handleOnFormInvalid])
+    triggerEventHandler("invalid")
+  }, [triggerEventHandler])
 
   const handleOnValidate = useCallback(() => {
+    const finalContext =
+      ILLAEditorRuntimePropsCollectorInstance.getCurrentPageCalcContext()
     allLikeInputChildrenNode.forEach((node) => {
       try {
         return evaluateDynamicString(
           "events",
           `{{${node.displayName}.validate()}}`,
-          BUILDER_CALC_CONTEXT,
+          finalContext,
         )
       } catch (e) {
         message.error({
@@ -258,14 +265,10 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
         }
       })
       if (updateSlice.length > 0) {
-        dispatch(
-          executionActions.updateExecutionByMultiDisplayNameReducer(
-            updateSlice,
-          ),
-        )
+        handleUpdateMultiExecutionResult?.(updateSlice)
       }
     },
-    [dispatch, formDataKeyMapProps],
+    [formDataKeyMapProps, handleUpdateMultiExecutionResult],
   )
 
   const handleOnReset = useCallback(() => {
@@ -278,18 +281,18 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
         },
       }
     })
-    dispatch(
-      executionActions.updateExecutionByMultiDisplayNameReducer(allUpdate),
-    )
-  }, [allLikeInputChildrenNode, dispatch])
+    handleUpdateMultiExecutionResult?.(allUpdate)
+  }, [allLikeInputChildrenNode, handleUpdateMultiExecutionResult])
 
   const handleOnSubmit = useCallback(() => {
     if (disabledSubmit || disabled) return
     if (validateInputsOnSubmit) {
+      const finalContext =
+        ILLAEditorRuntimePropsCollectorInstance.getCurrentPageCalcContext()
       const validateResult = allLikeInputChildrenNode.every((node) => {
         try {
           const validateFunc = get(
-            BUILDER_CALC_CONTEXT,
+            finalContext,
             `${node.displayName}.validate`,
           ) as unknown
           if (typeof validateFunc === "function") {
@@ -308,7 +311,7 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
         return
       }
     }
-    handleOnFormSubmit()
+    triggerEventHandler("submit")
     if (resetAfterSuccessful) {
       handleOnReset()
     }
@@ -316,16 +319,16 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
     allLikeInputChildrenNode,
     disabled,
     disabledSubmit,
-    handleOnFormSubmit,
     handleOnInvalid,
     handleOnReset,
     message,
     resetAfterSuccessful,
+    triggerEventHandler,
     validateInputsOnSubmit,
   ])
 
   useEffect(() => {
-    handleUpdateGlobalData?.(displayName, {
+    updateComponentRuntimeProps({
       submit: handleOnSubmit,
       invalid: handleOnInvalid,
       reset: handleOnReset,
@@ -337,26 +340,25 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
       validate: handleOnValidate,
     })
     return () => {
-      handleDeleteGlobalData(displayName)
+      deleteComponentRuntimeProps()
     }
   }, [
-    displayName,
-    handleDeleteGlobalData,
-    handleUpdateGlobalData,
+    deleteComponentRuntimeProps,
+    handleOnInvalid,
     handleOnReset,
+    handleOnSubmit,
     handleOnValidate,
     handleSetValue,
-    handleOnSubmit,
-    handleOnInvalid,
+    updateComponentRuntimeProps,
   ])
 
   const headerMinHeight = useMemo(
-    () => FORM_MIN_HEADER_HEIGHT_ROW_NUMBER * unitH,
-    [unitH],
+    () => FORM_MIN_HEADER_HEIGHT_ROW_NUMBER * UNIT_HEIGHT,
+    [],
   )
   const footerMinHeight = useMemo(
-    () => FORM_MIN_FOOTER_HEIGHT_ROW_NUMBER * unitH,
-    [unitH],
+    () => FORM_MIN_FOOTER_HEIGHT_ROW_NUMBER * UNIT_HEIGHT,
+    [],
   )
 
   const headerMaxHeight = useMemo(() => {
@@ -364,64 +366,64 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
       Math.floor(
         (containerBounds.height -
           (FORM_BODY_MIN_HEIGHT + 2 * FORM_BODY_MARGIN) -
-          footerHeight * unitH) /
-          unitH,
-      ) * unitH
+          footerHeight * UNIT_HEIGHT) /
+          UNIT_HEIGHT,
+      ) * UNIT_HEIGHT
     )
-  }, [containerBounds.height, footerHeight, unitH])
+  }, [containerBounds.height, footerHeight])
 
   const footerMaxHeight = useMemo(() => {
     return (
       Math.floor(
         (containerBounds.height -
           (FORM_BODY_MIN_HEIGHT + 2 * FORM_BODY_MARGIN) -
-          headerHeight * unitH) /
-          unitH,
-      ) * unitH
+          headerHeight * UNIT_HEIGHT) /
+          UNIT_HEIGHT,
+      ) * UNIT_HEIGHT
     )
-  }, [containerBounds.height, headerHeight, unitH])
+  }, [containerBounds.height, headerHeight])
+
+  const handleUpdateHeight = useCallback((_height: number) => {
+    // TODO: update height
+  }, [])
+
+  const canResizeCanvas = dynamicHeight !== "fixed"
 
   const renderHeader = useMemo(() => {
     const headerComponentNode = childrenNode[0]
     return (
-      <BasicContainer
-        componentNode={headerComponentNode}
-        canResizeY={false}
-        minHeight={headerBounds.height - 16}
-        padding={8}
-        addedRowNumber={0}
-        blockColumns={blockColumns}
+      <RenderChildrenCanvas
+        currentComponentNode={headerComponentNode}
+        columnNumber={columnNumber}
+        handleUpdateHeight={handleUpdateHeight}
+        canResizeCanvas={canResizeCanvas}
       />
     )
-  }, [blockColumns, childrenNode, headerBounds.height])
+  }, [canResizeCanvas, childrenNode, columnNumber, handleUpdateHeight])
 
   const renderBody = useMemo(() => {
     const bodyComponentNode = childrenNode[1]
     return (
-      <BasicContainer
-        componentNode={bodyComponentNode}
-        minHeight={bodyBounds.height - 2 * 8}
-        padding={8}
-        safeRowNumber={1}
-        addedRowNumber={20}
-        blockColumns={blockColumns}
+      <RenderChildrenCanvas
+        currentComponentNode={bodyComponentNode}
+        columnNumber={columnNumber}
+        handleUpdateHeight={handleUpdateHeight}
+        canResizeCanvas={canResizeCanvas}
       />
     )
-  }, [blockColumns, bodyBounds.height, childrenNode])
+  }, [canResizeCanvas, childrenNode, columnNumber, handleUpdateHeight])
 
   const renderFooter = useMemo(() => {
     const footerComponentNode = childrenNode[2]
     return (
-      <BasicContainer
-        componentNode={footerComponentNode}
-        canResizeY={false}
-        minHeight={footerBounds.height - 2 * 8}
-        padding={8}
-        addedRowNumber={0}
-        blockColumns={blockColumns}
+      <RenderChildrenCanvas
+        currentComponentNode={footerComponentNode}
+        columnNumber={columnNumber}
+        handleUpdateHeight={handleUpdateHeight}
+        canResizeCanvas={canResizeCanvas}
       />
     )
-  }, [blockColumns, childrenNode, footerBounds.height])
+  }, [canResizeCanvas, childrenNode, columnNumber, handleUpdateHeight])
 
   const resizeTopHandler = useMemo(() => {
     return {
@@ -446,34 +448,41 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
   const handleResizeStart: ResizeStartCallback = (e) => {
     e.preventDefault()
     e.stopPropagation()
+    dispatch(executionActions.setResizingNodeIDsReducer([displayName]))
   }
 
   const handleOnResizeTopStop: ResizeCallback = useCallback(
     (e, dir, elementRef, delta) => {
       const { height } = delta
-      let finalHeight = Math.floor((headerHeight * unitH + height) / unitH)
-      if (finalHeight * unitH >= headerMaxHeight) {
-        finalHeight = Math.floor(headerMaxHeight / unitH)
+      let finalHeight = Math.floor(
+        (headerHeight * UNIT_HEIGHT + height) / UNIT_HEIGHT,
+      )
+      if (finalHeight * UNIT_HEIGHT >= headerMaxHeight) {
+        finalHeight = Math.floor(headerMaxHeight / UNIT_HEIGHT)
       }
       handleUpdateOriginalDSLMultiAttr({
         headerHeight: finalHeight,
       })
+      dispatch(executionActions.setResizingNodeIDsReducer([]))
     },
-    [handleUpdateOriginalDSLMultiAttr, headerHeight, headerMaxHeight, unitH],
+    [dispatch, handleUpdateOriginalDSLMultiAttr, headerHeight, headerMaxHeight],
   )
 
   const handleOnResizeBottomStop: ResizeCallback = useCallback(
     (e, dir, elementRef, delta) => {
       const { height } = delta
-      let finalHeight = Math.floor((footerHeight * unitH + height) / unitH)
-      if (finalHeight * unitH > footerMaxHeight) {
-        finalHeight = Math.floor(footerMaxHeight / unitH)
+      let finalHeight = Math.floor(
+        (footerHeight * UNIT_HEIGHT + height) / UNIT_HEIGHT,
+      )
+      if (finalHeight * UNIT_HEIGHT > footerMaxHeight) {
+        finalHeight = Math.floor(footerMaxHeight / UNIT_HEIGHT)
       }
       handleUpdateOriginalDSLMultiAttr({
         footerHeight: finalHeight,
       })
+      dispatch(executionActions.setResizingNodeIDsReducer([]))
     },
-    [footerHeight, footerMaxHeight, handleUpdateOriginalDSLMultiAttr, unitH],
+    [dispatch, footerHeight, footerMaxHeight, handleUpdateOriginalDSLMultiAttr],
   )
 
   const [{ isDraggingActive }, dropRef] = useDrop<
@@ -487,17 +496,25 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
         if (monitor.isOver({ shallow: true })) {
         }
       },
-      drop: (dropInfo, monitor) => {
-        const { item } = dropInfo
+      drop: (dropInfo) => {
+        const { draggedComponents } = dropInfo
+        const drageedDisplayNames = draggedComponents.map(
+          (component) => component.displayName,
+        )
         if (disabled) {
           const updateSlice = {
             disabled: "{{true}}",
           }
-          dispatch(
-            componentsActions.updateComponentPropsReducer({
-              displayName: item.displayName,
+          const MultiUpdateSlice = drageedDisplayNames.map((displayName) => {
+            return {
+              displayName,
               updateSlice,
-            }),
+            }
+          })
+          dispatch(
+            componentsActions.updateMultiComponentPropsReducer(
+              MultiUpdateSlice,
+            ),
           )
         }
         return {
@@ -532,12 +549,12 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
         <Resizable
           size={{
             width: "100%",
-            height: headerHeight * unitH,
+            height: headerHeight * UNIT_HEIGHT,
           }}
           minHeight={headerMinHeight}
           maxHeight={headerMaxHeight}
           handleComponent={
-            illaMode === "edit" && isMouseHover && !isDraggingActive
+            isEditMode && isMouseHover && !isDraggingActive
               ? resizeTopHandler
               : undefined
           }
@@ -547,17 +564,15 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
           onResizeStart={handleResizeStart}
           onResizeStop={handleOnResizeTopStop}
         >
-          <div css={formHeaderStyle} ref={headerRef}>
-            {renderHeader}
-          </div>
-          {isMouseHover && !isDraggingActive && illaMode === "edit" && (
+          <div css={formHeaderStyle}>{renderHeader}</div>
+          {isMouseHover && !isDraggingActive && isEditMode && (
             <div css={applyDashedLineStyle(false, true, false)} />
           )}
         </Resizable>
       )}
-      <div css={formBodyStyle} ref={bodyRef}>
+      <div css={formBodyStyle}>
         {renderBody}
-        {isMouseHover && !isDraggingActive && illaMode === "edit" && (
+        {isMouseHover && !isDraggingActive && isEditMode && (
           <div css={applyXDirectionDashedLineStyle(false, true, false)} />
         )}
       </div>
@@ -565,12 +580,12 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
         <Resizable
           size={{
             width: "100%",
-            height: footerHeight * unitH,
+            height: footerHeight * UNIT_HEIGHT,
           }}
           minHeight={footerMinHeight}
           maxHeight={footerMaxHeight}
           handleComponent={
-            illaMode === "edit" && isMouseHover && !isDraggingActive
+            isEditMode && isMouseHover && !isDraggingActive
               ? resizeBottomHandler
               : undefined
           }
@@ -580,10 +595,8 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
           onResizeStart={handleResizeStart}
           onResizeStop={handleOnResizeBottomStop}
         >
-          <div css={formHeaderStyle} ref={footerRef}>
-            {renderFooter}
-          </div>
-          {isMouseHover && !isDraggingActive && illaMode === "edit" && (
+          <div css={formHeaderStyle}>{renderFooter}</div>
+          {isMouseHover && !isDraggingActive && isEditMode && (
             <div
               css={applyDashedLineStyle(false, true, false, footerMaxHeight)}
             />
@@ -595,3 +608,4 @@ export const FormWidget: FC<FormWIdgetProps> = (props) => {
 }
 
 FormWidget.displayName = "FormWidget"
+export default FormWidget

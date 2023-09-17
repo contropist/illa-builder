@@ -1,8 +1,12 @@
-import { FC, HTMLAttributes, useRef, useState } from "react"
+import {
+  ILLA_MIXPANEL_BUILDER_PAGE_NAME,
+  MixpanelTrackProvider,
+} from "@illa-public/mixpanel-utils"
+import { FC, HTMLAttributes, useRef } from "react"
 import { Divider } from "@illa-design/react"
-import { ActionPanelFunctionProps } from "@/page/App/components/Actions/ActionPanel/interface"
 import { DragBar } from "@/page/App/components/Actions/DragBar"
 import { FocusManager } from "@/utils/focusManager"
+import { resourceContextHelper } from "@/utils/mixpanelHelper"
 import { ActionList } from "./ActionList"
 import { ActionPanel } from "./ActionPanel"
 import { applyActionEditorStyle, contentContainerStyle } from "./styles"
@@ -10,41 +14,34 @@ import { applyActionEditorStyle, contentContainerStyle } from "./styles"
 const ActionEditorDefaultHeight = 300
 
 export const ActionEditor: FC<HTMLAttributes<HTMLDivElement>> = (props) => {
+  const { className, ...rest } = props
   const panelRef = useRef<HTMLDivElement | null>(null)
-  const actionPanelFuncRef = useRef<ActionPanelFunctionProps>({})
-  const [maxHeight, setMaxHeight] = useState<number>()
-
-  const onChangeSelectedAction = () => {
-    actionPanelFuncRef.current?.clearActionResult?.()
-  }
 
   return (
     <div
-      className={props.className}
+      className={className}
       css={applyActionEditorStyle(ActionEditorDefaultHeight)}
-      ref={(ele) => {
-        panelRef.current = ele
-        if (ele?.offsetHeight) {
-          setMaxHeight(ele?.offsetHeight - 100)
-        }
-      }}
       onClick={() => {
         FocusManager.switchFocus("action")
       }}
+      ref={panelRef}
+      {...rest}
     >
-      <DragBar
-        resizeRef={panelRef}
-        minHeight={ActionEditorDefaultHeight}
-        onChange={() => {
-          if (panelRef.current?.offsetHeight) {
-            setMaxHeight(panelRef.current?.offsetHeight - 100)
-          }
-        }}
-      />
+      <DragBar resizeRef={panelRef} minHeight={ActionEditorDefaultHeight} />
       <Divider direction="horizontal" />
       <div css={contentContainerStyle}>
-        <ActionList onChangeSelectedAction={onChangeSelectedAction} />
-        <ActionPanel ref={actionPanelFuncRef} maxHeight={maxHeight} />
+        <MixpanelTrackProvider
+          basicTrack={resourceContextHelper("editor_new")}
+          pageName={ILLA_MIXPANEL_BUILDER_PAGE_NAME.EDITOR}
+        >
+          <ActionList />
+        </MixpanelTrackProvider>
+        <MixpanelTrackProvider
+          pageName={ILLA_MIXPANEL_BUILDER_PAGE_NAME.EDITOR}
+          basicTrack={resourceContextHelper("editor_resource_new")}
+        >
+          <ActionPanel />
+        </MixpanelTrackProvider>
       </div>
     </div>
   )

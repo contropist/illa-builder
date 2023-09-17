@@ -1,14 +1,23 @@
-import { FC, useEffect } from "react"
+import { FC, useEffect, useLayoutEffect, useRef } from "react"
 import ReactMarkdown from "react-markdown"
+import rehypeRaw from "rehype-raw"
+import rehypeSanitize from "rehype-sanitize"
 import remarkGfm from "remark-gfm"
 import { Text as ILLAText, Link, Paragraph } from "@illa-design/react"
 import { TooltipWrapper } from "@/widgetLibrary/PublicSector/TooltipWrapper"
+import { HTMLTags } from "@/widgetLibrary/TextWidget/constans"
 import { TextProps, TextWidgetProps } from "./interface"
 import {
   applyAlignStyle,
-  fullWidthAndFullHeightStyle,
-  textStyle,
+  applyAutoHeightContainerStyle,
+  applyContainerStyle,
+  applyMarkdownStyle,
+  applyTextStyle,
 } from "./style"
+
+const MarkdownContainer: FC<any> = ({ children, colorScheme }) => {
+  return <div css={applyContainerStyle(colorScheme)}>{children}</div>
+}
 
 export const Text: FC<TextProps> = (props) => {
   const {
@@ -20,31 +29,42 @@ export const Text: FC<TextProps> = (props) => {
     disableMarkdown,
   } = props
 
+  const sanitizeOptions = {
+    allowedTags: HTMLTags,
+  }
+
   return (
-    <div css={applyAlignStyle(horizontalAlign, verticalAlign)}>
+    <div css={applyAlignStyle(verticalAlign)}>
       {disableMarkdown ? (
-        <ILLAText css={textStyle} colorScheme={colorScheme} fs={fs}>
+        <ILLAText
+          css={applyTextStyle(horizontalAlign)}
+          colorScheme={colorScheme}
+          fs={fs}
+        >
           {value}
         </ILLAText>
       ) : (
-        <ReactMarkdown
-          css={textStyle}
-          remarkPlugins={[remarkGfm]}
-          components={{
-            a: ({ node, ...props }) => (
-              <Link href={props.href} colorScheme={colorScheme} target="_blank">
-                {props.children}
-              </Link>
-            ),
-            p: ({ children, ...props }) => (
-              <Paragraph colorScheme={colorScheme} fs={fs}>
-                {children}
-              </Paragraph>
-            ),
-          }}
-        >
-          {value ?? ""}
-        </ReactMarkdown>
+        <MarkdownContainer colorScheme={colorScheme}>
+          <ReactMarkdown
+            css={applyMarkdownStyle(horizontalAlign)}
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeOptions]]}
+            components={{
+              a: ({ href, children }) => (
+                <Link href={href} target="_blank" colorScheme={colorScheme}>
+                  {children}
+                </Link>
+              ),
+              p: ({ children }) => (
+                <Paragraph fs={fs} colorScheme={colorScheme}>
+                  {children}
+                </Paragraph>
+              ),
+            }}
+          >
+            {value ?? ""}
+          </ReactMarkdown>
+        </MarkdownContainer>
       )}
     </div>
   )
@@ -56,19 +76,23 @@ export const TextWidget: FC<TextWidgetProps> = (props) => {
   const {
     value,
     horizontalAlign,
-    verticalAlign,
-    displayName,
+    verticalAlign = "start",
     handleUpdateDsl,
-    handleUpdateGlobalData,
-    handleDeleteGlobalData,
+    updateComponentRuntimeProps,
+    deleteComponentRuntimeProps,
+    updateComponentHeight,
+    disableMarkdown,
     tooltipText,
+    dynamicHeight = "fixed",
+    dynamicMinHeight,
+    dynamicMaxHeight,
+    colorScheme,
+    fs,
+    fw,
   } = props
 
   useEffect(() => {
-    handleUpdateGlobalData(displayName, {
-      value,
-      horizontalAlign,
-      verticalAlign,
+    updateComponentRuntimeProps({
       setValue: (value: string) => {
         handleUpdateDsl({ value })
       },
@@ -78,24 +102,61 @@ export const TextWidget: FC<TextWidgetProps> = (props) => {
     })
 
     return () => {
-      handleDeleteGlobalData(displayName)
+      deleteComponentRuntimeProps()
     }
   }, [
-    displayName,
-    value,
-    horizontalAlign,
-    verticalAlign,
-    handleUpdateGlobalData,
+    deleteComponentRuntimeProps,
     handleUpdateDsl,
-    handleDeleteGlobalData,
+    updateComponentRuntimeProps,
   ])
+
+  const enableAutoHeight =
+    dynamicHeight !== "fixed" && dynamicHeight != undefined
+
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  useLayoutEffect(() => {
+    const containerDOM = containerRef.current
+    const observerRef = new ResizeObserver((entries) => {
+      if (!updateComponentHeight) return
+      const height = entries[0].contentRect.height
+      updateComponentHeight?.(height)
+    })
+    if (observerRef && containerDOM && enableAutoHeight) {
+      observerRef.unobserve(containerDOM)
+      observerRef.observe(containerDOM)
+    }
+
+    return () => {
+      if (containerDOM && enableAutoHeight) {
+        observerRef.unobserve(containerDOM)
+      }
+    }
+  }, [enableAutoHeight, updateComponentHeight])
+
   return (
     <TooltipWrapper tooltipText={tooltipText} tooltipDisabled={!tooltipText}>
-      <div css={fullWidthAndFullHeightStyle}>
-        <Text {...props} />
+      <div
+        ref={containerRef}
+        css={applyAutoHeightContainerStyle(
+          dynamicHeight,
+          dynamicMinHeight,
+          dynamicMaxHeight,
+        )}
+      >
+        <Text
+          horizontalAlign={horizontalAlign}
+          value={value}
+          verticalAlign={verticalAlign}
+          colorScheme={colorScheme}
+          fs={fs}
+          fw={fw}
+          disableMarkdown={disableMarkdown}
+        />
       </div>
     </TooltipWrapper>
   )
 }
 
 TextWidget.displayName = "TextWidget"
+export default TextWidget

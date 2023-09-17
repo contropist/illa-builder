@@ -3,6 +3,10 @@ import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
 import { RadioGroup } from "@illa-design/react"
 import { CodeEditor } from "@/components/CodeEditor"
+import {
+  CODE_LANG,
+  CODE_TYPE,
+} from "@/components/CodeEditor/CodeMirror/extensions/interface"
 import { TransformComponentProps } from "@/page/App/components/Actions/ActionPanel/TransformerComponent/interface"
 import {
   codeMirrorStyle,
@@ -29,7 +33,7 @@ export const TransformerComponent: FC<TransformComponentProps> = (props) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
 
-  const { mysqlLike } = props
+  const { fullWidth } = props
   const cachedAction = useSelector(getCachedAction)
   const selectedAction = useSelector(getSelectedAction)
 
@@ -37,7 +41,7 @@ export const TransformerComponent: FC<TransformComponentProps> = (props) => {
     <>
       {cachedAction && (
         <div css={transformTitleStyle}>
-          {mysqlLike ? (
+          {fullWidth ? (
             <PanelLabel
               labelName={t("editor.action.panel.label.transformer")}
             />
@@ -49,6 +53,7 @@ export const TransformerComponent: FC<TransformComponentProps> = (props) => {
           <div css={transformSpaceStyle} />
           <RadioGroup
             css={transformRadioStyle}
+            forceEqualWidth={true}
             size="small"
             colorScheme="gray"
             value={cachedAction.transformer.enable}
@@ -65,8 +70,11 @@ export const TransformerComponent: FC<TransformComponentProps> = (props) => {
             ]}
             onChange={(value) => {
               let transformer: Transformer = TransformerInitial
-              if (selectedAction.transformer.enable === value) {
-                transformer = selectedAction.transformer
+              if (
+                selectedAction &&
+                selectedAction.transformer.enable === value
+              ) {
+                transformer = selectedAction.transformer || ""
               } else {
                 if (value) {
                   transformer = TransformerInitialTrue
@@ -83,15 +91,18 @@ export const TransformerComponent: FC<TransformComponentProps> = (props) => {
         </div>
       )}
       {cachedAction && cachedAction.transformer.enable && (
-        <div css={getCodeMirrorContainerStyle(!!mysqlLike)}>
-          {mysqlLike ? null : <span css={transformTitle}></span>}
+        <div css={getCodeMirrorContainerStyle(!!fullWidth)}>
+          {fullWidth ? null : <span css={transformTitle} />}
           <CodeEditor
             value={cachedAction.transformer.rawData}
-            css={codeMirrorStyle}
-            lineNumbers
+            wrapperCss={codeMirrorStyle}
+            showLineNumbers
+            canShowCompleteInfo
             height="88px"
-            expectedType={VALIDATION_TYPES.STRING}
-            mode="JAVASCRIPT"
+            expectValueType={VALIDATION_TYPES.STRING}
+            lang={CODE_LANG.JAVASCRIPT}
+            codeType={CODE_TYPE.NO_METHOD_FUNCTION}
+            modalTitle={t("editor.action.panel.label.transformer")}
             onChange={(value) => {
               dispatch(
                 configActions.updateCachedAction({

@@ -1,23 +1,14 @@
 import { get } from "lodash"
-import { FC, useEffect, useMemo } from "react"
+import { FC, useMemo } from "react"
 import { useSelector } from "react-redux"
-import { Select } from "@illa-design/react"
-import { applyBaseSelectWrapperStyle } from "@/page/App/components/PanelSetters/SelectSetter/style"
 import { getCachedAction } from "@/redux/config/configSelector"
 import { getWidgetExecutionResult } from "@/redux/currentApp/executionTree/executionSelector"
 import { widgetBuilder } from "@/widgetLibrary/widgetBuilder"
 import { BaseSelectSetterProps } from "./interface"
+import SearchSelectSetter from "./searchSelect"
 
-export const EventWidgetMethodSelect: FC<BaseSelectSetterProps> = (props) => {
-  const {
-    isSetterSingleRow,
-    attrName,
-    parentAttrName,
-    handleUpdateDsl,
-    value,
-    widgetDisplayName,
-    widgetOrAction,
-  } = props
+const EventWidgetMethodSelect: FC<BaseSelectSetterProps> = (props) => {
+  const { parentAttrName, value, widgetDisplayName, widgetOrAction } = props
 
   const widgetDisplayNameMapProps = useSelector(getWidgetExecutionResult)
   const selectedAction = useSelector(getCachedAction)
@@ -59,17 +50,12 @@ export const EventWidgetMethodSelect: FC<BaseSelectSetterProps> = (props) => {
   }, [finalOptions, value, selectedWidgetType])
 
   return (
-    <div css={applyBaseSelectWrapperStyle(isSetterSingleRow)}>
-      <Select
-        options={finalOptions}
-        size="medium"
-        value={finalValue}
-        colorScheme="techPurple"
-        onChange={(value) => {
-          handleUpdateDsl(attrName, value)
-        }}
-      />
-    </div>
+    <SearchSelectSetter
+      {...props}
+      value={finalValue as string}
+      options={finalOptions}
+    />
   )
 }
 EventWidgetMethodSelect.displayName = "EventWidgetMethodSelect"
+export default EventWidgetMethodSelect

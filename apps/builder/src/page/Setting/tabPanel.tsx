@@ -1,15 +1,16 @@
 import { css } from "@emotion/react"
+import { getCurrentTeamInfo } from "@illa-public/user-data"
 import { FC } from "react"
 import { useTranslation } from "react-i18next"
+import { useSelector } from "react-redux"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
-import { PreIcon, TabPane, Tabs } from "@illa-design/react"
+import { PreviousIcon, TabPane, Tabs } from "@illa-design/react"
 import { SettingLayout } from "@/page/Setting/Components/Layout"
 import {
   backAreaStyle,
   preIconStyle,
   tabPreTextStyle,
   tabPrefixStyle,
-  tabSuffixStyle,
 } from "@/page/Setting/style"
 
 export const SettingTabNavBar: FC = () => {
@@ -18,7 +19,8 @@ export const SettingTabNavBar: FC = () => {
   const location = useLocation()
   const pathList = location.pathname.split("/")
   const key = pathList[pathList.length - 1]
-
+  const teamInfo = useSelector(getCurrentTeamInfo)
+  const teamIdentifier = teamInfo?.identifier
   const TabItems = [
     {
       title: t("setting.account.title"),
@@ -39,23 +41,16 @@ export const SettingTabNavBar: FC = () => {
       <div
         css={backAreaStyle}
         onClick={() => {
-          navigate("/dashboard")
+          navigate(`/${teamIdentifier}/dashboard`)
         }}
       >
-        <PreIcon css={preIconStyle} />
+        <PreviousIcon css={preIconStyle} />
         <span css={tabPreTextStyle}>{t("back")}</span>
       </div>
     </div>
   )
 
-  const suffixTabs = (
-    <div css={css(tabPrefixStyle, tabSuffixStyle)} key="tab-suffix">
-      <div css={backAreaStyle}>
-        <PreIcon css={preIconStyle} />
-        <span css={tabPreTextStyle}>{t("back")}</span>
-      </div>
-    </div>
-  )
+  const suffixTabs = <div css={css(tabPrefixStyle)} />
 
   return (
     <>
@@ -81,7 +76,7 @@ export const SettingTabNavBar: FC = () => {
         }}
       >
         {TabItems.map((item) => (
-          <TabPane title={item.title} key={item.key}></TabPane>
+          <TabPane title={item.title} key={item.key} />
         ))}
       </Tabs>
       <SettingLayout>

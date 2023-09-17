@@ -1,13 +1,26 @@
 import { createSlice } from "@reduxjs/toolkit"
 import {
+  batchUpdateWidgetLayoutInfoReducer,
+  clearLocalStorageInExecutionReducer,
+  resetExecutionResultReducer,
   setDependenciesReducer,
+  setDraggingNodeIDsReducer,
   setExecutionDebuggerDataReducer,
   setExecutionErrorReducer,
   setExecutionResultReducer,
+  setGlobalStateInExecutionReducer,
+  setInGlobalStateInExecutionReducer,
+  setIndependenciesReducer,
+  setLocalStorageInExecutionReducer,
+  setResizingNodeIDsReducer,
+  setWidgetLayoutInfoReducer,
   startExecutionReducer,
+  updateCurrentPagePathReducer,
   updateExecutionByDisplayNameReducer,
   updateExecutionByMultiDisplayNameReducer,
   updateModalDisplayReducer,
+  updateWidgetLayoutInfoReducer,
+  updateWidgetLayoutInfoWhenChangeDisplayNameReducer,
 } from "@/redux/currentApp/executionTree/executionReducer"
 import { executionInitialState } from "@/redux/currentApp/executionTree/executionState"
 
@@ -16,6 +29,7 @@ const executionSlice = createSlice({
   initialState: executionInitialState,
   reducers: {
     setDependenciesReducer,
+    setIndependenciesReducer,
     setExecutionResultReducer,
     setExecutionErrorReducer,
     setExecutionDebuggerDataReducer,
@@ -23,6 +37,18 @@ const executionSlice = createSlice({
     updateExecutionByDisplayNameReducer,
     updateExecutionByMultiDisplayNameReducer,
     updateModalDisplayReducer,
+    resetExecutionResultReducer,
+    setWidgetLayoutInfoReducer,
+    updateWidgetLayoutInfoReducer,
+    batchUpdateWidgetLayoutInfoReducer,
+    setGlobalStateInExecutionReducer,
+    setInGlobalStateInExecutionReducer,
+    clearLocalStorageInExecutionReducer,
+    setLocalStorageInExecutionReducer,
+    updateWidgetLayoutInfoWhenChangeDisplayNameReducer,
+    setDraggingNodeIDsReducer,
+    setResizingNodeIDsReducer,
+    updateCurrentPagePathReducer,
   },
 })
 

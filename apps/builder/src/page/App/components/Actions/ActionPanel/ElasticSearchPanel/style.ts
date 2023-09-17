@@ -1,5 +1,5 @@
 import { css } from "@emotion/react"
-import { globalColor, illaPrefix } from "@illa-design/react"
+import { getColor } from "@illa-design/react"
 
 export const esContainerStyle = css`
   display: flex;
@@ -17,35 +17,10 @@ export const actionItemContainer = css`
   padding: 8px 0;
 `
 
-export const topDivider = css`
-  min-height: 8px;
-`
-
 export const esItemLabelStyle = css`
   min-width: 160px;
   font-size: 14px;
   font-weight: 500;
   text-align: right;
-  color: ${globalColor(`--${illaPrefix}-grayBlue-02`)};
-`
-
-export const esItemCodeEditorStyle = css`
-  width: 100%;
-  margin-top: 8px;
-  margin-bottom: 8px;
-  margin-left: 16px;
-`
-
-export const codeEditorLabelStyle = css`
-  min-width: 160px;
-  font-size: 14px;
-  font-weight: 500;
-  text-align: right;
-  color: ${globalColor(`--${illaPrefix}-grayBlue-02`)};
-  height: 48px;
-  display: flex;
-  flex-direction: row;
-  justify-content: end;
-  align-items: center;
-  align-self: start;
+  color: ${getColor("grayBlue", "02")};
 `

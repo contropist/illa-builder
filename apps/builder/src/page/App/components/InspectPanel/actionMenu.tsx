@@ -1,16 +1,11 @@
 import { FC, useCallback, useContext } from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch } from "react-redux"
-import { DropList, globalColor, illaPrefix } from "@illa-design/react"
-import { searchDSLByDisplayName } from "@/redux/currentApp/editor/components/componentsSelector"
+import { DropList, DropListItem } from "@illa-design/react"
 import { componentsActions } from "@/redux/currentApp/editor/components/componentsSlice"
-import { ComponentNode } from "@/redux/currentApp/editor/components/componentsState"
-import { getNewWidgetPropsByUpdateSlice } from "@/utils/componentNode"
 import { ShortCutContext } from "@/utils/shortcut/shortcutProvider"
 import { widgetBuilder } from "@/widgetLibrary/widgetBuilder"
 import { PanelHeaderActionProps } from "./interface"
-
-const { Item } = DropList
 
 export const ActionMenu: FC<PanelHeaderActionProps> = (props) => {
   const { widgetDisplayName, componentType } = props
@@ -21,38 +16,39 @@ export const ActionMenu: FC<PanelHeaderActionProps> = (props) => {
   const shortcut = useContext(ShortCutContext)
 
   const handleClickDropListItem = useCallback(() => {
-    const defaultProps = widgetBuilder(componentType).config.defaults
+    const defaults = widgetBuilder(componentType)?.config?.defaults
     if (!widgetDisplayName) return
-    const targetNode = searchDSLByDisplayName(
-      widgetDisplayName,
-    ) as ComponentNode
-    const newComponentNode: ComponentNode = {
-      ...targetNode,
-      props: {
-        ...defaultProps,
-      },
+    let defaultProps: unknown = defaults
+    if (typeof defaults === "function") {
+      defaultProps = defaults()
     }
-    newComponentNode.props = getNewWidgetPropsByUpdateSlice(
-      newComponentNode.displayName as string,
-      newComponentNode.props || {},
-      newComponentNode.props || {},
+    if (typeof defaultProps !== "object") return
+
+    dispatch(
+      componentsActions.updateComponentPropsReducer({
+        displayName: widgetDisplayName,
+        updateSlice: (defaultProps as Record<string, unknown>) || {},
+      }),
     )
-    dispatch(componentsActions.resetComponentPropsReducer(newComponentNode))
   }, [componentType, dispatch, widgetDisplayName])
 
   return (
-    <DropList width="184px">
-      <Item
+    <DropList w="184px">
+      <DropListItem
+        value="reset"
         key="reset"
         title={t("editor.inspect.header.action_menu.reset_state")}
         onClick={handleClickDropListItem}
       />
-      <Item
+      <DropListItem
         key="delete"
+        value="delete"
         title={t("editor.inspect.header.action_menu.delete")}
-        fontColor={globalColor(`--${illaPrefix}-red-03`)}
+        deleted
         onClick={() => {
-          shortcut.showDeleteDialog([widgetDisplayName])
+          shortcut.showDeleteDialog([widgetDisplayName], "widget", {
+            source: "left_delete",
+          })
         }}
       />
     </DropList>

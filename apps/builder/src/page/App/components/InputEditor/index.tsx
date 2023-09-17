@@ -1,5 +1,7 @@
-import { FC } from "react"
+import { FC, useMemo } from "react"
+import { Popover } from "@illa-design/react"
 import { CodeEditor } from "@/components/CodeEditor"
+import { CODE_LANG } from "@/components/CodeEditor/CodeMirror/extensions/interface"
 import { ControlledInputProps } from "@/page/App/components/InputEditor/interface"
 import { VALIDATION_TYPES } from "@/utils/validationFactory"
 import {
@@ -7,6 +9,7 @@ import {
   actionItemStyle,
   actionItemTip,
   codeEditorLabelStyle,
+  codeEditorSublabelStyle,
 } from "./style"
 
 export const InputEditor: FC<ControlledInputProps> = (props) => {
@@ -16,24 +19,67 @@ export const InputEditor: FC<ControlledInputProps> = (props) => {
     expectedType = VALIDATION_TYPES.STRING,
     value,
     tips,
+    subtitle,
+    handleSubtitleClick,
     placeholder,
     style = {},
-    mode = "TEXT_JS",
+    mode = CODE_LANG.JAVASCRIPT,
     lineNumbers = false,
+    sqlScheme,
+    canShowCompleteInfo,
+    popoverContent,
+    codeType,
+    hasExpectedType = true,
   } = props
+
+  const titleNode = useMemo(
+    () => (
+      <span css={codeEditorLabelStyle}>
+        <span>{title}</span>
+        {subtitle && (
+          <span css={codeEditorSublabelStyle} onClick={handleSubtitleClick}>
+            {subtitle}
+          </span>
+        )}
+      </span>
+    ),
+    [handleSubtitleClick, subtitle, title],
+  )
+
   return (
-    <>
+    <div style={{ width: "100%" }}>
       <div css={actionItemStyle}>
-        {title && <span css={codeEditorLabelStyle}>{title}</span>}
+        {title && (
+          <>
+            {popoverContent ? (
+              <Popover
+                content={popoverContent}
+                hasCloseIcon={false}
+                trigger="hover"
+                colorScheme="gray"
+                showArrow={false}
+              >
+                {titleNode}
+              </Popover>
+            ) : (
+              <>{titleNode}</>
+            )}
+          </>
+        )}
         <CodeEditor
           {...style}
-          lineNumbers={lineNumbers}
-          css={actionItemCodeEditorStyle}
-          mode={mode}
+          singleLine={!lineNumbers}
+          showLineNumbers={lineNumbers}
+          wrapperCss={actionItemCodeEditorStyle}
+          lang={mode}
           value={value}
+          sqlScheme={sqlScheme}
           onChange={onChange}
-          expectedType={expectedType}
+          expectValueType={hasExpectedType ? expectedType : undefined}
           placeholder={placeholder}
+          modalTitle={title}
+          codeType={codeType}
+          canShowCompleteInfo={canShowCompleteInfo}
         />
       </div>
       {tips && (
@@ -41,7 +87,7 @@ export const InputEditor: FC<ControlledInputProps> = (props) => {
           <span>{tips}</span>
         </div>
       )}
-    </>
+    </div>
   )
 }
 

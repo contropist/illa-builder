@@ -1,11 +1,9 @@
-import { ChartType } from "chart.js"
 import { get } from "lodash"
 import { FC, useCallback, useMemo } from "react"
 import { useSelector } from "react-redux"
 import { ChartDatasetShape } from "@/page/App/components/PanelSetters/ChartSetter/chartDatasetsSetter/interface"
 import { CHART_PRESET_COLOR } from "@/page/App/components/PanelSetters/ChartSetter/chartDatasetsSetter/listItem"
 import { ChartDataSourceSetterProps } from "@/page/App/components/PanelSetters/ChartSetter/interface"
-import { BaseSelectSetter } from "@/page/App/components/PanelSetters/SelectSetter/baseSelect"
 import {
   getCanvas,
   searchDsl,
@@ -14,21 +12,10 @@ import { getExecutionResult } from "@/redux/currentApp/executionTree/executionSe
 import { RootState } from "@/store"
 import { formatDataAsObject } from "@/utils/formatData"
 import { isObject } from "@/utils/typeHelper"
+import SearchSelectSetter from "../SelectSetter/searchSelect"
 
-export const ChartKeysSelectSetter: FC<ChartDataSourceSetterProps> = (
-  props,
-) => {
-  const {
-    widgetDisplayName,
-    attrName,
-    isSetterSingleRow,
-    widgetOrAction,
-    widgetType,
-    expectedType,
-    allowClear,
-    value,
-    handleUpdateMultiAttrDSL,
-  } = props
+const ChartKeysSelectSetter: FC<ChartDataSourceSetterProps> = (props) => {
+  const { widgetDisplayName, attrName, value, handleUpdateMultiAttrDSL } = props
 
   const targetComponentProps = useSelector<RootState, Record<string, any>>(
     (rootState) => {
@@ -120,19 +107,14 @@ export const ChartKeysSelectSetter: FC<ChartDataSourceSetterProps> = (
   )
 
   return (
-    <BaseSelectSetter
-      isSetterSingleRow={isSetterSingleRow}
+    <SearchSelectSetter
+      {...props}
       options={selectedOptions}
-      attrName={attrName}
       handleUpdateDsl={handleUpdateDsl}
-      value={value}
-      expectedType={expectedType}
-      widgetDisplayName={widgetDisplayName}
-      widgetOrAction={widgetOrAction}
-      widgetType={widgetType}
-      allowClear={allowClear}
     />
   )
 }
 
 ChartKeysSelectSetter.displayName = "ChartXAxisSetter"
+
+export default ChartKeysSelectSetter

@@ -1,9 +1,10 @@
-import { ChangeEvent, FC, useCallback, useMemo, useState } from "react"
+import { FC, useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button, Password, useMessage } from "@illa-design/react"
-import { Api } from "@/api/base"
 import { LabelAndSetter } from "@/page/Setting/Components/LabelAndSetter"
 import { publicButtonWrapperStyle } from "@/page/Setting/SettingAccount/style"
+import { fetchChangePassword } from "@/services/setting"
+import { isILLAAPiError } from "@/utils/typeHelper"
 
 const validatePasswordEmpty = (password: string) => {
   return !password
@@ -60,8 +61,7 @@ export const SettingPassword: FC = () => {
   ])
 
   const handleChangeNewPassword = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value
+    (value: string) => {
       setNewPassword(value)
       if (validatePasswordEmpty(value)) {
         setNewPasswordErrorMessage(t("setting.password.empty_password"))
@@ -85,8 +85,7 @@ export const SettingPassword: FC = () => {
   )
 
   const handleChangeConfirmPassword = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value
+    (value: string) => {
       setConfirmPassword(value)
       if (validatePasswordEmpty(value)) {
         setConfirmPasswordErrorMessage(t("setting.password.empty_password"))
@@ -120,8 +119,7 @@ export const SettingPassword: FC = () => {
   )
 
   const handleChangeCurrentPassword = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value
+    (value: string) => {
       setCurrentPassword(value)
       if (validatePasswordEmpty(value)) {
         setCurrentPasswordErrorMessage(t("setting.password.empty_password"))
@@ -132,7 +130,7 @@ export const SettingPassword: FC = () => {
     [t],
   )
 
-  const onClickSubmitButton = useCallback(() => {
+  const onClickSubmitButton = useCallback(async () => {
     if (
       currentPassword === "" ||
       newPassword === "" ||
@@ -140,42 +138,31 @@ export const SettingPassword: FC = () => {
     ) {
       return
     }
-    Api.request(
-      {
-        url: "/users/password",
-        method: "PATCH",
-        data: {
-          currentPassword,
-          newPassword,
-        },
-      },
-      (response) => {
-        setCurrentPassword("")
-        setNewPassword("")
-        setConfirmPassword("")
-        message.success({
-          content: t("edit_success"),
-        })
-      },
-      (failure) => {
-        //  TODO: need error code unique,to show error message
-        const { data } = failure
+    setIsLoading(true)
+    try {
+      fetchChangePassword(currentPassword, newPassword)
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+      message.success({
+        content: t("edit_success"),
+      })
+    } catch (error) {
+      if (isILLAAPiError(error)) {
+        const { data } = error
         if (data?.errorCode === 400) {
           message.error({
-            content: failure.data.errorMessage,
+            content: error.data.errorMessage,
           })
         }
-      },
-      (crash) => {
+      } else {
         message.error({
           content: t("network_error"),
         })
-      },
-      (loading) => {
-        setIsLoading(loading)
-      },
-    )
-  }, [currentPassword, newPassword, confirmPassword, t])
+      }
+    }
+    setIsLoading(false)
+  }, [currentPassword, newPassword, confirmPassword, message, t])
 
   return (
     <>
@@ -186,8 +173,10 @@ export const SettingPassword: FC = () => {
         <Password
           size="large"
           value={currentPassword}
-          onChange={handleChangeCurrentPassword}
-          borderColor="techPurple"
+          onChange={(v) => {
+            handleChangeCurrentPassword(v)
+          }}
+          colorScheme="techPurple"
           variant="fill"
         />
       </LabelAndSetter>
@@ -200,7 +189,7 @@ export const SettingPassword: FC = () => {
           size="large"
           value={newPassword}
           onChange={handleChangeNewPassword}
-          borderColor="techPurple"
+          colorScheme="techPurple"
           variant="fill"
         />
       </LabelAndSetter>
@@ -213,7 +202,7 @@ export const SettingPassword: FC = () => {
           size="large"
           value={confirmPassword}
           onChange={handleChangeConfirmPassword}
-          borderColor="techPurple"
+          colorScheme="techPurple"
           variant="fill"
         />
       </LabelAndSetter>

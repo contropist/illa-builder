@@ -8,13 +8,30 @@ export interface DashboardAppActivity {
   modifiedAt: string
 }
 
+export interface DashboardAppConfig {
+  public: boolean
+  waterMark: boolean
+  publishedToMarketplace: boolean
+  description?: string
+}
+
+interface EditorInfo {
+  userID: string
+  nickname: string
+  avatar: string
+  email: string
+  editedAt: string
+}
+
 export interface DashboardApp {
   appId: string
   appName: string
-  currentVersionId: string
+  deployed: boolean
   updatedAt: string
   updatedBy: string
   appActivity: DashboardAppActivity
+  config: DashboardAppConfig
+  editedBy?: EditorInfo[]
 }
 
 export const DashboardAppInitialState: DashboardApp = {
@@ -22,7 +39,12 @@ export const DashboardAppInitialState: DashboardApp = {
   updatedBy: "",
   appId: "",
   appName: "",
-  currentVersionId: "",
+  deployed: false,
+  config: {
+    public: false,
+    waterMark: false,
+    publishedToMarketplace: false,
+  },
   appActivity: {
     modifier: "",
     modifiedAt: "",

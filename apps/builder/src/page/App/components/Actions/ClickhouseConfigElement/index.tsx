@@ -1,12 +1,18 @@
-import { FC, useCallback, useState } from "react"
+import {
+  ILLA_MIXPANEL_EVENT_TYPE,
+  MixpanelTrackContext,
+} from "@illa-public/mixpanel-utils"
+import { isCloudVersion } from "@illa-public/utils"
+import { FC, useCallback, useContext, useState } from "react"
 import { useForm } from "react-hook-form"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useSelector } from "react-redux"
 import {
+  Alert,
   Button,
   ButtonGroup,
   Divider,
-  PaginationPreIcon,
+  PreviousIcon,
   WarningCircleIcon,
   getColor,
 } from "@illa-design/react"
@@ -30,77 +36,85 @@ import {
   optionLabelStyle,
 } from "@/page/App/components/Actions/styles"
 import { ControlledElement } from "@/page/App/components/ControlledElement"
-import { ClickhouseResource } from "@/redux/resource/clickhouseResource"
+import { TextLink } from "@/page/User/components/TextLink"
+import {
+  ClickhouseResource,
+  ClickhouseResourceInitial,
+  ClickhouseSSL,
+} from "@/redux/resource/clickhouseResource"
 import { Resource, generateSSLConfig } from "@/redux/resource/resourceState"
 import { RootState } from "@/store"
-import { isCloudVersion, isURL } from "@/utils/typeHelper"
+import { isContainLocalPath, urlValidate, validate } from "@/utils/form"
 import { ClickhouseConfigElementProps } from "./interface"
 
 export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
   props,
 ) => {
-  const { onBack, resourceId, onFinished } = props
+  const { onBack, resourceID, onFinished } = props
 
   const { t } = useTranslation()
-  const { control, handleSubmit, getValues, formState } = useForm({
+  const { control, handleSubmit, getValues, formState, watch } = useForm({
     mode: "onChange",
     shouldUnregister: true,
   })
 
   const resource = useSelector((state: RootState) => {
     return state.resource.find(
-      (r) => r.resourceId === resourceId,
+      (r) => r.resourceID === resourceID,
     ) as Resource<ClickhouseResource>
   })
 
-  const [sslOpen, setSSLOpen] = useState(resource?.content.ssl.ssl ?? false)
-  const [selfSigned, setSelfSigned] = useState(
-    resource?.content.ssl.selfSigned ?? false,
-  )
+  const content = resource?.content ?? ClickhouseResourceInitial
 
+  const [showAlert, setShowAlert] = useState<boolean>(false)
   const [testLoading, setTestLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const { track } = useContext(MixpanelTrackContext)
+
+  const sslOpen = watch("ssl", content.ssl.ssl)
+  const selfSigned = sslOpen && watch("selfSigned", content.ssl.selfSigned)
 
   const handleConnectionTest = useCallback(() => {
+    track?.(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+      element: "resource_configure_test",
+      parameter5: "clickhouse",
+    })
     const data = getValues()
     onActionConfigElementTest(
       data,
       {
-        host: data.host,
+        host: data.host.trim(),
         port: +data.port,
         username: data.username,
         password: data.password,
         databaseName: data.databaseName,
-        ssl: generateSSLConfig(sslOpen, data, "clickhouse"),
+        ssl: generateSSLConfig(sslOpen, data, "clickhouse") as ClickhouseSSL,
       },
       "clickhouse",
       setTestLoading,
     )
-  }, [setTestLoading, getValues, sslOpen])
+  }, [track, getValues, sslOpen])
 
-  const handleURLValidate = useCallback(
+  const handleDocLinkClick = () => {
+    window.open("https://www.illacloud.com/docs/illa-cli", "_blank")
+  }
+
+  const handleHostValidate = useCallback(
     (value: string) => {
-      return isURL(value) ? true : t("editor.action.resource.error.invalid_url")
+      const isShowAlert = isContainLocalPath(value ?? "")
+      if (isShowAlert !== showAlert) {
+        setShowAlert(isShowAlert)
+      }
+      return urlValidate(value)
     },
-    [t],
+    [showAlert],
   )
-
-  const handleSwitchValueChange = useCallback((open: boolean | string) => {
-    setSSLOpen(!!open)
-    if (!open) {
-      setSelfSigned(!!open)
-    }
-  }, [])
-
-  const handleSelfSignedValueChange = useCallback((open: boolean | string) => {
-    setSelfSigned(!!open)
-  }, [])
 
   return (
     <form
       onSubmit={onActionConfigElementSubmit(
         handleSubmit,
-        resourceId,
+        resourceID,
         "clickhouse",
         onFinished,
         setSaving,
@@ -116,7 +130,7 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
           defaultValue={resource?.resourceName ?? ""}
           rules={[
             {
-              required: true,
+              validate,
             },
           ]}
           placeholders={[t("editor.action.resource.db.placeholder.name")]}
@@ -139,14 +153,11 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
           isRequired
           title={t("editor.action.resource.db.label.hostname_port")}
           control={control}
-          defaultValue={[
-            resource?.content.host,
-            String(resource?.content.port || ""),
-          ]}
+          defaultValue={[content.host, content.port]}
           rules={[
             {
               required: t("editor.action.resource.error.invalid_url"),
-              validate: handleURLValidate,
+              validate: handleHostValidate,
             },
             {
               required: true,
@@ -165,25 +176,54 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
             },
           ]}
           tips={
-            formState.errors.host ? (
+            formState.errors.host && !showAlert ? (
               <div css={errorMsgStyle}>
-                <>
-                  <WarningCircleIcon css={errorIconStyle} />
-                  {formState.errors.host.message}
-                </>
+                <WarningCircleIcon css={errorIconStyle} />
+                <>{formState.errors.host.message}</>
               </div>
             ) : null
           }
         />
+        {showAlert && (
+          <ControlledElement
+            defaultValue=""
+            name=""
+            title=""
+            controlledType="none"
+            control={control}
+            tips={
+              <Alert
+                title={t("editor.action.form.tips.connect_to_local.title.tips")}
+                closable={false}
+                content={
+                  isCloudVersion ? (
+                    <Trans
+                      i18nKey="editor.action.form.tips.connect_to_local.cloud"
+                      t={t}
+                      components={[
+                        <TextLink
+                          key="editor.action.form.tips.connect_to_local.cloud"
+                          onClick={handleDocLinkClick}
+                        />,
+                      ]}
+                    />
+                  ) : (
+                    t("editor.action.form.tips.connect_to_local.selfhost")
+                  )
+                }
+              />
+            }
+          />
+        )}
         <ControlledElement
           controlledType={["input"]}
           isRequired
           title={t("editor.action.resource.db.label.database")}
           control={control}
-          defaultValue={resource?.content.databaseName}
+          defaultValue={content.databaseName}
           rules={[
             {
-              required: true,
+              validate,
             },
           ]}
           placeholders={[t("editor.action.resource.db.placeholder.default")]}
@@ -194,10 +234,7 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
           controlledType={["input", "password"]}
           title={t("editor.action.resource.db.label.username_password")}
           control={control}
-          defaultValue={[
-            resource?.content.username,
-            resource?.content.password,
-          ]}
+          defaultValue={[content.username, content.password]}
           placeholders={[
             t("editor.action.resource.db.placeholder.username"),
             t("editor.action.resource.db.placeholder.password"),
@@ -246,10 +283,10 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
           controlledType={["switch"]}
           title={t("editor.action.resource.db.label.ssl_options")}
           control={control}
-          defaultValue={resource?.content.ssl.ssl}
+          defaultValue={content.ssl.ssl}
           name="ssl"
-          onValueChange={handleSwitchValueChange}
           contentLabel={t("editor.action.resource.db.tip.ssl_options")}
+          tips={t("editor.action.form.tips.clickhouse.ssl")}
         />
 
         {sslOpen && (
@@ -257,9 +294,8 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
             controlledType={["switch"]}
             title={""}
             control={control}
-            defaultValue={resource?.content.ssl.selfSigned}
+            defaultValue={content.ssl.selfSigned}
             name="selfSigned"
-            onValueChange={handleSelfSignedValueChange}
             contentLabel={t(
               "editor.action.resource.db.label.self_signed_certificate",
             )}
@@ -273,11 +309,11 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
               isRequired
               rules={[
                 {
-                  required: true,
+                  validate,
                 },
               ]}
               control={control}
-              defaultValue={resource?.content.ssl.caCert}
+              defaultValue={content.ssl.caCert}
               name="caCert"
               placeholders={[
                 t("editor.action.resource.db.placeholder.certificate"),
@@ -287,7 +323,7 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
               controlledType={["textarea"]}
               title={t("editor.action.resource.db.label.client_key")}
               control={control}
-              defaultValue={resource?.content.ssl.privateKey}
+              defaultValue={content.ssl.privateKey}
               name="privateKey"
               placeholders={[
                 t("editor.action.resource.db.placeholder.certificate"),
@@ -297,7 +333,7 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
               controlledType={["textarea"]}
               title={t("editor.action.resource.db.label.client_certificate")}
               control={control}
-              defaultValue={resource?.content.ssl.clientCert}
+              defaultValue={content.ssl.clientCert}
               name="clientCert"
               placeholders={[
                 t("editor.action.resource.db.placeholder.certificate"),
@@ -308,7 +344,7 @@ export const ClickhouseConfigElement: FC<ClickhouseConfigElementProps> = (
       </div>
       <div css={footerStyle}>
         <Button
-          leftIcon={<PaginationPreIcon />}
+          leftIcon={<PreviousIcon />}
           variant="text"
           colorScheme="gray"
           type="button"

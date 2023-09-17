@@ -84,7 +84,13 @@ export const ListBody: FC = () => {
         }),
       )
     }
-  }, [viewsList])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [componentNode.childrenNode, viewsList])
+
+  const updateItem = (values: ItemsProps[]) => {
+    if (isEqual(values, items)) return
+    setItems(values)
+  }
 
   if (!Array.isArray(viewsList)) return null
 
@@ -94,7 +100,7 @@ export const ListBody: FC = () => {
         axis="y"
         initial={false}
         values={items}
-        onReorder={setItems}
+        onReorder={updateItem}
         css={removeNativeStyle}
       >
         {items.map((item, index) => {
@@ -112,7 +118,7 @@ export const ListBody: FC = () => {
                 label={label}
                 key={id}
                 index={index}
-                isSelected={key === currentSelected.key}
+                isSelected={key === currentSelected?.key}
               />
             </Reorder.Item>
           )

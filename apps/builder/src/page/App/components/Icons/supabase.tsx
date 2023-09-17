@@ -1,6 +1,6 @@
 import { createIcon } from "@illa-design/react"
 
-export const SupabaseIcon = createIcon({
+const SupabaseIcon = createIcon({
   title: "SupabaseIcon",
   viewBox: "0 0 24 24 ",
   path: (
@@ -50,3 +50,6 @@ export const SupabaseIcon = createIcon({
     </>
   ),
 })
+
+SupabaseIcon.displayName = "SupabaseIcon"
+export default SupabaseIcon

@@ -12,13 +12,13 @@ export interface viewListItemShaper {
 export interface ContainerProps extends BaseWidgetProps {
   currentIndex: number
   componentNode: ComponentNode
-  handleOnClick: () => void
-  handleOnChange: () => void
   viewList: viewListItemShaper[]
   tooltipText?: string
-  handleUpdateOriginalDSLMultiAttr: (updateSlice: Record<string, any>) => void
   h: number
+  linkWidgetDisplayName?: string
   unitH: number
-
-  blockColumns: number
+  columnNumber: number
+  dynamicHeight: "auto" | "fixed" | "limited"
+  dynamicMinHeight?: number
+  dynamicMaxHeight?: number
 }

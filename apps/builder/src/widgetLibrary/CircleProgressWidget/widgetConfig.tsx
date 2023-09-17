@@ -9,8 +9,9 @@ export const CIRCLE_PROGRESS_WIDGET_CONFIG: WidgetConfig = {
   keywords: ["Circle Progress", "圆形进度条"],
   icon: <CircleProgressWidgetIcon />,
   sessionType: "PRESENTATION",
-  w: 6,
+  w: 3,
   h: 12,
+  version: 0,
   defaults: {
     value: "50",
     alignment: "center",

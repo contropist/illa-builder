@@ -1,5 +1,9 @@
 import { css } from "@emotion/react"
 import { getColor } from "@illa-design/react"
+import {
+  LIST_ITEM_MARGIN_TOP,
+  WIDGET_SCALE_SQUARE_BORDER_WIDTH,
+} from "@/page/App/components/ScaleSquare/constant/widget"
 
 export const listParentContainerStyle = css`
   width: 100%;
@@ -8,6 +12,11 @@ export const listParentContainerStyle = css`
   flex-direction: column;
   position: relative;
   overflow: hidden;
+`
+
+export const listParentContainerWithPagination = css`
+  ${listParentContainerStyle};
+  height: 100%;
 `
 
 export const ListParentContainerWithScroll = css`
@@ -33,8 +42,8 @@ export const applyListItemStyle = (
     height: ${itemHeight ? `${itemHeight}px` : "100%"};
     background-color: ${bgColor || "white"};
     flex: none;
-    margin-top: ${!isFirst ? "8px" : 0};
-    border: 1px dashed
+    margin-top: ${!isFirst ? `${LIST_ITEM_MARGIN_TOP}px` : 0};
+    border: ${WIDGET_SCALE_SQUARE_BORDER_WIDTH}px dashed
       ${canShowBorder ? getColor("techPurple", "01") : "transparent"};
     opacity: ${isEditor && !isFirst ? 0.5 : 1};
   `

@@ -1,33 +1,36 @@
-import { debounce, get } from "lodash"
-import { FC, useCallback, useMemo } from "react"
+import { get, isEqual } from "lodash"
+import { FC, useCallback, useEffect, useMemo } from "react"
 import { useSelector } from "react-redux"
 import { publicPaddingStyle } from "@/page/App/components/InspectPanel/style"
-import { BaseDynamicSelect } from "@/page/App/components/PanelSetters/SelectSetter/baseDynamicSelect"
+import BaseDynamicSelect from "@/page/App/components/PanelSetters/SelectSetter/baseDynamicSelect"
 import { TableDataSourceSetterProps } from "@/page/App/components/PanelSetters/TableSetter/interface"
 import { getActionList } from "@/redux/currentApp/action/actionSelector"
 import { searchDSLByDisplayName } from "@/redux/currentApp/editor/components/componentsSelector"
 import {
-  getActionExecutionResult,
   getExecutionError,
+  getExecutionResult,
 } from "@/redux/currentApp/executionTree/executionSelector"
 import { RootState } from "@/store"
 import { evaluateDynamicString } from "@/utils/evaluateDynamicString"
 import { VALIDATION_TYPES } from "@/utils/validationFactory"
-import { tansTableDataToColumns } from "@/widgetLibrary/TableWidget/utils"
+import { ColumnItemShape } from "@/widgetLibrary/TableWidget/interface"
+import {
+  tansDataFromOld,
+  tansTableDataToColumns,
+} from "@/widgetLibrary/TableWidget/utils"
 
-export const TableDataSourceSelectSetter: FC<TableDataSourceSetterProps> = (
-  props,
-) => {
+const TableDataSourceSelectSetter: FC<TableDataSourceSetterProps> = (props) => {
   const {
     widgetDisplayName,
     labelName,
     labelDesc,
+    detailedDescription,
     handleUpdateDsl,
     handleUpdateMultiAttrDSL,
   } = props
 
   const actions = useSelector(getActionList)
-  const actionExecutionResult = useSelector(getActionExecutionResult)
+  const executionResult = useSelector(getExecutionResult)
   const isError = useSelector<RootState, boolean>((state) => {
     const errors = getExecutionError(state)
     const thisError = get(errors, `${widgetDisplayName}.dataSource`)
@@ -39,10 +42,13 @@ export const TableDataSourceSelectSetter: FC<TableDataSourceSetterProps> = (
     },
   )
 
-  const customColumns = useMemo(() => {
-    const columns = get(targetComponentProps, "columns", [])
-    return columns.filter((item: any) => item.custom)
+  const columns = useMemo(() => {
+    return get(targetComponentProps, "columns", []) as ColumnItemShape[]
   }, [targetComponentProps])
+
+  const customColumns = useMemo(() => {
+    return columns.filter((item) => item.custom)
+  }, [columns])
 
   const isDynamic = useMemo(() => {
     const dataSourceMode = get(targetComponentProps, "dataSourceMode", "select")
@@ -51,11 +57,29 @@ export const TableDataSourceSelectSetter: FC<TableDataSourceSetterProps> = (
 
   const finalValue = useMemo(() => {
     if (isDynamic) {
-      return get(targetComponentProps, "dataSourceJS")
+      return get(targetComponentProps, "dataSourceJS", [])
     } else {
-      return get(targetComponentProps, "dataSource")
+      return get(targetComponentProps, "dataSource", [])
     }
   }, [isDynamic, targetComponentProps])
+
+  useEffect(() => {
+    const oldKeyOrder: string[] = []
+    const oldKeyMap: Record<string, ColumnItemShape> = {}
+    columns?.forEach((item) => {
+      oldKeyMap[item.accessorKey] = item
+      oldKeyOrder.push(item.accessorKey)
+    })
+    let data
+    try {
+      data = evaluateDynamicString("", finalValue, executionResult)
+    } catch (e) {}
+    if (!Array.isArray(data)) return
+    const newColumns = tansDataFromOld(data, oldKeyMap, oldKeyOrder)
+    if (newColumns?.length && !isEqual(newColumns, columns)) {
+      handleUpdateMultiAttrDSL?.({ columns: newColumns })
+    }
+  }, [columns, executionResult, finalValue, handleUpdateMultiAttrDSL])
 
   const selectedOptions = useMemo(() => {
     return actions.map((action) => ({
@@ -83,55 +107,74 @@ export const TableDataSourceSelectSetter: FC<TableDataSourceSetterProps> = (
     }
   }, [handleUpdateDsl, isDynamic, selectedOptions, finalValue])
 
-  const handleChangeInput = useCallback(
+  const getNewColumn = useCallback(
     (value: string) => {
-      const data = evaluateDynamicString("", value, actionExecutionResult)
+      const data = evaluateDynamicString("", value, executionResult)
       if (Array.isArray(data)) {
         let newColumns = tansTableDataToColumns(data)
         if (newColumns?.length) {
-          handleUpdateMultiAttrDSL?.({
-            columns: newColumns.concat(customColumns),
-            dataSourceJS: value,
-          })
-          return
+          return newColumns.concat(
+            customColumns.map((item: ColumnItemShape, index) => {
+              return { ...item, columnIndex: newColumns.length + index }
+            }),
+          )
         }
       }
-      handleUpdateDsl("dataSourceJS", value)
     },
-    [
-      actionExecutionResult,
-      customColumns,
-      handleUpdateDsl,
-      handleUpdateMultiAttrDSL,
-    ],
+    [customColumns, executionResult],
   )
 
-  const debounceHandleChangeInput = debounce(handleChangeInput, 300)
+  const handleChangeInput = useCallback(
+    (value: string) => {
+      const newColumns = getNewColumn(value)
+      if (newColumns) {
+        handleUpdateMultiAttrDSL?.({
+          columns: newColumns,
+          dataSourceJS: value,
+        })
+        return
+      }
+      handleUpdateMultiAttrDSL?.({
+        dataSourceJS: value,
+      })
+    },
+    [getNewColumn, handleUpdateMultiAttrDSL],
+  )
 
   const handleChangeSelect = useCallback(
     (value: any) => {
+      const newColumns = getNewColumn(value)
+      if (newColumns) {
+        handleUpdateMultiAttrDSL?.({
+          columns: newColumns,
+          dataSource: value,
+        })
+        return
+      }
       handleUpdateMultiAttrDSL?.({
         dataSource: value,
       })
     },
-    [handleUpdateMultiAttrDSL],
+    [getNewColumn, handleUpdateMultiAttrDSL],
   )
 
   return (
     <div css={publicPaddingStyle}>
       <BaseDynamicSelect
+        {...props}
         isDynamic={isDynamic}
         onClickFxButton={handleClickFxButton}
         selectPlaceholder="Select a query or transformer"
         inputPlaceholder="{{}}"
-        onChangeInput={debounceHandleChangeInput}
+        onChangeInput={handleChangeInput}
         path={`${widgetDisplayName}.dataSourceJS`}
         options={selectedOptions}
-        expectedType={VALIDATION_TYPES.OBJECT}
+        expectedType={VALIDATION_TYPES.ARRAY}
         onChangeSelect={handleChangeSelect}
         value={finalValue}
         labelName={labelName}
         labelDesc={labelDesc}
+        detailedDescription={detailedDescription}
         isError={isError}
       />
     </div>
@@ -139,3 +182,4 @@ export const TableDataSourceSelectSetter: FC<TableDataSourceSetterProps> = (
 }
 
 TableDataSourceSelectSetter.displayName = "TableDataSourceSelectSetter"
+export default TableDataSourceSelectSetter

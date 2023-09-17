@@ -1,12 +1,12 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react"
+import { FC, useCallback, useEffect, useMemo } from "react"
 import { TabPane, Tabs } from "@illa-design/react"
+import { AutoHeightContainer } from "@/widgetLibrary/PublicSector/AutoHeightContainer"
 import { TooltipWrapper } from "@/widgetLibrary/PublicSector/TooltipWrapper"
 import { TabsWidgetProps, WrappedTabsProps } from "./interface"
 import { fullWidthAndFullHeightStyle } from "./style"
 
 export const WrappedTabs: FC<WrappedTabsProps> = (props) => {
   const {
-    value,
     align,
     activeKey,
     disabled,
@@ -27,7 +27,13 @@ export const WrappedTabs: FC<WrappedTabsProps> = (props) => {
       onChange={(value) => {
         new Promise((resolve) => {
           const currentIndex = tabList?.findIndex((view) => view.key === value)
-          handleUpdateOriginalDSLMultiAttr({ currentKey: value, currentIndex })
+          handleUpdateOriginalDSLMultiAttr(
+            {
+              currentKey: value,
+              currentIndex,
+            },
+            true,
+          )
           resolve(true)
         }).then(() => {
           handleOnChange?.()
@@ -62,19 +68,18 @@ export const TabsWidget: FC<TabsWidgetProps> = (props) => {
     displayName,
     linkWidgetDisplayName,
     handleUpdateDsl,
-    handleUpdateGlobalData,
-    handleDeleteGlobalData,
-    handleUpdateOriginalDSLMultiAttr,
-    handleUpdateOriginalDSLOtherMultiAttr,
-    handleUpdateMultiExecutionResult,
+    updateComponentRuntimeProps,
+    deleteComponentRuntimeProps,
     tooltipText,
     colorScheme,
     tabPosition,
+    triggerEventHandler,
+    updateComponentHeight,
+    handleUpdateOriginalDSLOtherMultiAttr,
   } = props
 
   useEffect(() => {
-    handleUpdateGlobalData(displayName, {
-      value,
+    updateComponentRuntimeProps({
       setValue: (value: string) => {
         handleUpdateDsl({ value })
       },
@@ -84,14 +89,14 @@ export const TabsWidget: FC<TabsWidgetProps> = (props) => {
     })
 
     return () => {
-      handleDeleteGlobalData(displayName)
+      deleteComponentRuntimeProps()
     }
   }, [
     displayName,
     value,
-    handleUpdateGlobalData,
+    updateComponentRuntimeProps,
     handleUpdateDsl,
-    handleDeleteGlobalData,
+    deleteComponentRuntimeProps,
   ])
 
   const list = useMemo(() => {
@@ -99,47 +104,51 @@ export const TabsWidget: FC<TabsWidgetProps> = (props) => {
     return tabList
   }, [navigateContainer, tabList, viewList])
 
-  const handleUpdateMultiAttrDSL = useCallback(
-    (updateSlice: Record<string, any>) => {
-      let allUpdateSLice = [
-        {
-          displayName,
-          value: updateSlice,
-        },
-      ]
+  const handleUpdateMultiExecutionResults = useCallback(
+    (updateSliceItem: Record<string, any>) => {
       if (navigateContainer && linkWidgetDisplayName) {
-        allUpdateSLice.push({
-          displayName: linkWidgetDisplayName,
-          value: updateSlice,
-        })
+        handleUpdateOriginalDSLOtherMultiAttr(
+          linkWidgetDisplayName,
+          updateSliceItem,
+          true,
+        )
       }
-      handleUpdateMultiExecutionResult?.(allUpdateSLice)
+      handleUpdateOriginalDSLOtherMultiAttr(displayName, updateSliceItem, true)
     },
     [
       displayName,
-      navigateContainer,
+      handleUpdateOriginalDSLOtherMultiAttr,
       linkWidgetDisplayName,
-      handleUpdateMultiExecutionResult,
+      navigateContainer,
     ],
   )
 
+  const handleOnChange = useCallback(() => {
+    triggerEventHandler("change")
+  }, [triggerEventHandler])
+
   return (
-    <TooltipWrapper tooltipText={tooltipText} tooltipDisabled={!tooltipText}>
-      <div css={fullWidthAndFullHeightStyle}>
-        <WrappedTabs
-          {...props}
-          tabList={list}
-          value={value}
-          align={align}
-          activeKey={currentKey}
-          colorScheme={colorScheme}
-          tabPosition={tabPosition}
-          disabled={disabled}
-          handleUpdateOriginalDSLMultiAttr={handleUpdateMultiAttrDSL}
-        />
-      </div>
-    </TooltipWrapper>
+    <AutoHeightContainer updateComponentHeight={updateComponentHeight}>
+      <TooltipWrapper tooltipText={tooltipText} tooltipDisabled={!tooltipText}>
+        <div css={fullWidthAndFullHeightStyle}>
+          <WrappedTabs
+            {...props}
+            tabList={list}
+            value={value}
+            align={align}
+            activeKey={currentKey}
+            colorScheme={colorScheme}
+            tabPosition={tabPosition}
+            disabled={disabled}
+            linkWidgetDisplayName={linkWidgetDisplayName}
+            handleUpdateOriginalDSLMultiAttr={handleUpdateMultiExecutionResults}
+            handleOnChange={handleOnChange}
+          />
+        </div>
+      </TooltipWrapper>
+    </AutoHeightContainer>
   )
 }
 
 TabsWidget.displayName = "TabsWidget"
+export default TabsWidget

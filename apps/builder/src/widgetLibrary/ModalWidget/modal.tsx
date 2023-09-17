@@ -9,17 +9,19 @@ import {
   useState,
 } from "react"
 import { useDrop } from "react-dnd"
+import { useDispatch, useSelector } from "react-redux"
 import useMeasure from "react-use-measure"
 import { ReactComponent as ResizeBar } from "@/assets/resizeBar.svg"
-import {
-  DragInfo,
-  DropResultInfo,
-} from "@/page/App/components/DotPanel/interface"
+import { DropResultInfo } from "@/page/App/components/DotPanel/components/Canvas/interface"
+import { UNIT_HEIGHT } from "@/page/App/components/DotPanel/constant/canvas"
+import { DragInfo } from "@/page/App/components/ScaleSquare/components/DragContainer/interface"
 import {
   applyDashedLineStyle,
   applyXDirectionDashedLineStyle,
 } from "@/page/App/components/ScaleSquare/style"
-import { BasicContainer } from "../BasicContainer/BasicContainer"
+import { getIsILLAEditMode } from "@/redux/config/configSelector"
+import { executionActions } from "@/redux/currentApp/executionTree/executionSlice"
+import { RenderChildrenCanvas } from "../PublicSector/RenderChildrenCanvas"
 import { ModalWidgetProps } from "./interface"
 import {
   formBodyStyle,
@@ -46,16 +48,16 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
     showHeader,
     headerHeight,
     footerHeight,
-    unitH,
     isVisible,
-    blockColumns,
+    columnNumber,
+    displayName,
     handleUpdateOriginalDSLMultiAttr,
-    handleOnOpenModal,
-    handleOnCloseModal,
+    triggerEventHandler,
   } = props
 
   const prevVisible = useRef<boolean>()
   const isMount = useRef(false)
+  const dispatch = useDispatch()
 
   useEffect(() => {
     isMount.current = true
@@ -67,20 +69,17 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
 
   useEffect(() => {
     if (isVisible && prevVisible.current !== isVisible && isMount.current) {
-      handleOnOpenModal && handleOnOpenModal()
+      triggerEventHandler("onOpenModal")
       prevVisible.current = true
     }
 
     return () => {
       if (isVisible && !isMount.current) {
-        handleOnCloseModal && handleOnCloseModal()
+        triggerEventHandler("onCloseModal")
       }
     }
-  }, [handleOnCloseModal, handleOnOpenModal, isVisible])
+  }, [isVisible, triggerEventHandler])
 
-  const [bodyRef, bodyBounds] = useMeasure()
-  const [headerRef, headerBounds] = useMeasure()
-  const [footerRef, footerBounds] = useMeasure()
   const [containerRef, containerBounds] = useMeasure()
   const containerNodeRef = useRef<HTMLDivElement>(
     null,
@@ -88,12 +87,12 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
   const [isMouseHover, setIsMouseHover] = useState(false)
 
   const headerMinHeight = useMemo(
-    () => MODAL_MIN_HEADER_HEIGHT_ROW_NUMBER * unitH,
-    [unitH],
+    () => MODAL_MIN_HEADER_HEIGHT_ROW_NUMBER * UNIT_HEIGHT,
+    [],
   )
   const footerMinHeight = useMemo(
-    () => MODAL_MIN_FOOTER_HEIGHT_ROW_NUMBER * unitH,
-    [unitH],
+    () => MODAL_MIN_FOOTER_HEIGHT_ROW_NUMBER * UNIT_HEIGHT,
+    [],
   )
 
   const headerMaxHeight = useMemo(() => {
@@ -101,64 +100,63 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
       Math.floor(
         (containerBounds.height -
           (MODAL_BODY_MIN_HEIGHT + 2 * MODAL_BODY_MARGIN) -
-          footerHeight * unitH) /
-          unitH,
-      ) * unitH
+          footerHeight * UNIT_HEIGHT) /
+          UNIT_HEIGHT,
+      ) * UNIT_HEIGHT
     )
-  }, [containerBounds.height, footerHeight, unitH])
+  }, [containerBounds.height, footerHeight])
 
   const footerMaxHeight = useMemo(() => {
     return (
       Math.floor(
         (containerBounds.height -
           (MODAL_BODY_MIN_HEIGHT + 2 * MODAL_BODY_MARGIN) -
-          headerHeight * unitH) /
-          unitH,
-      ) * unitH
+          headerHeight * UNIT_HEIGHT) /
+          UNIT_HEIGHT,
+      ) * UNIT_HEIGHT
     )
-  }, [containerBounds.height, headerHeight, unitH])
+  }, [containerBounds.height, headerHeight])
+
+  const isEditMode = useSelector(getIsILLAEditMode)
+
+  const handleUpdateHeight = useCallback((_height: number) => {
+    // console.log("height", height)
+    // TODO: auto height
+  }, [])
 
   const renderHeader = useMemo(() => {
     const headerComponentNode = childrenNode[0]
     return (
-      <BasicContainer
-        componentNode={headerComponentNode}
-        canResizeY={false}
-        minHeight={headerBounds.height - 16}
-        padding={8}
-        addedRowNumber={0}
-        blockColumns={blockColumns}
+      <RenderChildrenCanvas
+        currentComponentNode={headerComponentNode}
+        columnNumber={columnNumber}
+        handleUpdateHeight={handleUpdateHeight}
       />
     )
-  }, [blockColumns, childrenNode, headerBounds.height])
+  }, [childrenNode, columnNumber, handleUpdateHeight])
 
   const renderBody = useMemo(() => {
     const bodyComponentNode = childrenNode[1]
+
     return (
-      <BasicContainer
-        componentNode={bodyComponentNode}
-        minHeight={bodyBounds.height - 2 * 8}
-        padding={8}
-        safeRowNumber={1}
-        addedRowNumber={20}
-        blockColumns={blockColumns}
+      <RenderChildrenCanvas
+        currentComponentNode={bodyComponentNode}
+        columnNumber={columnNumber}
+        handleUpdateHeight={handleUpdateHeight}
       />
     )
-  }, [blockColumns, bodyBounds.height, childrenNode])
+  }, [childrenNode, columnNumber, handleUpdateHeight])
 
   const renderFooter = useMemo(() => {
     const footerComponentNode = childrenNode[2]
     return (
-      <BasicContainer
-        componentNode={footerComponentNode}
-        canResizeY={false}
-        minHeight={footerBounds.height - 2 * 8}
-        padding={8}
-        addedRowNumber={0}
-        blockColumns={blockColumns}
+      <RenderChildrenCanvas
+        currentComponentNode={footerComponentNode}
+        columnNumber={columnNumber}
+        handleUpdateHeight={handleUpdateHeight}
       />
     )
-  }, [blockColumns, childrenNode, footerBounds.height])
+  }, [childrenNode, columnNumber, handleUpdateHeight])
 
   const resizeTopHandler = useMemo(() => {
     return {
@@ -183,34 +181,41 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
   const handleResizeStart: ResizeStartCallback = (e) => {
     e.preventDefault()
     e.stopPropagation()
+    dispatch(executionActions.setResizingNodeIDsReducer([displayName]))
   }
 
   const handleOnResizeTopStop: ResizeCallback = useCallback(
     (e, dir, elementRef, delta) => {
       const { height } = delta
-      let finalHeight = Math.floor((headerHeight * unitH + height) / unitH)
-      if (finalHeight * unitH >= headerMaxHeight) {
-        finalHeight = Math.floor(headerMaxHeight / unitH)
+      let finalHeight = Math.floor(
+        (headerHeight * UNIT_HEIGHT + height) / UNIT_HEIGHT,
+      )
+      if (finalHeight * UNIT_HEIGHT >= headerMaxHeight) {
+        finalHeight = Math.floor(headerMaxHeight / UNIT_HEIGHT)
       }
       handleUpdateOriginalDSLMultiAttr({
         headerHeight: finalHeight,
       })
+      dispatch(executionActions.setResizingNodeIDsReducer([]))
     },
-    [handleUpdateOriginalDSLMultiAttr, headerHeight, headerMaxHeight, unitH],
+    [dispatch, handleUpdateOriginalDSLMultiAttr, headerHeight, headerMaxHeight],
   )
 
   const handleOnResizeBottomStop: ResizeCallback = useCallback(
     (e, dir, elementRef, delta) => {
       const { height } = delta
-      let finalHeight = Math.floor((footerHeight * unitH + height) / unitH)
-      if (finalHeight * unitH > footerMaxHeight) {
-        finalHeight = Math.floor(footerMaxHeight / unitH)
+      let finalHeight = Math.floor(
+        (footerHeight * UNIT_HEIGHT + height) / UNIT_HEIGHT,
+      )
+      if (finalHeight * UNIT_HEIGHT > footerMaxHeight) {
+        finalHeight = Math.floor(footerMaxHeight / UNIT_HEIGHT)
       }
       handleUpdateOriginalDSLMultiAttr({
         footerHeight: finalHeight,
       })
+      dispatch(executionActions.setResizingNodeIDsReducer([]))
     },
-    [footerHeight, footerMaxHeight, handleUpdateOriginalDSLMultiAttr, unitH],
+    [dispatch, footerHeight, footerMaxHeight, handleUpdateOriginalDSLMultiAttr],
   )
 
   const [{ isDraggingActive }, dropRef] = useDrop<
@@ -248,7 +253,7 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
         <Resizable
           size={{
             width: "100%",
-            height: headerHeight * unitH,
+            height: headerHeight * UNIT_HEIGHT,
           }}
           minHeight={headerMinHeight}
           maxHeight={headerMaxHeight}
@@ -256,22 +261,20 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
             isMouseHover && !isDraggingActive ? resizeTopHandler : undefined
           }
           enable={{
-            bottom: true,
+            bottom: isEditMode,
           }}
           onResizeStart={handleResizeStart}
           onResizeStop={handleOnResizeTopStop}
         >
-          <div css={formHeaderStyle} ref={headerRef}>
-            {renderHeader}
-          </div>
-          {isMouseHover && !isDraggingActive && (
+          <div css={formHeaderStyle}>{renderHeader}</div>
+          {isEditMode && isMouseHover && !isDraggingActive && (
             <div css={applyDashedLineStyle(false, true, false)} />
           )}
         </Resizable>
       )}
-      <div css={formBodyStyle} ref={bodyRef}>
+      <div css={formBodyStyle}>
         {renderBody}
-        {isMouseHover && !isDraggingActive && (
+        {isEditMode && isMouseHover && !isDraggingActive && (
           <div css={applyXDirectionDashedLineStyle(false, true, false)} />
         )}
       </div>
@@ -279,7 +282,7 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
         <Resizable
           size={{
             width: "100%",
-            height: footerHeight * unitH,
+            height: footerHeight * UNIT_HEIGHT,
           }}
           minHeight={footerMinHeight}
           maxHeight={footerMaxHeight}
@@ -287,15 +290,13 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
             isMouseHover && !isDraggingActive ? resizeBottomHandler : undefined
           }
           enable={{
-            top: true,
+            top: isEditMode,
           }}
           onResizeStart={handleResizeStart}
           onResizeStop={handleOnResizeBottomStop}
         >
-          <div css={formHeaderStyle} ref={footerRef}>
-            {renderFooter}
-          </div>
-          {isMouseHover && !isDraggingActive && (
+          <div css={formHeaderStyle}>{renderFooter}</div>
+          {isEditMode && isMouseHover && !isDraggingActive && (
             <div
               css={applyDashedLineStyle(false, true, false, footerMaxHeight)}
             />
@@ -306,4 +307,5 @@ export const ModalWidget: FC<ModalWidgetProps> = (props) => {
   )
 }
 
-ModalWidget.displayName = "FormWidget"
+ModalWidget.displayName = "ModalWidget"
+export default ModalWidget

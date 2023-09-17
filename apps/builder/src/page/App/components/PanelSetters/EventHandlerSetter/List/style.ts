@@ -34,6 +34,7 @@ export const fontButtonWrapperStyle = css`
   padding: 1px 8px;
   border-radius: 8px;
   font-size: 14px;
+
   &:hover {
     background-color: ${globalColor(`--${illaPrefix}-grayBlue-09`)};
   }
@@ -44,8 +45,16 @@ export const fontButtonStyle = css`
 `
 
 export const listItemWrapperStyle = css`
-  height: 40px;
+  height: 32px;
   width: 100%;
+
+  &:not(:last-child) {
+    margin-bottom: 16px;
+  }
+
+  &:last-child {
+    margin-bottom: 8px;
+  }
 `
 
 export const groupWrapperStyle = css`
@@ -82,10 +91,7 @@ export const eventAndMethodWrapperStyle = css`
 
 export const eventNameStyle = css`
   color: ${globalColor(`--${illaPrefix}-grayBlue-02`)};
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 0 0 64px;
+  min-width: 64px;
   margin-right: 8px;
   display: flex;
   align-items: center;
@@ -98,7 +104,10 @@ export const methodNameStyle = css`
 `
 
 export const emptyBodyStyle = css`
+  min-height: 32px;
   width: 100%;
+  display: flex;
+  align-items: center;
   padding: 8px 16px;
   background-color: ${globalColor(`--${illaPrefix}-grayBlue-09`)};
   color: ${globalColor(`--${illaPrefix}-grayBlue-03`)};

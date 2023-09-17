@@ -2,24 +2,15 @@ import { get } from "lodash"
 import { FC, useCallback, useMemo } from "react"
 import { useSelector } from "react-redux"
 import { ChartDataSourceSetterProps } from "@/page/App/components/PanelSetters/ChartSetter/interface"
-import { BaseSelectSetter } from "@/page/App/components/PanelSetters/SelectSetter/baseSelect"
 import { getAllContainerWidget } from "@/redux/currentApp/editor/components/componentsSelector"
+import SearchSelectSetter from "../SelectSetter/searchSelect"
 
-export const TabsContainerSelectSetter: FC<ChartDataSourceSetterProps> = (
-  props,
-) => {
+const TabsContainerSelectSetter: FC<ChartDataSourceSetterProps> = (props) => {
   const {
     value,
     handleUpdateMultiAttrDSL,
     handleUpdateOtherMultiAttrDSL,
     widgetDisplayName,
-    attrName,
-    allowClear,
-    componentNode,
-    isSetterSingleRow,
-    widgetOrAction,
-    widgetType,
-    expectedType,
   } = props
   const containers = useSelector(getAllContainerWidget)
 
@@ -63,24 +54,24 @@ export const TabsContainerSelectSetter: FC<ChartDataSourceSetterProps> = (
         [attrName]: targetDisplayName,
       })
     },
-    [handleUpdateMultiAttrDSL, value],
+    [
+      containers,
+      handleUpdateMultiAttrDSL,
+      handleUpdateOtherMultiAttrDSL,
+      value,
+      widgetDisplayName,
+    ],
   )
 
   return (
-    <BaseSelectSetter
+    <SearchSelectSetter
+      {...props}
       options={selectedOptions}
-      expectedType={expectedType}
-      value={value}
-      allowClear={allowClear}
-      attrName={attrName}
-      componentNode={componentNode}
       handleUpdateDsl={handleUpdateDsl}
-      isSetterSingleRow={isSetterSingleRow}
-      widgetDisplayName={widgetDisplayName}
-      widgetOrAction={widgetOrAction}
-      widgetType={widgetType}
     />
   )
 }
 
 TabsContainerSelectSetter.displayName = "TabsContainerSelectSetter"
+
+export default TabsContainerSelectSetter

@@ -1,5 +1,5 @@
-import { css } from "@emotion/react"
-import { SerializedStyles } from "@emotion/react"
+import { SerializedStyles, css } from "@emotion/react"
+import { globalColor, illaPrefix } from "@illa-design/react"
 
 export const applyValidateMessageWrapperStyle = (
   labelWidth: number,
@@ -62,6 +62,23 @@ const getShadowStyle = (shadow?: "none" | "small" | "medium" | "large") => {
   }
 }
 
+const getWrapperBackgroundColor = (
+  widgetType?: string,
+  backgroundColor?: string,
+) => {
+  if (
+    widgetType === "CONTAINER_WIDGET" ||
+    widgetType === "LIST_WIDGET" ||
+    widgetType === "MODAL_WIDGET" ||
+    widgetType === "FORM_WIDGET"
+  ) {
+    return backgroundColor
+      ? globalColor(`--${illaPrefix}-${backgroundColor}-03`) || backgroundColor
+      : "white"
+  }
+  return "transparent"
+}
+
 export const applyWrapperStylesStyle = (
   borderColor?: string,
   borderWidth?: string,
@@ -72,7 +89,11 @@ export const applyWrapperStylesStyle = (
 ) => {
   let borderStyle = "unset"
   if (borderColor && borderWidth) {
-    borderStyle = `${borderWidth} solid ${borderColor}`
+    borderStyle = `${borderWidth} solid ${
+      borderColor
+        ? globalColor(`--${illaPrefix}-${borderColor}-03`) || borderColor
+        : "transparent"
+    }`
   }
   const shadowStyle = getShadowStyle(shadow)
   return css`
@@ -80,11 +101,7 @@ export const applyWrapperStylesStyle = (
     height: 100%;
     border: ${borderStyle};
     border-radius: ${radius};
-    background-color: ${widgetType === "CONTAINER_WIDGET" ||
-    widgetType === "LIST_WIDGET" ||
-    widgetType === "MODAL_WIDGET"
-      ? backgroundColor || "white"
-      : "transparent"};
+    background-color: ${getWrapperBackgroundColor(widgetType, backgroundColor)};
     box-shadow: ${shadowStyle};
     overflow-x: hidden;
   `

@@ -1,4 +1,5 @@
 import { CaseReducer, PayloadAction } from "@reduxjs/toolkit"
+import { INIT_ACTION_ADVANCED_CONFIG } from "@/page/App/components/Actions/AdvancedPanel/constant"
 import {
   ConfigInitialState,
   ConfigState,
@@ -7,8 +8,12 @@ import {
 import {
   ActionContent,
   ActionItem,
+  IAdvancedConfig,
 } from "@/redux/currentApp/action/actionState"
-import { UpdateCanvasShapePayload } from "./configPayload"
+import {
+  UpdateCanvasShapePayload,
+  UpdateWSStatusPayload,
+} from "./configPayload"
 
 export const updateLeftPanel: CaseReducer<
   ConfigState,
@@ -24,10 +29,7 @@ export const updateIllaMode: CaseReducer<
   state.mode = action.payload
 }
 
-export const resetConfig: CaseReducer<ConfigState, PayloadAction> = (
-  state,
-  action,
-) => {
+export const resetConfig: CaseReducer<ConfigState, PayloadAction> = () => {
   return ConfigInitialState
 }
 
@@ -73,6 +75,28 @@ export const updateCachedAction: CaseReducer<
   state.cachedAction = action.payload
 }
 
+export const updateCachedActionAdvancedConfigReducer: CaseReducer<
+  ConfigState,
+  PayloadAction<Partial<IAdvancedConfig>>
+> = (state, action) => {
+  const cachedAction = state.cachedAction
+  if (!cachedAction) return
+  if (!cachedAction.config) {
+    cachedAction.config = {
+      public: false,
+      advancedConfig: INIT_ACTION_ADVANCED_CONFIG,
+    }
+  }
+  if (!cachedAction.config.advancedConfig) {
+    cachedAction.config.advancedConfig = INIT_ACTION_ADVANCED_CONFIG
+  }
+  cachedAction.config.advancedConfig = {
+    ...cachedAction.config.advancedConfig,
+    ...action.payload,
+  }
+  state.cachedAction = cachedAction
+}
+
 export const updateShowDot: CaseReducer<ConfigState, PayloadAction<boolean>> = (
   state,
   action,
@@ -82,14 +106,12 @@ export const updateShowDot: CaseReducer<ConfigState, PayloadAction<boolean>> = (
 
 export const plusScale: CaseReducer<ConfigState, PayloadAction<void>> = (
   state,
-  action,
 ) => {
   state.scale = state.scale + 10
 }
 
 export const minusScale: CaseReducer<ConfigState, PayloadAction<void>> = (
   state,
-  action,
 ) => {
   state.scale = state.scale - 10
 }
@@ -97,7 +119,7 @@ export const minusScale: CaseReducer<ConfigState, PayloadAction<void>> = (
 export const clearSelectedComponent: CaseReducer<
   ConfigState,
   PayloadAction<void>
-> = (state, action) => {
+> = (state) => {
   state.selectedComponents = []
 }
 
@@ -116,13 +138,6 @@ export const removeExpandedKey: CaseReducer<
   index > -1 && state.expandedKeys.splice(index, 1)
 }
 
-export const updateFreezeStateReducer: CaseReducer<
-  ConfigState,
-  PayloadAction<boolean>
-> = (state, action) => {
-  state.freezeCanvas = action.payload
-}
-
 export const updateCanvasShapeReducer: CaseReducer<
   ConfigState,
   PayloadAction<UpdateCanvasShapePayload>
@@ -137,4 +152,19 @@ export const updateDevicesOnlineStatusReducer: CaseReducer<
   PayloadAction<boolean>
 > = (state, action) => {
   state.isOnline = action.payload
+}
+
+export const updateWSStatusReducer: CaseReducer<
+  ConfigState,
+  PayloadAction<UpdateWSStatusPayload>
+> = (state, action) => {
+  const { context, wsStatus } = action.payload
+  state.wsStatus[context] = wsStatus
+}
+
+export const updateHoveredComponent: CaseReducer<
+  ConfigState,
+  PayloadAction<string[]>
+> = (state, action) => {
+  state.hoveredComponents = action.payload
 }

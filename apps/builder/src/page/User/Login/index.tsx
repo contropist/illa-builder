@@ -1,231 +1,91 @@
+import { Global } from "@emotion/react"
+import { ERROR_FLAG } from "@illa-public/illa-net/errorFlag"
+import {
+  ILLA_MIXPANEL_PUBLIC_PAGE_NAME,
+  MixpanelTrackProvider,
+} from "@illa-public/mixpanel-utils"
+import { LoginPage } from "@illa-public/sso-module"
+import { isCloudVersion } from "@illa-public/utils"
 import { FC, useState } from "react"
-import { Controller, SubmitHandler, useForm } from "react-hook-form"
-import { Trans, useTranslation } from "react-i18next"
-import { useDispatch } from "react-redux"
+import { SubmitHandler } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router-dom"
-import {
-  Button,
-  Input,
-  Password,
-  WarningCircleIcon,
-  useMessage,
-} from "@illa-design/react"
-import { Api } from "@/api/base"
-import { EMAIL_FORMAT } from "@/constants/regExp"
-import { TextLink } from "@/page/User/components/TextLink"
-import {
-  descriptionStyle,
-  errorIconStyle,
-  errorMsgStyle,
-  forgotPwdContainerStyle,
-  forgotPwdStyle,
-  formLabelStyle,
-  formTitleStyle,
-  gridFormFieldStyle,
-  gridFormStyle,
-  gridItemStyle,
-  gridValidStyle,
-} from "@/page/User/style"
-import { currentUserActions } from "@/redux/currentUser/currentUserSlice"
-import { CurrentUser } from "@/redux/currentUser/currentUserState"
-import { setLocalStorage } from "@/utils/storage"
-import { isCloudVersion } from "@/utils/typeHelper"
+import { useMessage } from "@illa-design/react"
+import { translateSearchParamsToURLPathWithSelfHost } from "@/router/utils/translateQS"
+import { fetchSignIn } from "@/services/auth"
+import { mobileAdaptationStyle } from "@/style"
+import { track } from "@/utils/mixpanelHelper"
+import { ILLABuilderStorage } from "@/utils/storage"
+import { isILLAAPiError } from "@/utils/typeHelper"
 import { LoginFields } from "./interface"
 
-export const Login: FC = () => {
+const UserLogin: FC = () => {
   const [submitLoading, setSubmitLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState({ email: "", password: "" })
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const dispatch = useDispatch()
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFields>({
-    mode: "onSubmit",
-  })
 
   const message = useMessage()
-  const onSubmit: SubmitHandler<LoginFields> = (data) => {
-    Api.request<CurrentUser>(
-      { method: "POST", url: "/auth/signin", data },
-      (res) => {
-        const token = res.headers["illa-token"]
-        if (!token) return
-        setLocalStorage("token", token, -1)
-        dispatch(
-          currentUserActions.updateCurrentUserReducer({
-            userId: res.data.userId,
-            nickname: res.data.nickname,
-            language: res.data.language || "en-US",
-            email: res.data.email,
-          }),
-        )
-        navigate(location.state?.from?.pathname ?? "/", {
+  const onSubmit: SubmitHandler<LoginFields> = async (requestBody) => {
+    setSubmitLoading(true)
+    try {
+      const res = await fetchSignIn(requestBody)
+      const token = res.headers["illa-token"]
+      if (!token) {
+        return
+      }
+      ILLABuilderStorage.setLocalStorage("token", token, -1)
+      if (!isCloudVersion) {
+        const urlSearchParams = new URLSearchParams(location.search)
+        const path = translateSearchParamsToURLPathWithSelfHost(urlSearchParams)
+        navigate(`${path}`)
+      } else {
+        navigate(location.state?.from ?? "/", {
           replace: true,
         })
-        message.success({
-          content: t("user.sign_in.tips.success"),
-        })
-      },
-      (res) => {
-        message.error({
-          content: t("user.sign_in.tips.fail"),
-        })
-        switch (res.data.errorMessage) {
-          case "no such user":
-            setErrorMsg({
-              ...errorMsg,
-              email: t("user.sign_in.error_message.email.registered"),
-            })
-            break
-          case "invalid password":
+      }
+      message.success({
+        content: t("user.sign_in.tips.success"),
+      })
+    } catch (error) {
+      if (isILLAAPiError(error)) {
+        switch (error.data.errorFlag) {
+          case ERROR_FLAG.ERROR_FLAG_SIGN_IN_FAILED:
             setErrorMsg({
               ...errorMsg,
               password: t("user.sign_in.error_message.password.incorrect"),
             })
             break
           default:
+            message.error({
+              content: t("user.sign_in.tips.fail"),
+            })
         }
-      },
-      () => {
+      } else {
         message.warning({
           content: t("network_error"),
         })
-      },
-      (loading) => {
-        setSubmitLoading(loading)
-      },
-    )
+      }
+    }
+    setSubmitLoading(false)
   }
 
   return (
-    <form css={gridFormStyle} onSubmit={handleSubmit(onSubmit)}>
-      <header css={gridItemStyle}>
-        <div css={formTitleStyle}>{t("user.sign_in.title")}</div>
-        <div css={descriptionStyle}>
-          <Trans
-            i18nKey="user.sign_in.description.register"
-            t={t}
-            components={[
-              <TextLink
-                key="text-link"
-                onClick={() => {
-                  navigate("/user/register")
-                }}
-              />,
-            ]}
-          />
-        </div>
-      </header>
-      <section css={gridFormFieldStyle}>
-        <section css={gridItemStyle}>
-          <label css={formLabelStyle}>{t("user.sign_in.fields.email")}</label>
-          <div css={gridValidStyle}>
-            <Controller
-              name="email"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  onChange={(value, event) => {
-                    field.onChange(event)
-                    if (errorMsg.email !== "") {
-                      setErrorMsg({ ...errorMsg, email: "" })
-                    }
-                  }}
-                  size="large"
-                  error={!!errors.email || !!errorMsg.email}
-                  variant="fill"
-                  placeholder={t("user.sign_in.placeholder.email")}
-                  borderColor="techPurple"
-                />
-              )}
-              rules={{
-                required: t("user.sign_in.error_message.email.require"),
-                validate: (value: string) => {
-                  if (isCloudVersion && !EMAIL_FORMAT.test(value)) {
-                    return t("user.sign_up.error_message.email.invalid_pattern")
-                  }
-                  return value === "root"
-                    ? true
-                    : EMAIL_FORMAT.test(value)
-                    ? true
-                    : t("user.sign_up.error_message.email.invalid_pattern")
-                },
-              }}
-            />
-            {(errors.email || errorMsg.email) && (
-              <div css={errorMsgStyle}>
-                <WarningCircleIcon css={errorIconStyle} />
-                {errors.email?.message || errorMsg.email}
-              </div>
-            )}
-          </div>
-        </section>
-        <section css={gridItemStyle}>
-          <div css={forgotPwdContainerStyle}>
-            <label css={formLabelStyle}>
-              {t("user.sign_in.fields.password")}
-            </label>
-            <TextLink
-              css={forgotPwdStyle}
-              onClick={() => {
-                navigate("/user/forgotPassword")
-              }}
-            >
-              {t("user.sign_in.description.forgot_password")}
-            </TextLink>
-          </div>
-          <div css={gridValidStyle}>
-            <Controller
-              name="password"
-              control={control}
-              render={({ field }) => (
-                <Password
-                  {...field}
-                  onChange={(event) => {
-                    field.onChange(event)
-                    if (errorMsg.password !== "") {
-                      setErrorMsg({ ...errorMsg, password: "" })
-                    }
-                  }}
-                  size="large"
-                  error={!!errors.password || !!errorMsg.password}
-                  variant="fill"
-                  placeholder={t("user.password.placeholder")}
-                  borderColor="techPurple"
-                />
-              )}
-              rules={{
-                required: t("user.sign_in.error_message.password.require"),
-                minLength: {
-                  value: 6,
-                  message: t("user.sign_in.error_message.password.min_length"),
-                },
-              }}
-            />
-            {(errors.password || errorMsg.password) && (
-              <div css={errorMsgStyle}>
-                <WarningCircleIcon css={errorIconStyle} />
-                {errors.password?.message || errorMsg.password}
-              </div>
-            )}
-          </div>
-        </section>
-      </section>
-      <Button
-        colorScheme="techPurple"
-        size="large"
+    <MixpanelTrackProvider
+      basicTrack={track}
+      pageName={ILLA_MIXPANEL_PUBLIC_PAGE_NAME.LOGIN}
+    >
+      <Global styles={mobileAdaptationStyle} />
+      <LoginPage
         loading={submitLoading}
-        fullWidth
-      >
-        {t("user.sign_in.actions.login")}
-      </Button>
-    </form>
+        errorMsg={errorMsg}
+        onSubmit={onSubmit}
+      />
+    </MixpanelTrackProvider>
   )
 }
 
-Login.displayName = "Login"
+export default UserLogin
+
+UserLogin.displayName = "UserLogin"

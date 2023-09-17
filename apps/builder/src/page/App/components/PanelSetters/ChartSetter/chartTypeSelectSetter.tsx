@@ -2,20 +2,21 @@ import { ChartType } from "chart.js"
 import { get } from "lodash"
 import { FC, useCallback, useMemo } from "react"
 import { useSelector } from "react-redux"
-import {
-  BarChartIcon,
-  LineChartIcon,
-  PieChartIcon,
-  ScatterPlotIcon,
-} from "@illa-design/react"
+import { ReactComponent as BarChartIcon } from "@/assets/chart/bar-chart.svg"
+import { ReactComponent as DoughnutIcon } from "@/assets/chart/doughnut-chart.svg"
+import { ReactComponent as LineChartIcon } from "@/assets/chart/line-chart.svg"
+import { ReactComponent as PieChartIcon } from "@/assets/chart/pie-chart.svg"
+import { ReactComponent as RadarIcon } from "@/assets/chart/radar-chart.svg"
+import { ReactComponent as ScatterPlotIcon } from "@/assets/chart/scatter-plot.svg"
 import i18n from "@/i18n/config"
 import { ChartDatasetShape } from "@/page/App/components/PanelSetters/ChartSetter/chartDatasetsSetter/interface"
 import { CHART_PRESET_COLOR } from "@/page/App/components/PanelSetters/ChartSetter/chartDatasetsSetter/listItem"
 import {
   chartTypeIconCss,
   chartTypeStringCss,
+  chatOptionContainerStyle,
 } from "@/page/App/components/PanelSetters/ChartSetter/style"
-import { BaseSelectSetter } from "@/page/App/components/PanelSetters/SelectSetter/baseSelect"
+import BaseSelectSetter from "@/page/App/components/PanelSetters/SelectSetter/baseSelect"
 import {
   getCanvas,
   searchDsl,
@@ -26,18 +27,18 @@ import { ChartTypeSelectSetterProps } from "./interface"
 const typeOptions = [
   {
     label: (
-      <span>
+      <div css={chatOptionContainerStyle}>
         <BarChartIcon css={chartTypeIconCss} />
         <span css={chartTypeStringCss}>
           {i18n.t("editor.inspect.setter_content.chart_type.bar")}
         </span>
-      </span>
+      </div>
     ),
     value: "bar",
   },
   {
     label: (
-      <div>
+      <div css={chatOptionContainerStyle}>
         <LineChartIcon css={chartTypeIconCss} />
         <span css={chartTypeStringCss}>
           {i18n.t("editor.inspect.setter_content.chart_type.line")}
@@ -48,7 +49,7 @@ const typeOptions = [
   },
   {
     label: (
-      <div>
+      <div css={chatOptionContainerStyle}>
         <ScatterPlotIcon css={chartTypeIconCss} />
         <span css={chartTypeStringCss}>
           {i18n.t("editor.inspect.setter_content.chart_type.scatterplot")}
@@ -59,7 +60,7 @@ const typeOptions = [
   },
   {
     label: (
-      <div>
+      <div css={chatOptionContainerStyle}>
         <PieChartIcon css={chartTypeIconCss} />
         <span css={chartTypeStringCss}>
           {i18n.t("editor.inspect.setter_content.chart_type.pie")}
@@ -68,20 +69,32 @@ const typeOptions = [
     ),
     value: "pie",
   },
+  {
+    label: (
+      <div css={chatOptionContainerStyle}>
+        <DoughnutIcon css={chartTypeIconCss} />
+        <span css={chartTypeStringCss}>
+          {i18n.t("editor.inspect.setter_option.chart.chart-type.Doughnut")}
+        </span>
+      </div>
+    ),
+    value: "doughnut",
+  },
+  {
+    label: (
+      <div css={chatOptionContainerStyle}>
+        <RadarIcon css={chartTypeIconCss} />
+        <span css={chartTypeStringCss}>
+          {i18n.t("editor.inspect.setter_option.chart.chart-type.Radar")}
+        </span>
+      </div>
+    ),
+    value: "radar",
+  },
 ]
 
-export const ChartTypeSelectSetter: FC<ChartTypeSelectSetterProps> = (
-  props,
-) => {
-  const {
-    attrName,
-    expectedType,
-    widgetDisplayName,
-    widgetType,
-    widgetOrAction,
-    handleUpdateMultiAttrDSL,
-    value,
-  } = props
+const ChartTypeSelectSetter: FC<ChartTypeSelectSetterProps> = (props) => {
+  const { widgetDisplayName, handleUpdateMultiAttrDSL } = props
 
   const insertValues = useSelector<RootState, Record<string, any>>(
     (rootState) => {
@@ -114,7 +127,7 @@ export const ChartTypeSelectSetter: FC<ChartTypeSelectSetterProps> = (
           }
         })
       } else {
-        return datasets.map((dataset, index) => {
+        return datasets.map((dataset) => {
           return {
             ...dataset,
             type: chartType,
@@ -139,14 +152,12 @@ export const ChartTypeSelectSetter: FC<ChartTypeSelectSetterProps> = (
 
   return (
     <BaseSelectSetter
-      attrName={attrName}
+      {...props}
       handleUpdateDsl={handleUpdateDsl}
-      expectedType={expectedType}
-      widgetDisplayName={widgetDisplayName}
-      widgetType={widgetType}
-      widgetOrAction={widgetOrAction}
       options={typeOptions}
-      value={value}
     />
   )
 }
+
+ChartTypeSelectSetter.displayName = "ChartTypeSelectSetter"
+export default ChartTypeSelectSetter

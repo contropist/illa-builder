@@ -9,15 +9,17 @@ import {
   setExpandedKey,
   updateBottomPanel,
   updateCachedAction,
+  updateCachedActionAdvancedConfigReducer,
   updateCanvasShapeReducer,
   updateDebuggerVisible,
   updateDevicesOnlineStatusReducer,
-  updateFreezeStateReducer,
+  updateHoveredComponent,
   updateIllaMode,
   updateLeftPanel,
   updateRightPanel,
   updateSelectedComponent,
   updateShowDot,
+  updateWSStatusReducer,
 } from "@/redux/config/configReducer"
 import { ConfigInitialState } from "@/redux/config/configState"
 
@@ -36,13 +38,15 @@ const configSlice = createSlice({
     clearSelectedComponent,
     changeSelectedAction,
     updateCachedAction,
+    updateCachedActionAdvancedConfigReducer,
     plusScale,
     minusScale,
     setExpandedKey,
     removeExpandedKey,
-    updateFreezeStateReducer,
     updateCanvasShapeReducer,
     updateDevicesOnlineStatusReducer,
+    updateWSStatusReducer,
+    updateHoveredComponent,
   },
 })
 

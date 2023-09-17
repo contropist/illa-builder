@@ -5,13 +5,13 @@ import { ListItemProps } from "./interface"
 import { optionListItemStyle } from "./style"
 
 export const ListItem: FC<ListItemProps> = (props) => {
-  const { id, label, value, index, ...otherProps } = props
+  const { id: _id, label, value: _value, index, ...otherProps } = props
 
   return (
     <div {...otherProps}>
       <div css={optionListItemStyle}>
         <DragIconAndLabel index={index} label={label} />
-        <More index={index} />
+        <More index={index} label={label} />
       </div>
     </div>
   )

@@ -1,31 +1,8 @@
-import { Diff } from "deep-diff"
 import { toPath } from "lodash"
 import { extractIdentifiersFromCode } from "@/utils/ast/ast"
-import { isDynamicString } from "@/utils/evaluateDynamicString/utils"
-import { RawTreeShape } from "@/utils/executionTreeHelper/interface"
 import { isInt, isObject } from "@/utils/typeHelper"
 
-export enum RawTreeDiffEvent {
-  NEW = "NEW",
-  DELETE = "DELETE",
-  EDIT = "EDIT",
-  NOOP = "NOOP",
-}
-
-export type RawTreeDiff = {
-  payload: {
-    propertyPath: string
-    value?: string
-  }
-  event: RawTreeDiffEvent
-}
-
-const ignorePathsForEvalRegex = /.(\$dynamicAttrPaths|\$validationPaths)/
 const IMMEDIATE_PARENT_REGEX = /^(.*)(\..*|\[.*\])$/
-
-const isUninterestingChangeForDependencyUpdate = (path: string) => {
-  return path.match(ignorePathsForEvalRegex)
-}
 
 export const convertPathToString = (attrPath: string[] | number[]) => {
   let string = ""
@@ -42,25 +19,16 @@ export const convertPathToString = (attrPath: string[] | number[]) => {
   return string
 }
 
-export const extractReferencesFromScript = (
-  script: string,
-  allPaths: Record<string, true>,
-): string[] => {
+export const extractReferencesFromScript = (script: string): string[] => {
   const references: Set<string> = new Set<string>()
   const identifiers = extractIdentifiersFromCode(script)
   identifiers.forEach((identifier: string) => {
-    if (allPaths.hasOwnProperty(identifier)) {
-      references.add(identifier)
-      return
-    }
+    references.add(identifier)
     const subPaths = toPath(identifier)
     let current = ""
     while (subPaths.length > 1) {
       current = convertPathToString(subPaths)
-      if (allPaths.hasOwnProperty(current)) {
-        references.add(current)
-        return
-      }
+      references.add(current)
       subPaths.pop()
     }
   })
@@ -81,122 +49,6 @@ export function getDisplayNameAndPropertyPath(fullPath: string): {
   const displayName = fullPath.substring(0, indexOfFirstDot)
   const attrPath = fullPath.substring(indexOfFirstDot + 1)
   return { displayName, attrPath }
-}
-
-export const translateDiffArrayIndexAccessors = (
-  propertyPath: string,
-  array: unknown[],
-  event: RawTreeDiffEvent,
-) => {
-  const result: RawTreeDiff[] = []
-  array.forEach((data, index) => {
-    const path = `${propertyPath}[${index}]`
-    result.push({
-      event,
-      payload: {
-        propertyPath: path,
-      },
-    })
-  })
-  return result
-}
-
-export const translateDiffEventToRawTreeEvent = (
-  diff: Diff<any, any>,
-  rawTree: RawTreeShape,
-): RawTreeDiff | RawTreeDiff[] => {
-  let result: RawTreeDiff | RawTreeDiff[] = {
-    payload: {
-      propertyPath: "",
-      value: "",
-    },
-    event: RawTreeDiffEvent.NOOP,
-  }
-  if (!diff.path) {
-    return result
-  }
-  const propertyPath = convertPathToString(diff.path)
-  const isUninterestingPathForUpdateTree =
-    isUninterestingChangeForDependencyUpdate(propertyPath)
-  if (!!isUninterestingPathForUpdateTree) {
-    return result
-  }
-
-  switch (diff.kind) {
-    case "N": {
-      result.event = RawTreeDiffEvent.NEW
-      result.payload = {
-        propertyPath,
-      }
-      break
-    }
-    case "D": {
-      result.event = RawTreeDiffEvent.DELETE
-      result.payload = { propertyPath }
-      break
-    }
-    case "E": {
-      let rhsChange = typeof diff.rhs === "string" && isDynamicString(diff.rhs),
-        lhsChange = typeof diff.lhs === "string" && isDynamicString(diff.lhs)
-      if (rhsChange || lhsChange) {
-        result.event = RawTreeDiffEvent.EDIT
-        result.payload = {
-          propertyPath,
-          value: diff.rhs,
-        }
-      } else if (diff.lhs === undefined || diff.rhs === undefined) {
-        if (
-          diff.lhs === undefined &&
-          (isObject(diff.rhs) || Array.isArray(diff.rhs))
-        ) {
-          result.event = RawTreeDiffEvent.NEW
-          result.payload = { propertyPath }
-        }
-        if (
-          diff.rhs === undefined &&
-          (isObject(diff.lhs) || Array.isArray(diff.lhs))
-        ) {
-          result.event = RawTreeDiffEvent.DELETE
-          result.payload = { propertyPath }
-        }
-      } else if (isObject(diff.lhs) && !isObject(diff.rhs)) {
-        result = Object.keys(diff.lhs).map((diffKey) => {
-          const path = `${propertyPath}.${diffKey}`
-          return {
-            event: RawTreeDiffEvent.DELETE,
-            payload: {
-              propertyPath: path,
-            },
-          }
-        })
-        if (Array.isArray(diff.rhs)) {
-          result = result.concat(
-            translateDiffArrayIndexAccessors(
-              propertyPath,
-              diff.rhs,
-              RawTreeDiffEvent.NEW,
-            ),
-          )
-        }
-      }
-      break
-    }
-    case "A": {
-      const result = translateDiffEventToRawTreeEvent(
-        {
-          ...diff.item,
-          path: [...diff.path, diff.index],
-        },
-        rawTree,
-      )
-      return result
-    }
-    default: {
-      break
-    }
-  }
-
-  return result
 }
 
 export function isWidget(entity: Record<string, any>) {
@@ -225,4 +77,60 @@ export const getImmediateParentsOfPropertyPaths = (
   })
 
   return Array.from(parents)
+}
+
+export const removeIgnoredKeys = (result: Record<string, unknown>) => {
+  return Object.keys(result).reduce(
+    (acc: Record<string, unknown>, key: string) => {
+      const componentOrAction = result[key]
+      if (isObject(componentOrAction)) {
+        const updatedComponentOrAction = Object.keys(componentOrAction).reduce(
+          (obj: Record<string, unknown>, innerKey: string) => {
+            if (!innerKey.startsWith("$")) {
+              obj[innerKey] = componentOrAction[innerKey]
+            }
+            return obj
+          },
+          {},
+        )
+        acc[key] = updatedComponentOrAction
+      } else {
+        acc[key] = componentOrAction
+      }
+      return acc
+    },
+    {},
+  )
+}
+
+export const removeWidgetOrActionMethods = (
+  result: Record<string, unknown>,
+) => {
+  return Object.keys(result).reduce(
+    (acc: Record<string, unknown>, key: string) => {
+      if (key === "utils") return acc
+      const componentOrAction = result[key]
+      if (
+        isObject(componentOrAction) &&
+        (componentOrAction.$type === "WIDGET" ||
+          componentOrAction.$type === "ACTION")
+      ) {
+        const updatedComponentOrAction = Object.keys(componentOrAction).reduce(
+          (obj: Record<string, unknown>, innerKey: string) => {
+            const innerValue = componentOrAction[innerKey]
+            if (typeof innerValue !== "function") {
+              obj[innerKey] = componentOrAction[innerKey]
+            }
+            return obj
+          },
+          {},
+        )
+        acc[key] = updatedComponentOrAction
+      } else {
+        acc[key] = componentOrAction
+      }
+      return acc
+    },
+    {},
+  )
 }

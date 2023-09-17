@@ -1,50 +1,28 @@
-import { FC } from "react"
-import { useTranslation } from "react-i18next"
+import { forwardRef } from "react"
 import { useSelector } from "react-redux"
-import { LockIcon } from "@illa-design/react"
 import { DotPanel } from "@/page/App/components/DotPanel"
-import { getFreezeState, getIllaMode } from "@/redux/config/configSelector"
-import { FocusManager } from "@/utils/focusManager"
+import { getIsILLAEditMode } from "@/redux/config/configSelector"
+import { getExecutionResult } from "@/redux/currentApp/executionTree/executionSelector"
 import { CanvasPanelProps } from "./interface"
-import {
-  applyScaleContainerStyle,
-  messageStyle,
-  messageWrapperStyle,
-} from "./style"
+import { applyScaleContainerStyle } from "./style"
 
-export const CanvasPanel: FC<CanvasPanelProps> = (props) => {
-  const { ...otherProps } = props
+export const CanvasPanel = forwardRef<HTMLDivElement, CanvasPanelProps>(
+  (props, ref) => {
+    const { ...otherProps } = props
 
-  const { t } = useTranslation()
-  const mode = useSelector(getIllaMode)
-  const isFreeze = useSelector(getFreezeState)
+    const isEditMode = useSelector(getIsILLAEditMode)
+    const executionResult = useSelector(getExecutionResult)
 
-  return (
-    <div
-      {...otherProps}
-      css={applyScaleContainerStyle(mode)}
-      onClick={() => {
-        FocusManager.switchFocus("canvas")
-      }}
-    >
-      <DotPanel />
-      {mode === "edit" && (
-        <>
-          {/*TODO: replace this to illa-design/Message,when Message is ok*/}
-          {isFreeze ? (
-            <div css={messageWrapperStyle}>
-              <span css={messageStyle}>
-                <LockIcon />
-                <span style={{ marginLeft: "8px" }}>
-                  {t("freeze_messages")}
-                </span>
-              </span>
-            </div>
-          ) : null}
-        </>
-      )}
-    </div>
-  )
-}
+    if (!executionResult || !executionResult.root) {
+      return null
+    }
+
+    return (
+      <div {...otherProps} ref={ref} css={applyScaleContainerStyle(isEditMode)}>
+        <DotPanel />
+      </div>
+    )
+  },
+)
 
 CanvasPanel.displayName = "CanvasPanel"

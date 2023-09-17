@@ -25,6 +25,7 @@ export const sessionContainerStyle = css`
   width: 100%;
   display: inline-flex;
   flex-direction: column;
+
   &:not(:nth-of-type(1)) {
     margin-top: 8px;
   }
@@ -55,15 +56,6 @@ export const itemContainerStyle = css`
   width: 88px;
 `
 
-export const dragPreviewStyle = css`
-  position: absolute;
-  background: transparent;
-  top: 0;
-  left: 0;
-  height: 1px;
-  width: 1px;
-`
-
 export const iconStyle = css`
   display: flex;
   justify-content: center;
@@ -74,6 +66,7 @@ export const iconStyle = css`
   color: ${globalColor(`--${illaPrefix}-grayBlue-04`)};
   transition: background-color 200ms ease-in-out;
   padding: 8px;
+
   &:hover {
     background-color: ${globalColor(`--${illaPrefix}-grayBlue-08`)};
   }
@@ -85,7 +78,7 @@ export const nameStyle = css`
   color: ${globalColor(`--${illaPrefix}-grayBlue-03`)};
   text-overflow: ellipsis;
   box-sizing: border-box;
-  padding: 4px 8px 0 8px;
+  padding: 4px 4px 0 4px;
   overflow: hidden;
   text-align: center;
   line-height: 14px;

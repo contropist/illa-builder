@@ -1,38 +1,38 @@
-import { get } from "lodash"
+import { get, toPath } from "lodash"
 import { FC, useMemo } from "react"
 import { useSelector } from "react-redux"
-import { Select } from "@illa-design/react"
-import { applyBaseSelectWrapperStyle } from "@/page/App/components/PanelSetters/SelectSetter/style"
 import {
   getCanvas,
   searchDsl,
 } from "@/redux/currentApp/editor/components/componentsSelector"
 import { PageNode } from "@/redux/currentApp/editor/components/componentsState"
 import { RootState } from "@/store"
+import { convertPathToString } from "@/utils/executionTreeHelper/utils"
 import { BaseSelectSetterProps } from "./interface"
+import SearchSelectSetter from "./searchSelect"
 
-export const EventTargetViewSelect: FC<BaseSelectSetterProps> = (props) => {
-  const {
-    isSetterSingleRow,
-    attrName,
-    handleUpdateDsl,
-    value,
-    componentNode,
-    placeholder,
-  } = props
-  let parentAttrNameArray = attrName.split(".")
+const EventTargetViewSelect: FC<BaseSelectSetterProps> = (props) => {
+  const { attrName, value, componentNode, widgetOrAction, panelConfig } = props
+
+  let parentAttrNameArray = toPath(attrName)
   parentAttrNameArray.splice(-1, 1)
-  let finalParentPath = `props.${parentAttrNameArray.join(".")}`
-  const parentAttr = get(componentNode, finalParentPath)
+
+  const parentAttr =
+    widgetOrAction === "WIDGET"
+      ? get(componentNode, `props.${convertPathToString(parentAttrNameArray)}`)
+      : get(panelConfig, convertPathToString(parentAttrNameArray))
+
   const pagePath = get(parentAttr, "pagePath")
   const pageComponent = useSelector<RootState>((state) => {
     const canvas = getCanvas(state)
     if (!canvas) return null
     return searchDsl(canvas, pagePath) || null
   }) as PageNode | null
+
   const finalOptions = useMemo(() => {
     if (!pageComponent) return []
     const options: { label: string; value: string }[] = []
+    const walkedConfig = new Map<string, Record<string, any>>()
     pageComponent.childrenNode.forEach((node) => {
       const { props } = node
       if (
@@ -41,6 +41,8 @@ export const EventTargetViewSelect: FC<BaseSelectSetterProps> = (props) => {
         Array.isArray(props.sectionViewConfigs)
       ) {
         props.sectionViewConfigs.forEach((config) => {
+          if (walkedConfig.get(config.path)) return
+          walkedConfig.set(config.path, config)
           options.push({
             label: config.path,
             value: config.path,
@@ -60,17 +62,14 @@ export const EventTargetViewSelect: FC<BaseSelectSetterProps> = (props) => {
   }, [finalOptions, value])
 
   return (
-    <div css={applyBaseSelectWrapperStyle(isSetterSingleRow)}>
-      <Select
-        options={finalOptions}
-        size="medium"
-        colorScheme="techPurple"
-        value={finalValue}
-        onChange={(value) => {
-          handleUpdateDsl(attrName, value)
-        }}
-        placeholder={placeholder}
-      />
-    </div>
+    <SearchSelectSetter
+      {...props}
+      value={finalValue as string}
+      options={finalOptions}
+    />
   )
 }
+
+EventTargetViewSelect.displayName = "EventTargetViewSelect"
+
+export default EventTargetViewSelect

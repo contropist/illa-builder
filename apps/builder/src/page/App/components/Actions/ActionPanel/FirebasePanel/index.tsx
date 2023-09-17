@@ -1,7 +1,7 @@
 import { FC, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
-import { Select } from "@illa-design/react"
+import { SelectValue } from "@illa-design/react"
 import { ActionEventHandler } from "@/page/App/components/Actions/ActionPanel/ActionEventHandler"
 import { AppendDataToListPart } from "@/page/App/components/Actions/ActionPanel/FirebasePanel/AppendDataToList"
 import { CreateOneUserPart } from "@/page/App/components/Actions/ActionPanel/FirebasePanel/CreateOneUser"
@@ -22,6 +22,7 @@ import { UpdateDataPart } from "@/page/App/components/Actions/ActionPanel/Fireba
 import { UpdateDocumentPart } from "@/page/App/components/Actions/ActionPanel/FirebasePanel/UpdateDocument"
 import { UpdateOneUserPart } from "@/page/App/components/Actions/ActionPanel/FirebasePanel/UpdateOneUser"
 import { ResourceChoose } from "@/page/App/components/Actions/ActionPanel/ResourceChoose"
+import { SingleTypeComponent } from "@/page/App/components/Actions/ActionPanel/SingleTypeComponent"
 import { TransformerComponent } from "@/page/App/components/Actions/ActionPanel/TransformerComponent"
 import {
   getCachedAction,
@@ -35,7 +36,6 @@ import {
   AuthActionTypeValue,
   CheckboxParams,
   FirebaseAction,
-  FirebaseActionInitial,
   FirebaseContentType,
   FirebaseServiceType,
   FirestoreActionTypeValue,
@@ -45,14 +45,9 @@ import {
   ServiceTypeInitialValue,
   ServiceTypeValue,
 } from "@/redux/currentApp/action/firebaseAction"
-import {
-  actionContainerStyle,
-  actionItemContainer,
-  actionItemLabelStyle,
-  actionItemStyle,
-} from "./style"
+import { actionContainerStyle, actionItemContainer } from "./style"
 
-export const FirebasePanel: FC = () => {
+const FirebasePanel: FC = () => {
   const { t } = useTranslation()
   const cachedAction = useSelector(getCachedAction) as ActionItem<
     FirebaseAction<FirebaseContentType>
@@ -65,13 +60,14 @@ export const FirebasePanel: FC = () => {
   const dispatch = useDispatch()
 
   const handleValueChange = useCallback(
-    (value: string, name: string) => {
+    (name: string) => (value: SelectValue) => {
+      const valueString = value as string
       switch (name) {
         case "operation":
-          let options = InitialValue[value as ActionTypeValue]
+          let options = InitialValue[valueString as ActionTypeValue]
           if (
             content.service === selectedContent.service &&
-            selectedContent.operation === value
+            selectedContent.operation === valueString
           ) {
             options = selectedContent.options
           }
@@ -80,7 +76,7 @@ export const FirebasePanel: FC = () => {
               ...cachedAction,
               content: {
                 ...cachedAction.content,
-                operation: value,
+                operation: valueString,
                 options,
               },
             }),
@@ -88,13 +84,13 @@ export const FirebasePanel: FC = () => {
           break
         case "service":
           const initialOptions =
-            ServiceTypeInitialValue[value as ServiceTypeValue]
+            ServiceTypeInitialValue[valueString as ServiceTypeValue]
           dispatch(
             configActions.updateCachedAction({
               ...cachedAction,
               content: {
                 operation: "",
-                service: value as ServiceTypeValue,
+                service: valueString as ServiceTypeValue,
                 options: initialOptions,
               },
             }),
@@ -165,45 +161,31 @@ export const FirebasePanel: FC = () => {
       case RealtimeActionTypeValue.APPEND_DATA_TO_LIST:
         return <AppendDataToListPart {...props} />
     }
-  }, [content])
+  }, [content.operation, content.options, handleOptionsValueChange])
 
   return (
     <div css={actionContainerStyle}>
       <ResourceChoose />
       <div css={actionItemContainer}>
-        <div css={actionItemStyle}>
-          <span css={actionItemLabelStyle}>
-            {t("editor.action.panel.firebase.service_type")}
-          </span>
-          <Select
-            colorScheme="techPurple"
-            showSearch={true}
-            defaultValue={content.service}
-            value={content.service}
-            ml="16px"
-            width="100%"
-            onChange={(value) => handleValueChange(value, "service")}
-            options={FirebaseServiceType}
-          />
-        </div>
-        <div css={actionItemStyle}>
-          <span css={actionItemLabelStyle}>
-            {t("editor.action.panel.firebase.action_type")}
-          </span>
-          <Select
-            colorScheme="techPurple"
-            showSearch={true}
-            defaultValue={content.operation}
-            value={content.operation}
-            ml="16px"
-            width="100%"
-            placeholder={t(
-              "editor.action.panel.firebase.placeholder.select_an_action",
-            )}
-            onChange={(value) => handleValueChange(value, "operation")}
-            options={ActionTypeList[content.service]}
-          />
-        </div>
+        <SingleTypeComponent
+          title={t("editor.action.panel.firebase.service_type")}
+          componentType="select"
+          value={content.service}
+          showSearch
+          options={FirebaseServiceType}
+          onSelectedValueChange={handleValueChange("service")}
+        />
+        <SingleTypeComponent
+          title={t("editor.action.panel.firebase.action_type")}
+          componentType="select"
+          showSearch={true}
+          value={content.operation}
+          placeholder={t(
+            "editor.action.panel.firebase.placeholder.select_an_action",
+          )}
+          options={ActionTypeList[content.service]}
+          onSelectedValueChange={handleValueChange("operation")}
+        />
         {renderInputBody}
         <TransformerComponent />
       </div>
@@ -213,3 +195,4 @@ export const FirebasePanel: FC = () => {
 }
 
 FirebasePanel.displayName = "FirebasePanel"
+export default FirebasePanel

@@ -12,9 +12,10 @@ export const FORM_WIDGET_CONFIG: WidgetConfig = {
   widgetName: i18n.t("widget.form.name"),
   keywords: ["form", "表单"],
   icon: <FormWidgetIcon />,
-  sessionType: "PRESENTATION",
-  w: 32,
+  sessionType: "CONTAINER",
+  w: 16,
   h: 40,
+  version: 0,
   childrenNode: [
     {
       ...BasicContainerConfig,
@@ -38,9 +39,9 @@ export const FORM_WIDGET_CONFIG: WidgetConfig = {
       childrenNode: [
         {
           ...BUTTON_WIDGET_CONFIG,
-          w: 16,
+          w: 8,
           h: 5,
-          x: 48,
+          x: 24,
           y: 0,
           defaults: {
             ...BUTTON_WIDGET_CONFIG.defaults,
@@ -69,7 +70,7 @@ export const FORM_WIDGET_CONFIG: WidgetConfig = {
     radius: "4px",
     borderWidth: "4px",
     shadow: "small",
-    headerHeight: 7,
+    headerHeight: 11,
     footerHeight: 7,
   },
 }
@@ -81,6 +82,7 @@ export const FORM_BODY_MARGIN = 7
 
 export const FORM_CAN_BIND_WIDGET_TYPE = new Map([
   ["INPUT_WIDGET", true],
+  ["TEXTAREA_INPUT_WIDGET", true],
   ["NUMBER_INPUT_WIDGET", true],
   ["SELECT_WIDGET", true],
   ["RADIO_BUTTON_WIDGET", true],
@@ -91,4 +93,10 @@ export const FORM_CAN_BIND_WIDGET_TYPE = new Map([
   ["DATE_WIDGET", true],
   ["RATE_WIDGET", true],
   ["FORM_WIDGET", true],
+  ["UPLOAD_WIDGET", true],
+  ["MULTISELECT_WIDGET", true],
+  ["TIME_PICKER_WIDGET", true],
+  ["TIME_RANGE_WIDGET", true],
+  ["SWITCH_GROUP_WIDGET", true],
+  ["RECORDING_WIDGET", true],
 ])

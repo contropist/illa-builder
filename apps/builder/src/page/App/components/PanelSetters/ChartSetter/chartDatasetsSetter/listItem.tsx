@@ -1,10 +1,12 @@
 import { FC, useCallback, useContext, useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   EyeOffIcon,
   EyeOnIcon,
   Trigger,
   globalColor,
   illaPrefix,
+  useModal,
 } from "@illa-design/react"
 import { ReactComponent as DeleteIcon } from "@/assets/delete-dataset-icon.svg"
 import { DatasetsContext } from "@/page/App/components/PanelSetters/ChartSetter/chartDatasetsSetter/datasetsContext"
@@ -98,6 +100,19 @@ export const CHART_COLOR_TYPE_CONFIG = {
   ],
 }
 
+export const CHART__BASE_COLOR_TYPE_CONFIG = CHART_COLOR_TYPE_CONFIG[
+  "illa-preset"
+].concat([
+  "#5343D0",
+  "#C24499",
+  "#09A9AE",
+  "#009A29",
+  "#104AE4",
+  "#E5700E",
+  "#E2A214",
+  "#0B0C0F",
+])
+
 export const CHART_PRESET_COLOR = CHART_COLOR_TYPE_CONFIG["illa-preset"]
 export const CHART_COLOR_TYPE_CONFIG_KEYS = Object.keys(CHART_COLOR_TYPE_CONFIG)
 
@@ -123,6 +138,8 @@ export const ColorArea: FC<ColorAreaProps> = ({ color }) => {
 export const ListItem: FC<ListItemProps> = (props) => {
   const { color, isHidden, datasetName, datasetMethod, index } = props
   const [modalVisible, setModalVisible] = useState(false)
+  const modal = useModal()
+  const { t } = useTranslation()
 
   const handleCloseModal = useCallback(() => {
     setModalVisible(false)
@@ -135,6 +152,25 @@ export const ListItem: FC<ListItemProps> = (props) => {
     handleHiddenDataset,
     handleDeleteDataSet,
   } = useContext(DatasetsContext)
+
+  const handleDeleteClick = useCallback(() => {
+    modal.show({
+      id: "deleteDatasetItem",
+      title: t("editor.component.delete_title", {
+        displayName: datasetName,
+      }),
+      children: t("editor.component.delete_content"),
+      cancelText: t("editor.component.cancel"),
+      okText: t("editor.component.delete"),
+      okButtonProps: {
+        colorScheme: "red",
+      },
+      onOk: () => {
+        handleDeleteDataSet(index)
+      },
+    })
+  }, [datasetName, handleDeleteDataSet, index, modal, t])
+
   return (
     <Trigger
       withoutPadding
@@ -190,7 +226,7 @@ export const ListItem: FC<ListItemProps> = (props) => {
             css={baseIconStyle}
             onClick={(e) => {
               e.stopPropagation()
-              handleDeleteDataSet(index)
+              handleDeleteClick()
             }}
           />
         </div>

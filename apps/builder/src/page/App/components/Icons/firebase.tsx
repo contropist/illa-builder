@@ -1,6 +1,6 @@
 import { createIcon } from "@illa-design/react"
 
-export const FirebaseIcon = createIcon({
+const FirebaseIcon = createIcon({
   title: "FirebaseIcon",
   viewBox: "0 0 24 24",
   path: (
@@ -20,3 +20,6 @@ export const FirebaseIcon = createIcon({
     </>
   ),
 })
+
+FirebaseIcon.displayName = "FirebaseIcon"
+export default FirebaseIcon

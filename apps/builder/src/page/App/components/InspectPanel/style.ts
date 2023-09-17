@@ -26,6 +26,10 @@ export function applyLabelStyle(isInList?: boolean): SerializedStyles {
   return isInList ? ListLabelStyle : baseLabelStyle
 }
 
+export const labelDescStyle = css`
+  word-break: break-all;
+`
+
 export function applyLabelTipsStyle(
   isInList?: boolean,
   hasLabelDesc?: boolean,
@@ -37,6 +41,8 @@ export function applyLabelTipsStyle(
       `
     : css``
   return css`
+    height: 22px;
+    line-height: 22px;
     ${labelStyle};
     ${borderBottomStyle};
   `
@@ -59,7 +65,6 @@ export const panelHeaderIconWrapperStyle = css`
 export function applySetterWrapperStyle(
   isSetterSingleRow: boolean = false,
   isInList: boolean = false,
-  isSetterSingleRowWrapper: boolean = false,
   useCustomLayout: boolean = false,
 ): SerializedStyles {
   if (useCustomLayout) {
@@ -77,7 +82,7 @@ export function applySetterWrapperStyle(
     justify-content: space-between;
   `
   return css`
-    ${isInList ? "padding: 0 12px;" : "padding: 0 16px;"};
+    ${isInList ? "padding: 0 12px;" : "padding: 0px 16px;"};
     ${basicStyle};
   `
 }
@@ -146,6 +151,10 @@ export const multiSelectedPanelWrapper = css`
   padding: 0 16px;
   width: 100%;
   font-size: 14px;
+  height: calc(100% - 1px);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 8px;
 `
 
 export const formHeaderStyle = css`
@@ -154,10 +163,11 @@ export const formHeaderStyle = css`
   align-items: center;
   color: ${globalColor(`--${illaPrefix}-grayBlue-02`)};
   font-weight: 600;
+  flex: none;
 `
 
 export const formContentStyle = css`
-  overflow: hidden;
+  overflow: auto;
   width: 100%;
   margin-bottom: 16px;
   border: 1px solid ${globalColor(`--${illaPrefix}-grayBlue-08`)};

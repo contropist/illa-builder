@@ -1,23 +1,29 @@
-import { FC, HTMLAttributes, useEffect, useRef, useState } from "react"
-import { useTranslation } from "react-i18next"
+import { ILLA_MIXPANEL_EVENT_TYPE } from "@illa-public/mixpanel-utils"
+import {
+  FC,
+  HTMLAttributes,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import { useSelector } from "react-redux"
-import { TabPane, Tabs } from "@illa-design/react"
-import { ComponentPanel } from "@/page/App/components/ComponentPanel"
-import { ConfigPanel } from "@/page/App/components/ConfigPanel"
-import { PagePanel } from "@/page/App/components/PagePanel"
-import { getSelectedComponents } from "@/redux/config/configSelector"
+import { SimpleTabs, getRenderBody } from "@/components/Tabs"
+import { COMPONENT_MANAGER_TABS } from "@/components/Tabs/constant"
+import { getSelectedComponentDisplayNames } from "@/redux/config/configSelector"
 import { getCurrentPageDisplayName } from "@/redux/currentApp/executionTree/executionSelector"
 import { FocusManager } from "@/utils/focusManager"
-import { componentPanelCss } from "./style"
+import { trackInEditor } from "@/utils/mixpanelHelper"
+import WidgetLoading from "@/widgetLibrary/PublicSector/WidgetLoading"
 
 export const ComponentsManager: FC<HTMLAttributes<HTMLDivElement>> = (
   props,
 ) => {
-  const { t } = useTranslation()
+  const { className, onClick, ...rest } = props
 
   const [activeKey, setActiveKey] = useState("Insert")
 
-  const selectedDisplayNames = useSelector(getSelectedComponents)
+  const selectedDisplayNames = useSelector(getSelectedComponentDisplayNames)
   const currentPageDisplayName = useSelector(getCurrentPageDisplayName)
   const prevPageDisplayName = useRef<string>(currentPageDisplayName)
   const isClickChange = useRef<boolean>(false)
@@ -36,39 +42,47 @@ export const ComponentsManager: FC<HTMLAttributes<HTMLDivElement>> = (
       }
     }
     if (prevPageDisplayName.current !== currentPageDisplayName) {
-      setActiveKey("Page")
       prevPageDisplayName.current = currentPageDisplayName
     }
     isClickChange.current = false
   }, [activeKey, currentPageDisplayName, selectedDisplayNames])
 
+  const handleClickChangeTab = (activeKey: string) => {
+    switch (activeKey) {
+      case "Page":
+        FocusManager.switchFocus("page_config")
+        break
+      case "Inspect":
+        FocusManager.switchFocus("components_config")
+        break
+      case "Insert":
+        FocusManager.switchFocus("widget_picker")
+        break
+    }
+    setActiveKey(activeKey)
+    isClickChange.current = true
+    trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+      element: "right_tab",
+      parameter2: activeKey,
+    })
+  }
+
   return (
     <div
-      className={props.className}
-      css={componentPanelCss}
-      onClick={() => {
-        FocusManager.switchFocus("components")
+      className={className}
+      {...rest}
+      onClick={(e) => {
+        onClick?.(e)
       }}
     >
-      <Tabs
-        variant="text"
+      <SimpleTabs
+        items={COMPONENT_MANAGER_TABS}
         activeKey={activeKey}
-        colorScheme="grayBlue"
-        onChange={(key) => {
-          isClickChange.current = true
-          setActiveKey(key)
-        }}
-      >
-        <TabPane title={t("editor.page.tab_title")} key="Page">
-          <PagePanel />
-        </TabPane>
-        <TabPane title={t("editor.inspect.tab_title")} key="Inspect">
-          <ConfigPanel />
-        </TabPane>
-        <TabPane title={t("editor.widget_picker.tab_title")} key="Insert">
-          <ComponentPanel />
-        </TabPane>
-      </Tabs>
+        handleClickChangeTab={handleClickChangeTab}
+      />
+      <Suspense fallback={<WidgetLoading />}>
+        {getRenderBody(activeKey, COMPONENT_MANAGER_TABS)}
+      </Suspense>
     </div>
   )
 }

@@ -12,7 +12,7 @@ export function applyConfigItemContainer(hasTextarea: boolean) {
   } else {
     return css`
       display: flex;
-      height: 48px;
+      min-height: 48px;
       align-items: center;
       flex-direction: row;
       padding-left: 24px;
@@ -28,14 +28,13 @@ export const sslStyle = css`
 
 export const configItemTip = css`
   font-size: 14px;
-  white-space: pre-line;
   color: ${getColor("grayBlue", "04")};
   font-weight: 400;
   margin-left: 192px;
-  padding-bottom: 8px;
-  padding-left: 24px;
+  padding: 0 24px 8px 24px;
   line-height: 22px;
-  height: 30px;
+  min-height: 30px;
+  white-space: normal;
 `
 
 export const labelContainer = css`
@@ -43,6 +42,7 @@ export const labelContainer = css`
   flex-direction: row;
   justify-content: end;
   min-width: 176px;
+  width: 176px;
 `
 
 export function applyConfigItemLabelText(
@@ -69,4 +69,6 @@ export const hostInputContainer = css`
   margin-right: 24px;
   flex-direction: row;
   width: 100%;
+  align-items: center;
+  gap: 8px;
 `

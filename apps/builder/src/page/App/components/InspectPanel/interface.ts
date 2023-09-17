@@ -9,7 +9,7 @@ export interface PanelHeaderActionProps {
 }
 
 export interface PanelLabelProps {
-  labelName?: any
+  labelName?: string
   labelDesc?: string
   isInList?: boolean
 }
@@ -21,8 +21,8 @@ export interface EventHandlerPanelConfig extends PanelFieldConfig {
 export interface PanelFieldConfig extends PanelLabelProps {
   id: string
   setterType: SetterType
-  expectedType?: VALIDATION_TYPES
-  attrName: string
+  expectedType?: VALIDATION_TYPES | VALIDATION_TYPES[]
+  attrName: string | string[]
   childrenSetter?: PanelFieldConfig[]
   useCustomLayout?: boolean
   options?: any
@@ -34,6 +34,14 @@ export interface PanelFieldConfig extends PanelLabelProps {
   bindAttrName?: string | string[]
   openDynamic?: boolean
   allowClear?: boolean
+  detailedDescription?: string
+  canShowLabel?: boolean
+  // DynamicSelectSetter props
+  inputPlaceholder?: string
+  selectPlaceholder?: string
+  isDynamicAttrName?: string
+  selectAttrName?: string
+  inputAttrName?: string
 }
 
 export interface PanelFieldGroupConfig {
@@ -46,6 +54,7 @@ export type PanelConfig = PanelFieldConfig | PanelFieldGroupConfig
 
 export interface PanelSetterProps extends Omit<PanelFieldConfig, "id"> {
   parentAttrName: string
+  displayName: string
 }
 
 export interface SelectedPanelProps {

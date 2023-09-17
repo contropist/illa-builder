@@ -7,32 +7,57 @@
   "license": "Apache-2.0",
   "version": "0.0.0",
   "scripts": {
-    "preinstall": "cd illa-design && pnpm install",
-    "dev": "turbo run dev",
-    "build-cloud": "NODE_OPTIONS=--max-old-space-size=10240 turbo run build-cloud",
-    "build-self": "NODE_OPTIONS=--max-old-space-size=10240 turbo run build-self",
+    "dev": "turbo run dev --filter=illa-builder",
+    "build-cloud": "NODE_OPTIONS=--max-old-space-size=12288 turbo run build-cloud --filter=illa-builder",
+    "build-self": "NODE_OPTIONS=--max-old-space-size=12288 turbo run build-self --filter=illa-builder",
     "prepare": "husky install",
     "format": "prettier --write \"apps/**/*.{ts,tsx}\"",
-    "lint": "eslint \"apps/**/src/**\" --ext \".ts,.tsx\" --config \".eslintrc.js\"",
-    "test": "turbo run test"
+    "lint": "eslint \"apps/**/src/**/**.{ts,tsx}\" --config \".eslintrc.js\"",
+    "lint:fix": "eslint --fix \"apps/**/src/**/**.{ts,tsx}\" --config \".eslintrc.js\"",
+    "test": "turbo run test",
+    "ts-check": "turbo run ts-check"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.5",
+    "react-router-dom": "^6.4.4",
+    "@reduxjs/toolkit": "^1.9.1",
+    "react-i18next": "^12.1.4",
+    "i18next": "^22.4.9",
+    "turbo": "1.8.3"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.0.3",
-    "@commitlint/config-conventional": "^17.0.3",
+    "@commitlint/cli": "^17.4.2",
+    "@commitlint/config-conventional": "^17.4.2",
+    "@rollup/plugin-typescript": "^11.1.2",
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.33.1",
-    "@typescript-eslint/parser": "^5.33.1",
-    "eslint": "^8.28.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-config-react": "^1.1.7",
-    "eslint-import-resolver-typescript": "^3.4.2",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jsx-a11y": "^6.6.1",
-    "eslint-plugin-react": "^7.30.1",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "husky": "^8.0.0",
-    "lint-staged": "^13.0.3",
-    "prettier": "^2.7.1",
-    "turbo": "^1.6.3"
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "@types/node": "^18.14.4",
+    "eslint": "^8.33.0",
+    "eslint-config-illa": "workspace:*",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.1",
+    "prettier": "^2.8.4",
+    "typescript": "^5.0.4",
+    "vite": "^4.4.9"
+  },
+  "engines": {
+    "pnpm": "^8.7.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "$react",
+      "react-dom": "$react-dom",
+      "@types/react": "$@types/react",
+      "@types/react-dom": "$@types/react-dom",
+      "react-redux": "$react-redux",
+      "react-router-dom": "$react-router-dom",
+      "@reduxjs/toolkit": "$@reduxjs/toolkit",
+      "react-i18next": "$react-i18next",
+      "i18next": "$i18next"
+    }
   }
 }

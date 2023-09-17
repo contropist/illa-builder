@@ -2,8 +2,9 @@ import { ComponentNode } from "@/redux/currentApp/editor/components/componentsSt
 import { VALIDATION_TYPES } from "@/utils/validationFactory"
 
 export interface BaseSetter {
+  className?: string
   isSetterSingleRow?: boolean
-  value?: any
+  value?: unknown
   attrName: string
   parentAttrName?: string
   panelConfig?: Record<string, any>
@@ -11,13 +12,18 @@ export interface BaseSetter {
   handleUpdateMultiAttrDSL?: (updateSlice: Record<string, any>) => void
   handleUpdateOtherMultiAttrDSL?: (
     displayName: string,
-    updateSlice: Record<string, any>,
+    updateSlice: Record<string, unknown>,
   ) => void
-  expectedType: VALIDATION_TYPES
+  expectedType?: VALIDATION_TYPES | VALIDATION_TYPES[]
+  attrNames?: string[]
   isInList?: boolean
   widgetDisplayName: string
   widgetType: string
   widgetOrAction: "ACTION" | "WIDGET"
   defaultValue?: any
   componentNode?: ComponentNode
+  detailedDescription?: string
+  labelName?: string
+  labelDesc?: string
+  isGuideMode?: boolean
 }

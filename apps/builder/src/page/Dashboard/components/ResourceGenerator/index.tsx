@@ -1,4 +1,8 @@
-import { FC, useState } from "react"
+import {
+  ILLA_MIXPANEL_EVENT_TYPE,
+  MixpanelTrackContext,
+} from "@illa-public/mixpanel-utils"
+import { FC, useContext, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Modal } from "@illa-design/react"
 import { ResourceCreator } from "@/page/Dashboard/components/ResourceGenerator/ResourceCreator"
@@ -14,12 +18,41 @@ import { modalContentStyle } from "./style"
 export const ResourceGenerator: FC<ResourceGeneratorProps> = (props) => {
   const { visible, onClose } = props
   const [currentStep, setCurrentStep] = useState<ResourceCreatorPage>("select")
+  const { track } = useContext(MixpanelTrackContext)
 
   const [currentResource, setCurrentResource] = useState<ResourceType | null>(
     null,
   )
 
+  const onCancel = () => {
+    const element =
+      currentStep === "createResource"
+        ? "resource_configure_close"
+        : "resource_type_modal_close"
+    track?.(ILLA_MIXPANEL_EVENT_TYPE.CLICK, { element })
+    onClose()
+    setCurrentStep("select")
+    setCurrentResource(null)
+  }
+
   const { t } = useTranslation()
+
+  useEffect(() => {
+    if (visible) {
+      const element =
+        currentStep === "createResource"
+          ? "resource_configure_modal"
+          : "resource_type_modal"
+      track?.(
+        ILLA_MIXPANEL_EVENT_TYPE.SHOW,
+        {
+          element,
+          parameter5: currentResource,
+        },
+        "both",
+      )
+    }
+  }, [currentStep, visible, track, currentResource])
 
   let title
   switch (currentStep) {
@@ -34,21 +67,19 @@ export const ResourceGenerator: FC<ResourceGeneratorProps> = (props) => {
       }
       break
   }
+  const isMaskCloseable = currentStep === "select"
 
   return (
     <Modal
-      w="696px"
+      w="1080px"
       visible={visible}
       footer={false}
       closable
+      maskClosable={isMaskCloseable}
       withoutLine
       withoutPadding
       title={title}
-      onCancel={() => {
-        onClose()
-        setCurrentStep("select")
-        setCurrentResource(null)
-      }}
+      onCancel={onCancel}
     >
       <div css={modalContentStyle}>
         {currentStep === "select" && (
@@ -56,6 +87,10 @@ export const ResourceGenerator: FC<ResourceGeneratorProps> = (props) => {
             onSelect={(resourceType) => {
               setCurrentStep("createResource")
               setCurrentResource(resourceType)
+              track?.(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+                element: "resource_type_modal_resource",
+                parameter5: resourceType,
+              })
             }}
           />
         )}
@@ -64,11 +99,19 @@ export const ResourceGenerator: FC<ResourceGeneratorProps> = (props) => {
             onBack={() => {
               setCurrentStep("select")
               setCurrentResource(null)
+              track?.(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+                element: "resource_configure_back",
+                parameter5: currentResource,
+              })
             }}
             onFinished={() => {
               setCurrentStep("select")
               setCurrentResource(null)
               onClose()
+              track?.(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+                element: "resource_configure_save",
+                parameter5: currentResource,
+              })
             }}
             resourceType={currentResource}
           />

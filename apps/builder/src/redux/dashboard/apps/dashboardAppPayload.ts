@@ -5,7 +5,17 @@ export interface AddDashboardAppPayload {
   index?: number
 }
 
-export interface RenameDashboardAppPayload {
+export interface ModifyDashboardAppPublic {
   appId: string
-  newName: string
+  isPublic: boolean
+}
+
+export interface ModifyDashboardAppContribute {
+  appId: string
+  publishedToMarketplace: boolean
+}
+
+export interface ModifyDashboardAppDeployed {
+  appId: string
+  deployed: boolean
 }

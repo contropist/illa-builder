@@ -1,25 +1,28 @@
 import { FC } from "react"
-import { useTranslation } from "react-i18next"
-import { renderFieldAndLabel } from "@/page/App/components/InspectPanel/utils/fieldFactory"
+import RenderFieldAndLabel from "@/page/App/components/InspectPanel/components/FieldAndLabel"
 import { MappedOptionSetterProps } from "./interface"
 import { listStyle, listWrapperStyle, optionListHeaderStyle } from "./style"
 
-export const MappedOptionSetter: FC<MappedOptionSetterProps> = (props) => {
+const MappedOptionSetter: FC<MappedOptionSetterProps> = (props) => {
   const { attrName, labelName, childrenSetter, widgetDisplayName } = props
-  const { t } = useTranslation()
 
   return (
     <div css={listStyle}>
       <div css={optionListHeaderStyle}>
-        <div>{t(labelName)}</div>
+        <div>{labelName}</div>
       </div>
       <div css={listWrapperStyle}>
         {childrenSetter?.map((child) => {
-          return renderFieldAndLabel(
-            child,
-            widgetDisplayName ?? "",
-            true,
-            attrName,
+          const { id } = child
+
+          return (
+            <RenderFieldAndLabel
+              key={`${id}-${widgetDisplayName}`}
+              config={child}
+              displayName={widgetDisplayName ?? ""}
+              isInList
+              parentAttrName={attrName}
+            />
           )
         })}
       </div>
@@ -28,3 +31,4 @@ export const MappedOptionSetter: FC<MappedOptionSetterProps> = (props) => {
 }
 
 MappedOptionSetter.displayName = "MappedOptionSetter"
+export default MappedOptionSetter

@@ -1,18 +1,25 @@
+import { AvatarUpload } from "@illa-public/cropper"
+import { currentUserActions, getCurrentUser } from "@illa-public/user-data"
 import { FC, useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
 import { Button, Input, useMessage } from "@illa-design/react"
-import { Api } from "@/api/base"
+import { Avatar } from "@/page/App/components/Avatar"
 import { LabelAndSetter } from "@/page/Setting/Components/LabelAndSetter"
-import { publicButtonWrapperStyle } from "@/page/Setting/SettingAccount/style"
-import { getCurrentUser } from "@/redux/currentUser/currentUserSelector"
-import { currentUserActions } from "@/redux/currentUser/currentUserSlice"
-import { CurrentUser } from "@/redux/currentUser/currentUserState"
+import {
+  avatarStyle,
+  editLabelStyle,
+  fullWidth,
+  publicButtonWrapperStyle,
+  settingAccountStyle,
+} from "@/page/Setting/SettingAccount/style"
+import { fetchChangeNickname } from "@/services/setting"
+import { updateUserAvatar, uploadUserAvatar } from "@/services/users"
+import { isILLAAPiError } from "@/utils/typeHelper"
 
 export const SettingAccount: FC = () => {
   const { t } = useTranslation()
   const userInfo = useSelector(getCurrentUser)
-
   const dispatch = useDispatch()
   const [nickNameValue, setNickNameValue] = useState<string>(
     userInfo.nickname ?? "",
@@ -50,81 +57,99 @@ export const SettingAccount: FC = () => {
     },
     [checkUserNameValidate],
   )
+
+  const handleUpdateAvatar = async (file: Blob) => {
+    try {
+      const icon = await uploadUserAvatar(file)
+      await updateUserAvatar(icon)
+      dispatch(currentUserActions.updateUserAvatarReducer(icon))
+      message.success({
+        content: t("profile.setting.message.save_suc"),
+      })
+      return true
+    } catch (e) {
+      console.error("handleUpdateAvatar error:", e)
+      message.error({
+        content: t("profile.setting.message.save_fail"),
+      })
+    }
+    return false
+  }
+
+  const handleChangeNickname = useCallback(async () => {
+    if (!!errorMessage) {
+      return
+    }
+    setIsLoading(true)
+    try {
+      await fetchChangeNickname(nickNameValue)
+      message.success({
+        content: "success!",
+      })
+    } catch (e) {
+      if (isILLAAPiError(e)) {
+        message.error({
+          content: "fail!",
+        })
+      } else {
+        message.error({
+          content: t("network_error"),
+        })
+      }
+    }
+
+    setIsLoading(false)
+  }, [errorMessage, message, nickNameValue, t])
+
   return (
-    <>
-      <LabelAndSetter errorMessage="" label={t("setting.account.email")}>
-        <Input
-          value={userInfo?.email}
-          disabled
-          size="large"
-          borderColor="techPurple"
-          variant="fill"
+    <div css={settingAccountStyle}>
+      <AvatarUpload onOk={handleUpdateAvatar}>
+        <Avatar
+          css={avatarStyle}
+          userID={userInfo?.userID}
+          nickname={userInfo?.nickname}
+          avatar={userInfo?.avatar}
         />
-      </LabelAndSetter>
+        <span css={editLabelStyle}>Edit</span>
+      </AvatarUpload>
+      <div css={fullWidth}>
+        <LabelAndSetter errorMessage="" label={t("setting.account.email")}>
+          <Input
+            value={userInfo?.email}
+            disabled
+            size="large"
+            colorScheme="techPurple"
+            variant="fill"
+          />
+        </LabelAndSetter>
 
-      <LabelAndSetter
-        errorMessage={errorMessage}
-        label={t("setting.account.username")}
-      >
-        <Input
-          size="large"
-          value={nickNameValue}
-          onChange={handleChangeUserName}
-          borderColor={errorMessage ? "red" : "techPurple"}
-          variant="fill"
-        />
-      </LabelAndSetter>
-
-      <div css={publicButtonWrapperStyle}>
-        <Button
-          size="large"
-          fullWidth
-          disabled={!!errorMessage}
-          loading={isLoading}
-          onClick={() => {
-            if (!!errorMessage) {
-              return
-            }
-            Api.request<CurrentUser>(
-              {
-                url: "/users/nickname",
-                method: "PATCH",
-                data: {
-                  nickname: nickNameValue,
-                },
-              },
-              (response) => {
-                dispatch(
-                  currentUserActions.updateCurrentUserReducer({
-                    ...response.data,
-                    nickname: response.data.nickname,
-                  }),
-                )
-                message.success({
-                  content: "success!",
-                })
-              },
-              (failure) => {
-                message.error({
-                  content: t("setting.account.save_fail"),
-                })
-              },
-              (crash) => {
-                message.error({
-                  content: t("network_error"),
-                })
-              },
-              (loading) => {
-                setIsLoading(loading)
-              },
-            )
-          }}
-          colorScheme="techPurple"
+        <LabelAndSetter
+          errorMessage={errorMessage}
+          label={t("setting.account.username")}
         >
-          {t("setting.account.save")}
-        </Button>
+          <Input
+            size="large"
+            value={nickNameValue}
+            onChange={handleChangeUserName}
+            colorScheme={errorMessage ? "red" : "techPurple"}
+            variant="fill"
+          />
+        </LabelAndSetter>
+
+        <div css={publicButtonWrapperStyle}>
+          <Button
+            size="large"
+            fullWidth
+            disabled={!!errorMessage}
+            loading={isLoading}
+            onClick={handleChangeNickname}
+            colorScheme="techPurple"
+          >
+            {t("setting.account.save")}
+          </Button>
+        </div>
       </div>
-    </>
+    </div>
   )
 }
 

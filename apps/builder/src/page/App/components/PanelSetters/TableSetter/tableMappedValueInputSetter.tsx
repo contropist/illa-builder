@@ -1,23 +1,14 @@
-import { get } from "lodash"
-import { FC, useMemo } from "react"
+import { get, toPath } from "lodash"
+import { FC, useCallback, useMemo } from "react"
 import { useSelector } from "react-redux"
-import { CodeEditor } from "@/components/CodeEditor"
 import { BaseInputSetterProps } from "@/page/App/components/PanelSetters/InputSetter/interface"
-import { applyInputSetterWrapperStyle } from "@/page/App/components/PanelSetters/InputSetter/style"
 import { getExecutionResult } from "@/redux/currentApp/executionTree/executionSelector"
 import { RootState } from "@/store"
 import { JSToString, stringToJS } from "@/utils/evaluateDynamicString/utils"
-
-function getPath(attrName?: string, widgetDisplayName?: string) {
-  if (attrName && widgetDisplayName) {
-    return `${widgetDisplayName}.${attrName}`
-  } else {
-    return widgetDisplayName
-  }
-}
+import BaseInput from "../InputSetter/baseInput"
 
 const realInputValue = (
-  attrValue: string,
+  attrValue: string | undefined,
   dataPath: string,
   widgetDisplayName: string,
 ) => {
@@ -41,19 +32,8 @@ const getNeedComputedValue = (
   return `{{${widgetDisplayName}.${dataPath}.map((currentRow) => ( ${stringToCanEvaluate}))}}`
 }
 
-export const TableMappedValueInputSetter: FC<BaseInputSetterProps> = (
-  props,
-) => {
-  const {
-    isSetterSingleRow,
-    placeholder,
-    attrName,
-    parentAttrName,
-    handleUpdateDsl,
-    expectedType,
-    value,
-    widgetDisplayName,
-  } = props
+const TableMappedValueInputSetter: FC<BaseInputSetterProps> = (props) => {
+  const { parentAttrName, handleUpdateDsl, value, widgetDisplayName } = props
 
   const targetComponentProps = useSelector<RootState, Record<string, any>>(
     (rootState) => {
@@ -67,6 +47,14 @@ export const TableMappedValueInputSetter: FC<BaseInputSetterProps> = (
     return dataSourceMode === "dynamic"
   }, [targetComponentProps])
 
+  const fromCurrentRow = useMemo(() => {
+    return get(
+      targetComponentProps,
+      `${parentAttrName}.fromCurrentRow`,
+      {},
+    ) as Record<string, boolean>
+  }, [targetComponentProps, parentAttrName])
+
   const dataPath = useMemo(() => {
     if (isDynamic) {
       return "dataSourceJS"
@@ -74,32 +62,49 @@ export const TableMappedValueInputSetter: FC<BaseInputSetterProps> = (
     return "dataSource"
   }, [isDynamic])
 
-  const handleValueChange = (value: string) => {
-    const fromCurrentRow = value.includes("currentRow")
-    const output = fromCurrentRow
-      ? getNeedComputedValue(value, dataPath, widgetDisplayName)
-      : value
-    const name = attrName.substring(
-      parentAttrName ? parentAttrName?.length + 1 : 0,
-    )
-    handleUpdateDsl(attrName, output)
-    handleUpdateDsl(`${parentAttrName}.fromCurrentRow`, {
-      [name]: fromCurrentRow,
-    })
-  }
+  const handleValueChange = useCallback(
+    (attrName: string, value: string) => {
+      const isFromCurrentRow = value.includes("currentRow")
+      const output = isFromCurrentRow
+        ? getNeedComputedValue(value, dataPath, widgetDisplayName)
+        : value
+      const paths = toPath(attrName)
+      const name = paths.at(-1) as string
+      handleUpdateDsl(attrName, output)
+      handleUpdateDsl(`${parentAttrName}.fromCurrentRow`, {
+        ...fromCurrentRow,
+        [name]: isFromCurrentRow,
+      })
+    },
+    [
+      dataPath,
+      fromCurrentRow,
+      handleUpdateDsl,
+      parentAttrName,
+      widgetDisplayName,
+    ],
+  )
+
+  const wrappedCodeFunc = useCallback(
+    (code: string) => {
+      const fromCurrentRow = code.includes("currentRow")
+      const output = fromCurrentRow
+        ? getNeedComputedValue(code, dataPath, widgetDisplayName)
+        : code
+      return output
+    },
+    [dataPath, widgetDisplayName],
+  )
 
   return (
-    <div css={applyInputSetterWrapperStyle(isSetterSingleRow)}>
-      <CodeEditor
-        value={realInputValue(value, dataPath, widgetDisplayName)}
-        placeholder={placeholder}
-        onChange={handleValueChange}
-        mode="TEXT_JS"
-        expectedType={expectedType}
-        path={getPath(attrName, widgetDisplayName)}
-      />
-    </div>
+    <BaseInput
+      {...props}
+      value={realInputValue(value, dataPath, widgetDisplayName)}
+      wrappedCodeFunc={wrappedCodeFunc}
+      handleUpdateDsl={handleValueChange}
+    />
   )
 }
 
 TableMappedValueInputSetter.displayName = "TableMappedValueInputSetter"
+export default TableMappedValueInputSetter

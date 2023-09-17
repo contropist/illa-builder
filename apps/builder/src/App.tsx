@@ -1,7 +1,18 @@
-import { Global } from "@emotion/react"
-import { useEffect } from "react"
+import createCache from "@emotion/cache"
+import { CacheProvider, Global } from "@emotion/react"
+import {
+  ILLA_MIXPANEL_EVENT_TYPE,
+  ILLA_MIXPANEL_PUBLIC_PAGE_NAME,
+} from "@illa-public/mixpanel-utils"
+import {
+  UpgradeDrawerGroup,
+  UpgradeModalGroup,
+} from "@illa-public/upgrade-modal"
+import { getCurrentTranslateLanguage } from "@illa-public/user-data"
+import { useEffect, useMemo } from "react"
 import { DndProvider } from "react-dnd"
-import { HTML5Backend } from "react-dnd-html5-backend"
+import { TouchBackend } from "react-dnd-touch-backend"
+import { HelmetProvider } from "react-helmet-async"
 import { useTranslation } from "react-i18next"
 import { useSelector } from "react-redux"
 import { RouterProvider } from "react-router-dom"
@@ -10,22 +21,41 @@ import {
   MessageGroup,
   ModalGroup,
   NotificationGroup,
+  enUS,
+  jaJP,
+  koKR,
+  zhCN,
 } from "@illa-design/react"
-import "@/api/base"
-import { GlobalDataProvider } from "@/page/App/context/globalDataProvider"
-import { getIllaMode } from "@/redux/config/configSelector"
-import {
-  getCurrentConfigLanguage,
-  getCurrentTranslateLanguage,
-} from "@/redux/currentUser/currentUserSelector"
+import { illaCodeMirrorTooltipStyle } from "@/components/CodeEditor/CodeMirror/theme"
+import { getIsILLAProductMode } from "@/redux/config/configSelector"
 import { ILLARoute } from "@/router"
+import { px2Rem } from "@/utils/stylis-plugin/px2rem"
 import { globalStyle } from "./style"
+import { track } from "./utils/mixpanelHelper"
+
+const dragOptions = {
+  enableTouchEvents: true,
+  enableMouseEvents: true,
+}
 
 function App() {
-  const configLanguage = useSelector(getCurrentConfigLanguage)
   const currentUserLanguage = useSelector(getCurrentTranslateLanguage)
+  const configLanguage = useMemo(() => {
+    switch (currentUserLanguage) {
+      case "en-US":
+        return enUS
+      case "zh-CN":
+        return zhCN
+      case "ja-JP":
+        return jaJP
+      case "ko-KR":
+        return koKR
+      default:
+        return enUS
+    }
+  }, [currentUserLanguage])
   const { i18n } = useTranslation()
-  const mode = useSelector(getIllaMode)
+  const isProductMode = useSelector(getIsILLAProductMode)
 
   useEffect(() => {
     if (!!currentUserLanguage) {
@@ -33,18 +63,43 @@ function App() {
     }
   }, [currentUserLanguage, i18n])
 
+  useEffect(() => {
+    track(
+      ILLA_MIXPANEL_EVENT_TYPE.ILLA_ACTIVE,
+      ILLA_MIXPANEL_PUBLIC_PAGE_NAME.PLACEHOLDER,
+    )
+  }, [])
+
+  let cache = createCache({
+    key: "css",
+    stylisPlugins: [
+      px2Rem({
+        unit: "rem",
+        remSize: 100,
+      }),
+    ],
+  })
+
   return (
-    <DndProvider backend={HTML5Backend}>
-      <GlobalDataProvider>
-        <ConfigProvider locale={configLanguage}>
-          <Global styles={globalStyle} />
-          <MessageGroup pt={mode !== "production" ? "46px" : "0"} />
-          <NotificationGroup pt={mode !== "production" ? "46px" : "0"} />
-          <ModalGroup />
-          <RouterProvider router={ILLARoute} />
-        </ConfigProvider>
-      </GlobalDataProvider>
-    </DndProvider>
+    <CacheProvider value={cache}>
+      <HelmetProvider>
+        <DndProvider backend={TouchBackend} options={dragOptions}>
+          <ConfigProvider locale={configLanguage}>
+            <Global styles={globalStyle} />
+            <MessageGroup pt={!isProductMode ? "46px" : "0"} />
+            <UpgradeDrawerGroup />
+            <UpgradeModalGroup />
+            <NotificationGroup pt={!isProductMode ? "46px" : "0"} />
+            <ModalGroup />
+            <RouterProvider router={ILLARoute} />
+            <div
+              className="illaCodeMirrorWrapper"
+              css={illaCodeMirrorTooltipStyle}
+            />
+          </ConfigProvider>
+        </DndProvider>
+      </HelmetProvider>
+    </CacheProvider>
   )
 }
 

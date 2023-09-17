@@ -1,3 +1,5 @@
+import { ViewItemShape } from "@/page/App/components/PanelSetters/ContainerSetter/ViewsSetter/interface"
+
 export enum CONTAINER_TYPE {
   "EDITOR_DOT_PANEL" = "EDITOR_DOT_PANEL",
   "EDITOR_SCALE_SQUARE" = "EDITOR_SCALE_SQUARE",
@@ -12,24 +14,20 @@ export enum SECTION_POSITION {
   "FULL" = "FULL",
   "NONE" = "NONE",
 }
+export type ViewportSizeType = "fluid" | "desktop" | "tablet" | "custom"
+
 export interface ComponentNode {
+  version: number
   displayName: string
   parentNode: string | null
   showName: string
-  isDragging: boolean
-  isResizing: boolean
   childrenNode: ComponentNode[]
   type: string
   containerType: CONTAINER_TYPE
-  verticalResize: boolean
   h: number
   w: number
   minH: number
   minW: number
-  // default 0
-  unitW: number
-  // default 0
-  unitH: number
   // default -1
   x: number
   // default -1
@@ -48,6 +46,8 @@ export interface RootComponentNodeProps {
 
   viewportWidth?: number
   viewportHeight?: number
+  viewportSizeType?: ViewportSizeType
+  currentSubPagePath?: string
 }
 
 export interface RootComponentNode extends ComponentNode {
@@ -81,6 +81,7 @@ export interface PageNodeProps {
   headerColumns?: number
   footerColumns?: number
 }
+
 export interface PageNode extends ComponentNode {
   type: "PAGE_NODE"
   props: PageNodeProps
@@ -128,6 +129,7 @@ export const ComponentsInitialState: ComponentsState = null
 
 export interface DeleteComponentNodePayload {
   displayNames: string[]
+  source?: "keyboard" | "manage_delete" | "left_delete" | "left_multi_delete"
 }
 
 export interface DeletePageNodePayload {
@@ -135,14 +137,30 @@ export interface DeletePageNodePayload {
   originPageSortedKey: string[]
 }
 
-export interface sortComponentNodeChildrenPayload {
+export interface SortComponentNodeChildrenPayload {
   parentDisplayName: string
   newChildrenNode: ComponentNode[]
 }
 
 export interface UpdateComponentPropsPayload {
   displayName: string
-  updateSlice: Record<string, any>
+  updateSlice: Record<string, unknown>
+  notUseUndoRedo?: boolean
+}
+
+export interface AddContainerComponentViewsReducerPayload {
+  displayName: string
+  containerDisplayName: string
+  linkedDisplayName?: string
+  addedViewItem: ViewItemShape[]
+  addComponent: ComponentNode
+}
+
+export interface DeleteContainerComponentViewsReducerPayload {
+  displayName: string
+  containerDisplayName: string
+  linkedDisplayName?: string
+  deletedIndex: number
 }
 export interface UpdateComponentDisplayNamePayload {
   displayName: string
@@ -154,23 +172,25 @@ export interface UpdateComponentReflowPayload {
   childNodes: ComponentNode[]
 }
 
-export interface CopyComponentPayload {
-  oldComponentNode: ComponentNode
-  newComponentNode: ComponentNode
-}
-
 export interface UpdateTargetPageLayoutPayload {
   pageName: string
-  layout: "default" | "presetA" | "presetB" | "presetC" | "presetD" | "presetE"
+  layout:
+    | "default"
+    | "presetA"
+    | "presetB"
+    | "presetC"
+    | "presetD"
+    | "presetE"
+    | "Custom"
+  originPageNode?: ComponentNode
 }
 
 export interface UpdateTargetPagePropsPayload {
   pageName: string
   newProps: Partial<PageNodeProps>
   options?: Record<string, unknown>
+  notUseUndoRedo?: boolean
 }
-
-export interface UpdateRootNodePropsPayload {}
 
 export interface DeleteTargetPageSectionPayload {
   pageName: string
@@ -179,7 +199,6 @@ export interface DeleteTargetPageSectionPayload {
     | "rightSection"
     | "headerSection"
     | "footerSection"
-  options: Record<string, any>
 }
 
 export interface AddTargetPageSectionPayload {
@@ -189,13 +208,23 @@ export interface AddTargetPageSectionPayload {
     | "rightSection"
     | "headerSection"
     | "footerSection"
-  options: Record<string, any>
+  originSectionNode?: ComponentNode
 }
 
 export interface AddSectionViewPayload {
   parentNodeName: string
-  containerNode: ComponentNode
-  newSectionViewConfig: SectionViewShape
+  sectionName:
+    | "leftSection"
+    | "rightSection"
+    | "headerSection"
+    | "footerSection"
+    | "bodySection"
+  originChildrenNode?: ComponentNode[]
+}
+
+export interface AddSectionViewByConfigPayload extends AddSectionViewPayload {
+  sectionViewNode: ComponentNode
+  sectionViewConfig: SectionViewShape
 }
 
 export interface DeleteSectionViewPayload {
@@ -212,4 +241,25 @@ export interface UpdateSectionViewPropsPayload {
 export interface AddModalComponentPayload {
   currentPageDisplayName: string
   modalComponentNode: ComponentNode
+}
+
+export interface UpdateComponentNodeHeightPayload {
+  displayName: string
+  height: number
+  oldHeight: number
+}
+
+export interface SetGlobalStatePayload {
+  key: string
+  value: string
+  oldKey?: string
+}
+
+export interface DeleteGlobalStatePayload {
+  key: string
+}
+
+export interface DeleteSubPageViewNodePayload {
+  pageName: string
+  subPagePath: string
 }

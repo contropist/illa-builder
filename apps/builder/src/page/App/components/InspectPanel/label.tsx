@@ -1,5 +1,6 @@
 import { FC, memo } from "react"
-import { Trigger, Text } from "@illa-design/react"
+import { Trigger } from "@illa-design/react"
+import { ILLAMarkdown } from "@/components/ILLAMarkdown"
 import { PanelLabelProps } from "./interface"
 import { applyLabelTipsStyle } from "./style"
 
@@ -9,7 +10,7 @@ export const PanelLabel: FC<PanelLabelProps> = memo(
 
     return (
       <Trigger
-        content={<Text colorScheme="white">{labelDesc}</Text>}
+        content={<ILLAMarkdown textString={labelDesc} />}
         trigger="hover"
         position="left"
         maxW="240px"

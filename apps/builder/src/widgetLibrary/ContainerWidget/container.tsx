@@ -1,62 +1,86 @@
-import { FC, useEffect, useMemo, useRef } from "react"
-import useMeasure from "react-use-measure"
-import { BasicContainer } from "@/widgetLibrary/BasicContainer/BasicContainer"
+import { FC, useCallback, useEffect, useMemo, useRef } from "react"
 import { ContainerProps } from "@/widgetLibrary/ContainerWidget/interface"
 import { TooltipWrapper } from "@/widgetLibrary/PublicSector/TooltipWrapper"
+import { RenderChildrenCanvas } from "../PublicSector/RenderChildrenCanvas"
 import { ContainerEmptyState } from "./emptyState"
 import { containerWrapperStyle } from "./style"
 
 export const ContainerWidget: FC<ContainerProps> = (props) => {
   const {
-    handleOnClick,
     currentIndex,
-    handleOnChange,
-    handleUpdateGlobalData,
-    handleDeleteGlobalData,
+    updateComponentRuntimeProps,
+    deleteComponentRuntimeProps,
+    handleUpdateOriginalDSLOtherMultiAttr,
     handleUpdateOriginalDSLMultiAttr,
-    displayName,
     viewList,
     tooltipText,
     childrenNode,
-    blockColumns,
+    columnNumber,
+    dynamicHeight = "fixed",
+    triggerEventHandler,
+    updateComponentHeight,
+    linkWidgetDisplayName,
   } = props
   const preCurrentViewIndex = useRef<number>(currentIndex)
-  const [containerRef, containerBounds] = useMeasure()
+
   useEffect(() => {
     if (typeof preCurrentViewIndex.current !== "number") {
       preCurrentViewIndex.current = currentIndex
     }
     if (preCurrentViewIndex.current !== currentIndex) {
-      handleOnChange()
+      triggerEventHandler("change")
       preCurrentViewIndex.current = currentIndex
     }
-  }, [currentIndex, handleOnChange, handleOnClick])
+  }, [currentIndex, triggerEventHandler])
 
-  const renderComponent = useMemo(() => {
-    if (Array.isArray(childrenNode) && currentIndex < childrenNode.length) {
-      const currentViewComponentNode = childrenNode[currentIndex]
-      return (
-        <BasicContainer
-          componentNode={currentViewComponentNode}
-          minHeight={containerBounds.height - 8}
-          padding={4}
-          safeRowNumber={1}
-          addedRowNumber={20}
-          blockColumns={blockColumns}
-        />
-      )
+  const handleOnClick = useCallback(() => {
+    triggerEventHandler("click")
+  }, [triggerEventHandler])
+
+  const enableAutoHeight = useMemo(() => {
+    switch (dynamicHeight) {
+      case "auto":
+        return true
+      case "limited":
+        return true
+      case "fixed":
+      default:
+        return false
     }
-    return <ContainerEmptyState />
-  }, [blockColumns, childrenNode, containerBounds.height, currentIndex])
+  }, [dynamicHeight])
+
+  const handleUpdateHeight = useCallback(
+    (height: number) => {
+      if (!updateComponentHeight || !enableAutoHeight) return
+      updateComponentHeight(height + 2)
+    },
+    [enableAutoHeight, updateComponentHeight],
+  )
+
+  const handleUpdateOriginalDSLAttrs = useCallback(
+    (updateSlice: Record<string, any>) => {
+      handleUpdateOriginalDSLMultiAttr(updateSlice, true)
+      if (linkWidgetDisplayName) {
+        handleUpdateOriginalDSLOtherMultiAttr?.(
+          linkWidgetDisplayName,
+          updateSlice,
+          true,
+        )
+      }
+    },
+    [
+      handleUpdateOriginalDSLMultiAttr,
+      handleUpdateOriginalDSLOtherMultiAttr,
+      linkWidgetDisplayName,
+    ],
+  )
 
   useEffect(() => {
-    handleUpdateGlobalData?.(displayName, {
-      currentIndex,
-      viewList,
+    updateComponentRuntimeProps?.({
       setCurrentViewKey: (key: string) => {
         const index = viewList.findIndex((viewItem) => viewItem.key === key)
         if (index === -1) return
-        handleUpdateOriginalDSLMultiAttr({
+        handleUpdateOriginalDSLAttrs({
           currentIndex: index,
           currentKey: key,
         })
@@ -65,7 +89,7 @@ export const ContainerWidget: FC<ContainerProps> = (props) => {
         const numberIndex = parseInt(index)
         const view = viewList[numberIndex]
         if (!view) return
-        handleUpdateOriginalDSLMultiAttr({
+        handleUpdateOriginalDSLAttrs({
           currentIndex: numberIndex,
           currentKey: view.key,
         })
@@ -77,7 +101,7 @@ export const ContainerWidget: FC<ContainerProps> = (props) => {
           newCurrentIndex = 0
         }
         const currentView = viewList[newCurrentIndex]
-        handleUpdateOriginalDSLMultiAttr({
+        handleUpdateOriginalDSLAttrs({
           currentIndex: newCurrentIndex,
           currentKey: currentView.key,
         })
@@ -97,7 +121,7 @@ export const ContainerWidget: FC<ContainerProps> = (props) => {
             newCurrentIndex = 0
           }
         }
-        handleUpdateOriginalDSLMultiAttr({
+        handleUpdateOriginalDSLAttrs({
           currentIndex: newCurrentIndex,
           currentKey: currentView.key,
         })
@@ -110,7 +134,7 @@ export const ContainerWidget: FC<ContainerProps> = (props) => {
           newCurrentIndex = viewList.length - 1
         }
         const currentView = viewList[newCurrentIndex]
-        handleUpdateOriginalDSLMultiAttr({
+        handleUpdateOriginalDSLAttrs({
           currentIndex: newCurrentIndex,
           currentKey: currentView.key,
         })
@@ -131,30 +155,39 @@ export const ContainerWidget: FC<ContainerProps> = (props) => {
             newCurrentIndex = viewList.length - 1
           }
         }
-
-        handleUpdateOriginalDSLMultiAttr({
+        handleUpdateOriginalDSLAttrs({
           currentIndex: newCurrentIndex,
           currentKey: currentView.key,
         })
       },
     })
     return () => {
-      handleDeleteGlobalData(displayName)
+      deleteComponentRuntimeProps()
     }
   }, [
-    currentIndex,
-    displayName,
-    handleDeleteGlobalData,
-    handleUpdateGlobalData,
-    handleUpdateOriginalDSLMultiAttr,
+    deleteComponentRuntimeProps,
+    updateComponentRuntimeProps,
+    handleUpdateOriginalDSLAttrs,
     viewList,
+    currentIndex,
   ])
 
   return (
     <TooltipWrapper tooltipText={tooltipText} tooltipDisabled={!tooltipText}>
-      <div css={containerWrapperStyle} ref={containerRef}>
-        {renderComponent}
+      <div css={containerWrapperStyle} onClick={handleOnClick}>
+        {Array.isArray(childrenNode) && currentIndex < childrenNode.length ? (
+          <RenderChildrenCanvas
+            currentComponentNode={childrenNode[currentIndex]}
+            columnNumber={columnNumber}
+            handleUpdateHeight={handleUpdateHeight}
+            canResizeCanvas={enableAutoHeight}
+          />
+        ) : (
+          <ContainerEmptyState />
+        )}
       </div>
     </TooltipWrapper>
   )
 }
+
+export default ContainerWidget

@@ -1,18 +1,16 @@
-import { cloneDeep } from "lodash"
-import { FC, MouseEvent, useCallback, useMemo } from "react"
+import { FC, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
 import { omit } from "@illa-design/react"
 import { PanelBar } from "@/components/PanelBar"
-import { hiddenFields } from "@/page/App/components/DataWorkspace/components/WorkSpaceTree"
 import { WorkSpaceTreeGroup } from "@/page/App/components/DataWorkspace/components/WorkSpaceTreeGroup"
 import { WorkSpaceTreeItem } from "@/page/App/components/DataWorkspace/components/WorkSpaceTreeItem"
-import { getSelectedComponents } from "@/redux/config/configSelector"
+import { hiddenFields } from "@/page/App/components/DataWorkspace/constant"
+import { getSelectedComponentDisplayNames } from "@/redux/config/configSelector"
 import { configActions } from "@/redux/config/configSlice"
-import { updateModalDisplayReducer } from "@/redux/currentApp/executionTree/executionReducer"
 import {
-  getGeneralWidgetExecutionResultArray,
-  getModalWidgetExecutionResultArray,
+  getCurrentPageGeneralWidgetExecutionResultArray,
+  getCurrentPageModalWidgetExecutionResultArray,
 } from "@/redux/currentApp/executionTree/executionSelector"
 import { executionActions } from "@/redux/currentApp/executionTree/executionSlice"
 import { FocusManager } from "@/utils/focusManager"
@@ -22,103 +20,22 @@ export const ComponentSpaceTree: FC = () => {
   const dispatch = useDispatch()
 
   const generalWidgetExecutionArray = useSelector(
-    getGeneralWidgetExecutionResultArray,
+    getCurrentPageGeneralWidgetExecutionResultArray,
   )
   const modalWidgetExecutionArray = useSelector(
-    getModalWidgetExecutionResultArray,
+    getCurrentPageModalWidgetExecutionResultArray,
   )
-  const selectedComponents = useSelector(getSelectedComponents)
-
-  const handleSelectComponentWhenPressMetaKey = useCallback(
-    (selectedKeys: string[]) => {
-      const currentSelectedDisplayName = cloneDeep(selectedComponents)
-      const index = currentSelectedDisplayName.findIndex(
-        (displayName) => displayName === selectedKeys[0],
-      )
-      if (index !== -1) {
-        currentSelectedDisplayName.splice(index, 1)
-        dispatch(
-          configActions.updateSelectedComponent(currentSelectedDisplayName),
-        )
-      } else {
-        currentSelectedDisplayName.push(...selectedKeys)
-        dispatch(
-          configActions.updateSelectedComponent(currentSelectedDisplayName),
-        )
-      }
-    },
-    [dispatch, selectedComponents],
-  )
-  const handleSelectComponentWhenPressShiftKey = useCallback(
-    (selectedKeys: string[], referenceComponent: Record<string, any>[]) => {
-      const currentSelectedDisplayName = cloneDeep(selectedComponents)
-      if (currentSelectedDisplayName.length === 0) return
-      const lastCurrentSelectDisplayName =
-        currentSelectedDisplayName[currentSelectedDisplayName.length - 1]
-      const selectedDisplayName = selectedKeys[0]
-      const currentIndex = referenceComponent.findIndex(
-        (node) => node.displayName === lastCurrentSelectDisplayName,
-      )
-      const selectedIndex = referenceComponent.findIndex(
-        (node) => node.displayName === selectedDisplayName,
-      )
-      let left = currentIndex === -1 ? 0 : currentIndex
-      let right =
-        selectedIndex === -1 ? referenceComponent.length - 1 : selectedIndex
-      if (left > right) {
-        right = currentIndex
-        left = selectedIndex
-      } else if (left < right) {
-        right = selectedIndex
-        left = currentIndex
-      }
-      if (left !== -1 && right !== -1) {
-        const result: string[] = []
-        for (let i = left; i <= right; i++) {
-          result.push(referenceComponent[i].displayName)
-        }
-        dispatch(configActions.updateSelectedComponent(result))
-      }
-    },
-    [dispatch, selectedComponents],
-  )
+  const selectedComponents = useSelector(getSelectedComponentDisplayNames)
 
   const handleGeneralComponentSelect = useCallback(
-    (selectedKeys: string[], e: MouseEvent<HTMLDivElement>) => {
-      if (e.metaKey) {
-        handleSelectComponentWhenPressMetaKey(selectedKeys)
-        return
-      }
-      if (e.shiftKey) {
-        handleSelectComponentWhenPressShiftKey(
-          selectedKeys,
-          generalWidgetExecutionArray,
-        )
-        return
-      }
+    (selectedKeys: string[]) => {
       dispatch(configActions.updateSelectedComponent(selectedKeys))
     },
-    [
-      dispatch,
-      handleSelectComponentWhenPressMetaKey,
-      handleSelectComponentWhenPressShiftKey,
-      generalWidgetExecutionArray,
-    ],
+    [dispatch],
   )
 
   const handleModalComponentSelect = useCallback(
-    (selectedKeys: string[], e: MouseEvent<HTMLDivElement>) => {
-      if (e.metaKey) {
-        handleSelectComponentWhenPressMetaKey(selectedKeys)
-        return
-      }
-      if (e.shiftKey) {
-        handleSelectComponentWhenPressShiftKey(
-          selectedKeys,
-          generalWidgetExecutionArray,
-        )
-        return
-      }
+    (selectedKeys: string[]) => {
       dispatch(
         executionActions.updateModalDisplayReducer({
           displayName: selectedKeys[0],
@@ -127,12 +44,7 @@ export const ComponentSpaceTree: FC = () => {
       )
       dispatch(configActions.updateSelectedComponent(selectedKeys))
     },
-    [
-      dispatch,
-      handleSelectComponentWhenPressMetaKey,
-      handleSelectComponentWhenPressShiftKey,
-      generalWidgetExecutionArray,
-    ],
+    [dispatch],
   )
 
   const componentTotalNumber =
@@ -145,8 +57,10 @@ export const ComponentSpaceTree: FC = () => {
           key={data.displayName}
           title={data.displayName}
           data={omit(data, hiddenFields)}
+          level={0}
           handleSelect={handleGeneralComponentSelect}
           isSelected={selectedComponents?.includes(data.displayName)}
+          parentKey={data.displayName}
         />
       )
     })
@@ -163,12 +77,18 @@ export const ComponentSpaceTree: FC = () => {
           key={data.displayName}
           title={data.displayName}
           data={omit(data, hiddenFields)}
+          level={0}
           handleSelect={handleModalComponentSelect}
           isSelected={selectedComponents?.includes(data.displayName)}
+          parentKey={data.displayName}
         />
       )
     })
-  }, [modalWidgetExecutionArray, selectedComponents])
+  }, [
+    handleModalComponentSelect,
+    modalWidgetExecutionArray,
+    selectedComponents,
+  ])
 
   return (
     <PanelBar
@@ -177,8 +97,9 @@ export const ComponentSpaceTree: FC = () => {
         `(${componentTotalNumber})`
       }
       onIllaFocus={() => {
-        FocusManager.switchFocus("dataWorkspace_component")
+        FocusManager.switchFocus("data_component")
       }}
+      destroyChildrenWhenClose
     >
       <WorkSpaceTreeGroup title="Modal">{modalWidgetTree}</WorkSpaceTreeGroup>
       <WorkSpaceTreeGroup title="General">

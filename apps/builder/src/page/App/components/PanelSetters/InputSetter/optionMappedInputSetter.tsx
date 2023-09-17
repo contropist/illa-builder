@@ -1,49 +1,38 @@
-import { FC } from "react"
-import { CodeEditor } from "@/components/CodeEditor"
+import { FC, useCallback } from "react"
 import {
   getNeedComputedValue,
   realInputValue,
 } from "@/utils/InspectHelper/selectWidgetHelper"
+import BaseInput from "./baseInput"
 import { BaseInputSetterProps } from "./interface"
-import { applyInputSetterWrapperStyle } from "./style"
 
-function getPath(attrName?: string, widgetDisplayName?: string) {
-  if (attrName && widgetDisplayName) {
-    return `${widgetDisplayName}.${attrName}`
-  } else {
-    return widgetDisplayName
-  }
-}
+const OptionMappedInputSetter: FC<BaseInputSetterProps> = (props) => {
+  const { handleUpdateDsl, value, widgetDisplayName } = props
 
-export const OptionMappedInputSetter: FC<BaseInputSetterProps> = (props) => {
-  const {
-    isSetterSingleRow,
-    placeholder,
-    attrName,
-    handleUpdateDsl,
-    expectedType,
-    value,
-    widgetDisplayName,
-  } = props
+  const handleValueChange = useCallback(
+    (attrName: string, value: string) => {
+      const output = getNeedComputedValue(value, widgetDisplayName)
+      handleUpdateDsl(attrName, output)
+    },
+    [handleUpdateDsl, widgetDisplayName],
+  )
 
-  const handleValueChange = (value: string) => {
-    const output = getNeedComputedValue(value, widgetDisplayName)
-
-    handleUpdateDsl(attrName, output)
-  }
+  const wrappedCodeFunc = useCallback(
+    (value: string) => {
+      return getNeedComputedValue(value, widgetDisplayName)
+    },
+    [widgetDisplayName],
+  )
 
   return (
-    <div css={applyInputSetterWrapperStyle(isSetterSingleRow)}>
-      <CodeEditor
-        value={realInputValue(value, widgetDisplayName)}
-        placeholder={placeholder}
-        onChange={handleValueChange}
-        mode="TEXT_JS"
-        expectedType={expectedType}
-        path={getPath(attrName, widgetDisplayName)}
-      />
-    </div>
+    <BaseInput
+      {...props}
+      value={realInputValue(value, widgetDisplayName)}
+      handleUpdateDsl={handleValueChange}
+      wrappedCodeFunc={wrappedCodeFunc}
+    />
   )
 }
 
 OptionMappedInputSetter.displayName = "OptionMappedInputSetter"
+export default OptionMappedInputSetter

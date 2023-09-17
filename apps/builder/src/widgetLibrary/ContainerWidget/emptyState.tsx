@@ -1,26 +1,24 @@
-import { FC } from "react"
-import { Trans } from "react-i18next"
+import { FC, useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import { UNIT_HEIGHT } from "@/page/App/components/DotPanel/constant/canvas"
 import {
+  applyEmptyStateWrapperStyle,
   emptyStateStyle,
-  emptyStateWrapperStyle,
-  keyPressComponentStyle,
 } from "@/widgetLibrary/ContainerWidget/style"
 
-export const KeyPressComponent: FC = (props) => {
-  return <span css={keyPressComponentStyle}>{props.children}</span>
-}
-
-export const ContainerEmptyState: FC = () => {
+export const ContainerEmptyState: FC<{
+  isInner?: boolean
+  handleUpdateHeight?: (height: number) => void
+}> = ({ handleUpdateHeight, isInner }) => {
+  const { t } = useTranslation()
+  useEffect(() => {
+    if (handleUpdateHeight) {
+      handleUpdateHeight(15 * UNIT_HEIGHT)
+    }
+  }, [handleUpdateHeight])
   return (
-    <div css={emptyStateWrapperStyle}>
-      <span css={emptyStateStyle}>
-        <Trans
-          i18nKey="widget.container.empty"
-          components={{
-            keyPress: <KeyPressComponent />,
-          }}
-        />
-      </span>
+    <div css={applyEmptyStateWrapperStyle(isInner)}>
+      <span css={emptyStateStyle}>{t("widget.container.empty")}</span>
     </div>
   )
 }

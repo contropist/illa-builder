@@ -1,4 +1,9 @@
-import { FC, useState } from "react"
+import {
+  ILLA_MIXPANEL_EVENT_TYPE,
+  MixpanelTrackContext,
+} from "@illa-public/mixpanel-utils"
+import { isCloudVersion } from "@illa-public/utils"
+import { FC, useCallback, useContext, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { useSelector } from "react-redux"
@@ -6,9 +11,8 @@ import {
   Button,
   ButtonGroup,
   Divider,
-  Input,
-  PaginationPreIcon,
   Popover,
+  PreviousIcon,
   TextArea,
   WarningCircleIcon,
   getColor,
@@ -18,14 +22,22 @@ import {
   onActionConfigElementSubmit,
   onActionConfigElementTest,
 } from "@/page/App/components/Actions/api"
+import { ConfigElementProps } from "@/page/App/components/Actions/interface"
 import {
-  configItem,
+  applyConfigItemLabelText,
   configItemTip,
   connectType,
   connectTypeStyle,
+  container,
+  divider,
+  errorIconStyle,
+  errorMsgStyle,
+  footerStyle,
   labelContainer,
   optionLabelStyle,
+  privateKeyItem,
 } from "@/page/App/components/Actions/styles"
+import { ControlledElement } from "@/page/App/components/ControlledElement"
 import { TextLink } from "@/page/User/components/TextLink"
 import {
   FirebaseResource,
@@ -33,25 +45,14 @@ import {
 } from "@/redux/resource/firebaseResource"
 import { Resource } from "@/redux/resource/resourceState"
 import { RootState } from "@/store"
-import { isCloudVersion, isURL } from "@/utils/typeHelper"
-import { FirebaseConfigElementProps } from "./interface"
-import {
-  applyConfigItemLabelText,
-  container,
-  divider,
-  errorIconStyle,
-  errorMsgStyle,
-  footerStyle,
-  privateKeyItem,
-} from "./style"
+import { urlValidate, validate } from "@/utils/form"
 
-export const FirebaseConfigElement: FC<FirebaseConfigElementProps> = (
-  props,
-) => {
-  const { onBack, resourceId, onFinished } = props
+export const FirebaseConfigElement: FC<ConfigElementProps> = (props) => {
+  const { onBack, resourceID, onFinished } = props
 
   const { t } = useTranslation()
   const message = useMessage()
+  const { track } = useContext(MixpanelTrackContext)
 
   const { control, handleSubmit, getValues, formState } = useForm({
     mode: "onChange",
@@ -59,7 +60,7 @@ export const FirebaseConfigElement: FC<FirebaseConfigElementProps> = (
   })
 
   const findResource = useSelector((state: RootState) => {
-    return state.resource.find((r) => r.resourceId === resourceId)
+    return state.resource.find((r) => r.resourceID === resourceID)
   })
 
   let content: FirebaseResource
@@ -73,29 +74,31 @@ export const FirebaseConfigElement: FC<FirebaseConfigElementProps> = (
   const [testLoading, setTestLoading] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  const handleConnectionTest = () => {
+  const handleConnectionTest = useCallback(() => {
+    track?.(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+      element: "resource_configure_test",
+      parameter5: "firebase",
+    })
     const data = getValues()
-
     try {
       const content = {
-        databaseUrl: data.databaseUrl,
+        databaseUrl: data.databaseUrl.trim(),
         projectID: data.projectID,
         privateKey: JSON.parse(data.privateKey),
       }
-
       onActionConfigElementTest(data, content, "firebase", setTestLoading)
     } catch (e) {
       message.error({
         content: t("editor.action.resource.db.invalid_private.key"),
       })
     }
-  }
+  }, [getValues, message, t, track])
 
   return (
     <form
       onSubmit={onActionConfigElementSubmit(
         handleSubmit,
-        resourceId,
+        resourceID,
         "firebase",
         onFinished,
         setSaving,
@@ -103,39 +106,21 @@ export const FirebaseConfigElement: FC<FirebaseConfigElementProps> = (
     >
       <div css={container}>
         <div css={divider} />
-        <div css={configItem}>
-          <div css={labelContainer}>
-            <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-            <span
-              css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-            >
-              {t("editor.action.resource.db.label.name")}
-            </span>
-          </div>
-          <Controller
-            control={control}
-            defaultValue={findResource?.resourceName ?? ""}
-            rules={{
-              required: true,
-            }}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Input
-                w="100%"
-                ml="16px"
-                mr="24px"
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-                borderColor="techPurple"
-                placeholder={t("editor.action.resource.db.placeholder.name")}
-              />
-            )}
-            name="resourceName"
-          />
-        </div>
-        <div css={configItemTip}>
-          {t("editor.action.resource.restapi.tip.name")}
-        </div>
+        <ControlledElement
+          controlledType="input"
+          isRequired
+          title={t("editor.action.resource.db.label.name")}
+          control={control}
+          defaultValue={findResource?.resourceName ?? ""}
+          rules={[
+            {
+              validate,
+            },
+          ]}
+          placeholders={[t("editor.action.resource.db.placeholder.name")]}
+          name="resourceName"
+          tips={t("editor.action.resource.restapi.tip.name")}
+        />
         <Divider
           direction="horizontal"
           ml="24px"
@@ -147,79 +132,41 @@ export const FirebaseConfigElement: FC<FirebaseConfigElementProps> = (
         <div css={optionLabelStyle}>
           {t("editor.action.resource.db.title.general_option")}
         </div>
-        <div css={configItem}>
-          <div css={labelContainer}>
-            <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-            <span
-              css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-            >
-              {t("editor.action.resource.db.label.firebase_database_url")}
-            </span>
-          </div>
-          <Controller
-            defaultValue={content.databaseUrl}
-            control={control}
-            rules={{
+        <ControlledElement
+          title={t("editor.action.resource.db.label.firebase_database_url")}
+          defaultValue={content.databaseUrl}
+          name="databaseUrl"
+          controlledType="input"
+          control={control}
+          isRequired
+          rules={[
+            {
               required: t("editor.action.resource.error.invalid_url"),
-              validate: (value: string) => {
-                return isURL(value)
-                  ? true
-                  : t("editor.action.resource.error.invalid_url")
-              },
-            }}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Input
-                w="100%"
-                ml="16px"
-                mr="24px"
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-                borderColor="techPurple"
-              />
-            )}
-            name="databaseUrl"
-          />
-        </div>
-        {formState.errors.databaseUrl && (
-          <div css={configItemTip}>
-            <div css={errorMsgStyle}>
-              <>
+              validate: urlValidate,
+            },
+          ]}
+          tips={
+            formState.errors.databaseUrl && (
+              <div css={errorMsgStyle}>
                 <WarningCircleIcon css={errorIconStyle} />
-                {formState.errors.databaseUrl.message}
-              </>
-            </div>
-          </div>
-        )}
-        <div css={configItem}>
-          <div css={labelContainer}>
-            <span css={applyConfigItemLabelText(getColor("red", "02"))}>*</span>
-            <span
-              css={applyConfigItemLabelText(getColor("grayBlue", "02"), true)}
-            >
-              {t("editor.action.resource.db.label.firebase_project_id")}
-            </span>
-          </div>
-          <Controller
-            defaultValue={content.projectID}
-            control={control}
-            rules={{
-              required: true,
-            }}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Input
-                w="100%"
-                ml="16px"
-                mr="24px"
-                onBlur={onBlur}
-                onChange={onChange}
-                value={value}
-                borderColor="techPurple"
-              />
-            )}
-            name="projectID"
-          />
-        </div>
+                <>{formState.errors.databaseUrl.message}</>
+              </div>
+            )
+          }
+        />
+        <ControlledElement
+          title={t("editor.action.resource.db.label.firebase_project_id")}
+          defaultValue={content.projectID}
+          name="projectID"
+          controlledType="input"
+          control={control}
+          isRequired
+          rules={[
+            {
+              validate,
+            },
+          ]}
+        />
         <div css={privateKeyItem}>
           <Popover
             content={t("editor.action.resource.db.label.private_key_hover")}
@@ -251,8 +198,7 @@ export const FirebaseConfigElement: FC<FirebaseConfigElementProps> = (
                   overflow: "scroll",
                   minHeight: "240px",
                 }}
-                borderColor="techPurple"
-                overflow="scroll"
+                colorScheme="techPurple"
                 w="100%"
                 ml="16px"
                 mr="24px"
@@ -301,7 +247,7 @@ export const FirebaseConfigElement: FC<FirebaseConfigElementProps> = (
       </div>
       <div css={footerStyle}>
         <Button
-          leftIcon={<PaginationPreIcon />}
+          leftIcon={<PreviousIcon />}
           variant="text"
           colorScheme="gray"
           type="button"

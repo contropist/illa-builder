@@ -1,4 +1,3 @@
-import { PanelLabelProps } from "@/page/App/components/InspectPanel/interface"
 import { BaseSetter } from "@/page/App/components/PanelSetters/interface"
 import { VALIDATION_TYPES } from "@/utils/validationFactory"
 
@@ -7,9 +6,11 @@ export interface BaseSelectSetterProps extends BaseSetter {
   allowClear?: boolean
   onChange?: (value: any) => void
   placeholder?: string
+  value: string
+  showSearch?: boolean
 }
 
-export interface BaseDynamicSelectSetterProps extends PanelLabelProps {
+export interface BaseDynamicSelectSetterProps extends BaseSetter {
   isDynamic: boolean
   onClickFxButton: () => void
   onChangeInput: (value: string) => void
@@ -21,4 +22,9 @@ export interface BaseDynamicSelectSetterProps extends PanelLabelProps {
   selectPlaceholder?: string
   inputPlaceholder?: string
   isError: boolean
+  detailedDescription?: string
+}
+
+export interface HeightModeSetterProps extends BaseSelectSetterProps {
+  handleUpdateMultiAttrDSL: (updateSlice: Record<string, any>) => void
 }

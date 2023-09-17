@@ -16,6 +16,14 @@ export const Databases: ActionDataItem[] = [
     isDraft: false,
   },
   {
+    actionType: "mssql",
+    isDraft: false,
+  },
+  {
+    actionType: "oracle",
+    isDraft: false,
+  },
+  {
     actionType: "mariadb",
     isDraft: false,
   },
@@ -24,7 +32,15 @@ export const Databases: ActionDataItem[] = [
     isDraft: false,
   },
   {
+    actionType: "neon",
+    isDraft: false,
+  },
+  {
     actionType: "redis",
+    isDraft: false,
+  },
+  {
+    actionType: "upstash",
     isDraft: false,
   },
   {
@@ -36,11 +52,31 @@ export const Databases: ActionDataItem[] = [
     isDraft: false,
   },
   {
+    actionType: "dynamodb",
+    isDraft: false,
+  },
+  {
+    actionType: "snowflake",
+    isDraft: false,
+  },
+  {
     actionType: "supabasedb",
     isDraft: false,
   },
   {
     actionType: "clickhouse",
+    isDraft: false,
+  },
+  {
+    actionType: "couchdb",
+    isDraft: false,
+  },
+  {
+    actionType: "appwrite",
+    isDraft: false,
+  },
+  {
+    actionType: "hydra",
     isDraft: false,
   },
 ]
@@ -67,7 +103,19 @@ export const Apis: ActionDataItem[] = [
     isDraft: false,
   },
   {
+    actionType: "googlesheets",
+    isDraft: false,
+  },
+  {
+    actionType: "airtable",
+    isDraft: false,
+  },
+  {
     actionType: "huggingface",
+    isDraft: false,
+  },
+  {
+    actionType: "hfendpoint",
     isDraft: false,
   },
 ]
@@ -75,6 +123,13 @@ export const Apis: ActionDataItem[] = [
 export const JsTransformer: ActionDataItem[] = [
   {
     actionType: "transformer",
+    isDraft: false,
+  },
+]
+
+export const AIAgent: ActionDataItem[] = [
+  {
+    actionType: "aiagent",
     isDraft: false,
   },
 ]
@@ -94,5 +149,10 @@ export const ActionTypeList = [
     title: i18n.t("editor.action.type.js_transformer"),
     item: JsTransformer,
     category: "jsTransformer" as const,
+  },
+  {
+    title: "AI Agent",
+    item: AIAgent,
+    category: "aiAgent" as const,
   },
 ]

@@ -1,13 +1,13 @@
 import { get } from "lodash"
 import { FC, useCallback, useMemo } from "react"
 import { useSelector } from "react-redux"
-import { BaseSelectSetter } from "@/page/App/components/PanelSetters/SelectSetter/baseSelect"
 import { getExecutionResult } from "@/redux/currentApp/executionTree/executionSelector"
 import { RootState } from "@/store"
 import { ColumnItemShape } from "@/widgetLibrary/TableWidget/interface"
+import SearchSelectSetter from "../SelectSetter/searchSelect"
 import { ColumnsSelectSetterProps, SelectOptions } from "./interface"
 
-export const ColumnsSelectSetter: FC<ColumnsSelectSetterProps> = (props) => {
+const ColumnsSelectSetter: FC<ColumnsSelectSetterProps> = (props) => {
   const {
     widgetDisplayName,
     attrName,
@@ -30,11 +30,16 @@ export const ColumnsSelectSetter: FC<ColumnsSelectSetterProps> = (props) => {
 
   const options = useMemo(() => {
     const columns = get(targetComponentProps, "columns", [])
-    const opt: SelectOptions = []
-    columns.map((item: ColumnItemShape) => {
+    const opt: SelectOptions = [
+      {
+        value: "default",
+        label: "—",
+      },
+    ]
+    columns.forEach((item: ColumnItemShape) => {
       opt.push({
-        value: item.accessorKey,
-        label: item.header,
+        value: item.accessorKey ?? "",
+        label: item.header ?? "",
       })
     })
     return opt
@@ -50,7 +55,7 @@ export const ColumnsSelectSetter: FC<ColumnsSelectSetterProps> = (props) => {
   )
 
   return (
-    <BaseSelectSetter
+    <SearchSelectSetter
       {...otherProps}
       isSetterSingleRow={isSetterSingleRow}
       options={options}
@@ -67,3 +72,5 @@ export const ColumnsSelectSetter: FC<ColumnsSelectSetterProps> = (props) => {
 }
 
 ColumnsSelectSetter.displayName = "ColumnsSelectSetter"
+
+export default ColumnsSelectSetter

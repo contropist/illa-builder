@@ -1,27 +1,36 @@
-import { FC, useCallback, useMemo, useState } from "react"
+import { ILLA_MIXPANEL_EVENT_TYPE } from "@illa-public/mixpanel-utils"
+import { isEqual } from "lodash"
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
 import {
   Button,
   CaretRightIcon,
   DropList,
+  DropListItem,
   Dropdown,
   MoreIcon,
-  globalColor,
-  illaPrefix,
+  SuccessCircleIcon,
+  UpIcon,
+  WarningCircleIcon,
   useMessage,
 } from "@illa-design/react"
-import { Api } from "@/api/base"
 import { EditableText } from "@/components/EditableText"
+import { SimpleTabs } from "@/components/Tabs"
+import { ACTION_PANEL_TABS } from "@/components/Tabs/constant"
 import i18n from "@/i18n/config"
 import { isFileOversize } from "@/page/App/components/Actions/ActionPanel/utils/calculateFileSize"
-import { runAction } from "@/page/App/components/Actions/ActionPanel/utils/runAction"
-import {
-  onCopyActionItem,
-  onDeleteActionItem,
-} from "@/page/App/components/Actions/api"
+import { onCopyActionItem } from "@/page/App/components/Actions/api"
 import {
   getCachedAction,
+  getIsILLAGuideMode,
   getSelectedAction,
 } from "@/redux/config/configSelector"
 import { actionActions } from "@/redux/currentApp/action/actionSlice"
@@ -36,16 +45,26 @@ import {
   QueryContentType,
 } from "@/redux/currentApp/action/elasticSearchAction"
 import { SMPTAction } from "@/redux/currentApp/action/smtpAction"
-import { getAppInfo } from "@/redux/currentApp/appInfo/appInfoSelector"
+import { getExecutionResult } from "@/redux/currentApp/executionTree/executionSelector"
+import { fetchUpdateAction } from "@/services/action"
+import { RootState } from "@/store"
+import { runOriginAction } from "@/utils/action/runAction"
+import { trackInEditor } from "@/utils/mixpanelHelper"
+import { ShortCutContext } from "@/utils/shortcut/shortcutProvider"
 import { ActionTitleBarProps } from "./interface"
 import {
-  actionTitleBarSpaceStyle,
+  actionFailBlockStyle,
+  actionSuccessBlockStyle,
+  actionTextStyle,
   actionTitleBarStyle,
+  applyOpenStateStyle,
   editableTitleBarWrapperStyle,
+  runResultAndRunContainerStyle,
+  tabsContainerStyle,
 } from "./style"
 
-const Item = DropList.Item
-export type RunMode = "save" | "run" | "save_and_run"
+const Item = DropListItem
+export type RunMode = "save" | "run" | "test_run" | "save_and_run"
 const FILE_SIZE_LIMIT_TYPE = ["s3", "smtp"]
 
 const getCanRunAction = (cachedAction: ActionItem<ActionContent> | null) => {
@@ -75,7 +94,7 @@ const getActionFilteredContent = (cachedAction: ActionItem<ActionContent>) => {
     case "elasticsearch":
       let content = cachedAction.content as ElasticSearchAction
       if (!IDEditorType.includes(content.operation)) {
-        const { id = "", ...otherContent } = content
+        const { id: _id = "", ...otherContent } = content
         cachedActionValue = {
           ...cachedAction,
           content: { ...otherContent },
@@ -83,7 +102,7 @@ const getActionFilteredContent = (cachedAction: ActionItem<ActionContent>) => {
         content = otherContent
       }
       if (!BodyContentType.includes(content.operation)) {
-        const { body = "", ...otherContent } = content
+        const { body: _body = "", ...otherContent } = content
         cachedActionValue = {
           ...cachedActionValue,
           content: { ...otherContent },
@@ -91,7 +110,7 @@ const getActionFilteredContent = (cachedAction: ActionItem<ActionContent>) => {
         content = otherContent
       }
       if (!QueryContentType.includes(content.operation)) {
-        const { query = "", ...otherContent } = content
+        const { query: _query = "", ...otherContent } = content
         cachedActionValue = {
           ...cachedActionValue,
           content: { ...otherContent },
@@ -105,6 +124,7 @@ const getActionFilteredContent = (cachedAction: ActionItem<ActionContent>) => {
         ...cachedAction,
         content: {
           ...otherContent,
+          // if to, cc, bcc or attachment is empty, remove it from the content
           ...(to && { to }),
           ...(cc && { cc }),
           ...(bcc && { bcc }),
@@ -117,21 +137,45 @@ const getActionFilteredContent = (cachedAction: ActionItem<ActionContent>) => {
 }
 
 export const ActionTitleBar: FC<ActionTitleBarProps> = (props) => {
-  const { onActionRun } = props
+  const { onResultVisibleChange, openState, activeTab, handleChangeTab } = props
 
   const message = useMessage()
+  const [saveLoading, setSaveLoading] = useState(false)
+  const shortcut = useContext(ShortCutContext)
+
   const selectedAction = useSelector(getSelectedAction)!
   const cachedAction = useSelector(getCachedAction)!
+  const selectedActionExecutionResult = useSelector<
+    RootState,
+    Record<string, any>
+  >((rootState) => {
+    const executionResult = getExecutionResult(rootState)
+    return executionResult[selectedAction.displayName] || {}
+  })
+  const isRunning = !!selectedActionExecutionResult.isRunning
 
-  const isChanged =
-    JSON.stringify(selectedAction) !== JSON.stringify(cachedAction)
-  const currentApp = useSelector(getAppInfo)
+  const isChanged = !isEqual(selectedAction, cachedAction)
+
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  const [loading, setLoading] = useState(false)
   const [canRunAction, canNotRunMessage] = getCanRunAction(cachedAction)
 
+  const executionResult = useSelector(getExecutionResult)
+  const isGuideOpen = useSelector(getIsILLAGuideMode)
+
+  const renderResult =
+    executionResult[selectedAction.displayName]?.data !== undefined ||
+    executionResult[selectedAction.displayName]?.runResult !== undefined
+
+  const runError = executionResult[selectedAction.displayName]?.runResult?.error
+
   let runMode: RunMode = useMemo(() => {
+    if (isGuideOpen) {
+      if (isChanged) {
+        return "save"
+      }
+      return "test_run"
+    }
     if (cachedAction != undefined && isChanged) {
       if (cachedAction.triggerMode === "manually") {
         return "save"
@@ -143,195 +187,308 @@ export const ActionTitleBar: FC<ActionTitleBarProps> = (props) => {
     } else {
       return "run"
     }
-  }, [isChanged, cachedAction])
+  }, [isChanged, cachedAction, isGuideOpen])
 
-  const handleActionOperation = useCallback(() => {
+  const innerTabItems = useMemo(() => {
+    if (selectedAction.actionType === "transformer") {
+      return [ACTION_PANEL_TABS[0]]
+    }
+    return ACTION_PANEL_TABS
+  }, [selectedAction.actionType])
+
+  useEffect(() => {
+    if (selectedAction.actionType === "transformer") {
+      handleChangeTab("general")
+    }
+  }, [handleChangeTab, selectedAction.actionType])
+
+  useEffect(() => {
+    switch (runMode) {
+      case "save": {
+        trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.SHOW, {
+          element: "action_edit_save",
+          parameter1: cachedAction.actionType,
+        })
+        break
+      }
+      case "run": {
+        trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.SHOW, {
+          element: "action_edit_run",
+          parameter1: cachedAction.actionType,
+        })
+        break
+      }
+      case "save_and_run": {
+        trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.SHOW, {
+          element: "action_edit_save_run",
+          parameter1: cachedAction.actionType,
+        })
+        break
+      }
+    }
+  }, [cachedAction.actionType, runMode])
+
+  const runCachedAction = useCallback(
+    async (cachedActionValue: ActionItem<ActionContent>) => {
+      if (cachedActionValue) {
+        try {
+          await runOriginAction(cachedActionValue)
+        } catch (e) {
+        } finally {
+          onResultVisibleChange(true)
+        }
+      }
+    },
+    [onResultVisibleChange],
+  )
+
+  const updateAndRunCachedAction = useCallback(
+    (cachedActionValue: ActionItem<ActionContent>) => {
+      if (cachedActionValue) {
+        dispatch(actionActions.updateActionItemReducer(cachedActionValue))
+        runCachedAction(cachedActionValue)
+      }
+    },
+    [dispatch, runCachedAction],
+  )
+
+  const handleActionOperation = useCallback(async () => {
     let cachedActionValue: ActionItem<ActionContent> =
       getActionFilteredContent(cachedAction)
 
     switch (runMode) {
-      case "run":
+      case "test_run":
         if (!canRunAction) {
           message.error({
             content: canNotRunMessage,
           })
           return
         }
-        setLoading(true)
-        if (cachedActionValue) {
-          runAction(cachedActionValue, (result: unknown, error?: boolean) => {
-            setLoading(false)
-            onActionRun(result, error)
+        updateAndRunCachedAction(cachedActionValue)
+        break
+      case "run":
+        trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+          element: "action_edit_run",
+          parameter1: cachedAction.actionType,
+          parameter2: cachedAction,
+        })
+        if (!canRunAction) {
+          message.error({
+            content: canNotRunMessage,
           })
+          return
         }
+        runCachedAction(cachedActionValue)
         break
       case "save":
-        Api.request(
-          {
-            method: "PUT",
-            url: `/apps/${currentApp.appId}/actions/${selectedAction.actionId}`,
-            data: cachedActionValue,
-          },
-          () => {
-            if (cachedActionValue) {
-              dispatch(actionActions.updateActionItemReducer(cachedActionValue))
-            }
-          },
-          () => {
-            message.error({
-              content: t("create_fail"),
-            })
-          },
-          () => {
-            message.error({
-              content: t("create_fail"),
-            })
-          },
-          (l) => {
-            setLoading(l)
-          },
-        )
+        if (isGuideOpen) {
+          cachedActionValue &&
+            dispatch(actionActions.updateActionItemReducer(cachedActionValue))
+          return
+        }
+        trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+          element: "action_edit_save",
+          parameter1: cachedAction.actionType,
+          parameter2: cachedAction,
+        })
+        setSaveLoading(true)
+        try {
+          await fetchUpdateAction(cachedActionValue)
+          if (cachedActionValue) {
+            dispatch(actionActions.updateActionItemReducer(cachedActionValue))
+          }
+        } catch (e) {
+          message.error({
+            content: t("create_fail"),
+          })
+        }
+        setSaveLoading(false)
+
         break
       case "save_and_run":
+        trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.CLICK, {
+          element: "action_edit_save_run",
+          parameter1: cachedAction.actionType,
+          parameter2: cachedAction,
+        })
         if (!canRunAction) {
           message.error({
             content: canNotRunMessage,
           })
           return
         }
-        Api.request(
-          {
-            method: "PUT",
-            url: `/apps/${currentApp.appId}/actions/${selectedAction.actionId}`,
-            data: cachedActionValue,
-          },
-          () => {
-            if (cachedActionValue) {
-              dispatch(actionActions.updateActionItemReducer(cachedActionValue))
-              setLoading(true)
-
-              runAction(
-                cachedActionValue,
-                (result: unknown, error?: boolean) => {
-                  setLoading(false)
-                  onActionRun(result, error)
-                },
-              )
-            }
-          },
-          () => {
-            message.error({
-              content: t("editor.action.panel.btn.save_fail"),
-            })
-          },
-          () => {
-            message.error({
-              content: t("editor.action.panel.btn.save_fail"),
-            })
-          },
-          (l) => {
-            setLoading(l)
-          },
-        )
+        setSaveLoading(true)
+        try {
+          await fetchUpdateAction(cachedActionValue)
+          updateAndRunCachedAction(cachedActionValue)
+        } catch (e) {
+          message.error({
+            content: t("editor.action.panel.btn.save_fail"),
+          })
+        }
+        setSaveLoading(false)
         break
     }
   }, [
     cachedAction,
-    runMode,
+    canNotRunMessage,
     canRunAction,
-    currentApp.appId,
-    selectedAction?.actionId,
-    t,
-    onActionRun,
     dispatch,
+    isGuideOpen,
     message,
+    runCachedAction,
+    runMode,
+    t,
+    updateAndRunCachedAction,
   ])
 
   const renderButton = useMemo(() => {
-    return runMode === "run" ? cachedAction?.actionType !== "transformer" : true
+    return runMode === "run" || runMode === "test_run"
+      ? cachedAction?.actionType !== "transformer"
+      : true
   }, [cachedAction?.actionType, runMode])
 
-  if (selectedAction == undefined || cachedAction === undefined) {
+  if (cachedAction === undefined) {
     return <></>
   }
 
-  return (
-    <div css={actionTitleBarStyle}>
-      <div css={editableTitleBarWrapperStyle}>
-        <EditableText
-          key={selectedAction.displayName}
-          displayName={selectedAction.displayName}
-          updateDisplayNameByBlur={(value) => {
-            const newAction = {
-              ...selectedAction,
-              displayName: value,
-            }
-            Api.request(
-              {
-                method: "PUT",
-                url: `/apps/${currentApp.appId}/actions/${selectedAction.actionId}`,
-                data: newAction,
-              },
-              () => {
-                dispatch(actionActions.updateActionItemReducer(newAction))
-              },
-              () => {
-                message.error({
-                  content: t("change_fail"),
-                })
-              },
-              () => {
-                message.error({
-                  content: t("change_fail"),
-                })
-              },
-              (l) => {
-                setLoading(l)
-              },
-            )
-          }}
-        />
-      </div>
-      <div css={actionTitleBarSpaceStyle} />
-      <Dropdown
-        position="bottom-end"
-        trigger="click"
-        dropList={
-          <DropList width={"184px"}>
-            <Item
-              key={"duplicate"}
-              title={t("editor.action.action_list.contextMenu.duplicate")}
-              onClick={() => {
-                onCopyActionItem(selectedAction)
-              }}
-            />
-            <Item
-              key={"delete"}
-              title={t("editor.action.action_list.contextMenu.delete")}
-              fontColor={globalColor(`--${illaPrefix}-red-03`)}
-              onClick={() => {
-                onDeleteActionItem(selectedAction)
-              }}
-            />
-          </DropList>
-        }
-      >
-        <Button colorScheme="grayBlue" leftIcon={<MoreIcon size="14px" />} />
-      </Dropdown>
-      {renderButton && (
-        <Button
-          ml="8px"
-          colorScheme="techPurple"
-          variant={isChanged ? "fill" : "light"}
-          size="medium"
-          loading={loading}
-          leftIcon={<CaretRightIcon />}
-          onClick={handleActionOperation}
-        >
-          {t(`editor.action.panel.btn.${runMode}`)}
-        </Button>
-      )}
+  const successBlock = (
+    <div
+      css={actionSuccessBlockStyle}
+      onClick={() => {
+        onResultVisibleChange(!openState)
+      }}
+    >
+      <SuccessCircleIcon fs="16px" size="16px" />
+      <span css={actionTextStyle}>
+        {t("editor.action.panel.status.ran_successfully")}
+      </span>
+      <UpIcon css={applyOpenStateStyle(openState)} />
     </div>
+  )
+
+  const failBlock = (
+    <div
+      css={actionFailBlockStyle}
+      onClick={() => {
+        onResultVisibleChange(!openState)
+      }}
+    >
+      <WarningCircleIcon fs="16px" size="16px" />
+      <span css={actionTextStyle}>
+        {t("editor.action.panel.status.ran_failed")}
+      </span>
+      <UpIcon css={applyOpenStateStyle(openState)} />
+    </div>
+  )
+
+  return (
+    <>
+      <div css={actionTitleBarStyle}>
+        <SimpleTabs
+          items={innerTabItems}
+          activeKey={activeTab}
+          handleClickChangeTab={handleChangeTab}
+          containerStyle={tabsContainerStyle}
+        />
+        <div css={editableTitleBarWrapperStyle}>
+          <EditableText
+            key={selectedAction.displayName}
+            displayName={selectedAction.displayName}
+            updateDisplayNameByBlur={async (value) => {
+              const newAction = {
+                ...selectedAction,
+                displayName: value,
+              }
+              if (isGuideOpen) {
+                dispatch(
+                  actionActions.updateActionDisplayNameReducer({
+                    newDisplayName: value,
+                    oldDisplayName: selectedAction.displayName,
+                    actionID: newAction.actionID,
+                  }),
+                )
+                return
+              }
+              setSaveLoading(true)
+              try {
+                await fetchUpdateAction(newAction)
+                dispatch(
+                  actionActions.updateActionDisplayNameReducer({
+                    newDisplayName: value,
+                    oldDisplayName: selectedAction.displayName,
+                    actionID: newAction.actionID,
+                  }),
+                )
+              } catch (e) {
+                message.error({
+                  content: t("change_fail"),
+                })
+              }
+              setSaveLoading(false)
+            }}
+            onClick={() => {
+              trackInEditor(ILLA_MIXPANEL_EVENT_TYPE.RENAME, {
+                element: "action_rename",
+                parameter1: selectedAction.actionType,
+                parameter2: "hover",
+              })
+            }}
+          />
+        </div>
+        <div css={runResultAndRunContainerStyle}>
+          {renderResult && (runError ? failBlock : successBlock)}
+          <Dropdown
+            position="bottom-end"
+            trigger="click"
+            dropList={
+              <DropList w="184px">
+                <Item
+                  value="duplicate"
+                  key="duplicate"
+                  title={t("editor.action.action_list.contextMenu.duplicate")}
+                  onClick={() => {
+                    onCopyActionItem(selectedAction)
+                  }}
+                />
+                <Item
+                  key="delete"
+                  value="delete"
+                  title={t("editor.action.action_list.contextMenu.delete")}
+                  deleted
+                  onClick={() => {
+                    shortcut.showDeleteDialog(
+                      [selectedAction.displayName],
+                      "action",
+                    )
+                  }}
+                />
+              </DropList>
+            }
+          >
+            <Button
+              colorScheme="grayBlue"
+              leftIcon={<MoreIcon size="14px" />}
+            />
+          </Dropdown>
+          {renderButton && (
+            <Button
+              pos="relative"
+              className={`${cachedAction.displayName}-run`}
+              ml="8px"
+              colorScheme="techPurple"
+              variant={isChanged ? "fill" : "light"}
+              size="medium"
+              loading={isRunning || saveLoading}
+              leftIcon={<CaretRightIcon />}
+              onClick={handleActionOperation}
+            >
+              {t(`editor.action.panel.btn.${runMode}`)}
+            </Button>
+          )}
+        </div>
+      </div>
+    </>
   )
 }
 

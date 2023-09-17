@@ -1,5 +1,9 @@
 import { v4 } from "uuid"
 import {
+  DEFAULT_ASIDE_COLUMNS_NUMBER,
+  DEFAULT_BODY_COLUMNS_NUMBER,
+} from "@/page/App/components/DotPanel/constant/canvas"
+import {
   CONTAINER_TYPE,
   ComponentNode,
   ModalSectionNode,
@@ -8,6 +12,7 @@ import {
   SECTION_POSITION,
   SectionNode,
 } from "@/redux/currentApp/editor/components/componentsState"
+import { newGenerateComponentNode } from "./generateComponentNode"
 import { DisplayNameGenerator } from "./generateDisplayName"
 
 export type SectionNodeType =
@@ -18,14 +23,9 @@ export type SectionNodeType =
   | "footerSection"
   | "modalSection"
 
-export const BASIC_BLOCK_COLUMNS = 64
-
-export const LEFT_OR_RIGHT_DEFAULT_COLUMNS = 16
-
 export const generateSectionContainerConfig = (
   parentNode: string,
   showName: string,
-  childrenNode: ComponentNode[] = [],
 ): ComponentNode => {
   const displayName = DisplayNameGenerator.generateDisplayName(
     "CONTAINER_NODE",
@@ -35,28 +35,44 @@ export const generateSectionContainerConfig = (
     displayName: displayName,
     parentNode: parentNode,
     showName: showName,
-    isDragging: false,
-    isResizing: false,
     type: "CONTAINER_NODE",
     containerType: CONTAINER_TYPE.EDITOR_DOT_PANEL,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
-    childrenNode: childrenNode,
+    childrenNode: [],
+    version: 0,
     props: {},
   }
+}
+
+const generateSectionsChildrenMenuComponentNode = (
+  parentDisplayName: string,
+) => {
+  const displayName = DisplayNameGenerator.generateDisplayName(
+    "MENU_WIDGET",
+    "menu",
+  )
+  const menuNode = newGenerateComponentNode(
+    0,
+    0,
+    32,
+    "MENU_WIDGET",
+    displayName,
+    parentDisplayName,
+  )
+  menuNode.props!.$dynamicAttrPaths = ["dataSources", "selectedValues"]
+  return menuNode
 }
 
 export const generateSectionConfig = (
   parentNode: string,
   showName: SectionNodeType,
+  bodySubpaths: string[] = ["sub-page1"],
 ): SectionNode => {
   const displayName = DisplayNameGenerator.generateDisplayName(
     "SECTION_NODE",
@@ -66,34 +82,52 @@ export const generateSectionConfig = (
     displayName,
     `${showName}Container`,
   )
+
+  if (showName === "headerSection") {
+    const menuNode = generateSectionsChildrenMenuComponentNode(
+      childrenNode.displayName,
+    )
+    childrenNode.childrenNode.push(menuNode)
+  }
+
+  if (showName === "leftSection") {
+    const menuNode = generateSectionsChildrenMenuComponentNode(
+      childrenNode.displayName,
+    )
+    menuNode.w = 8
+    menuNode.props!.mode = "vertical"
+    childrenNode.childrenNode.push(menuNode)
+  }
+
+  const defaultSubPath =
+    Array.isArray(bodySubpaths) && bodySubpaths.length > 0
+      ? bodySubpaths[0]
+      : "sub-page1"
+
   return {
     displayName: `${displayName}`,
     parentNode: parentNode,
     showName: showName,
-    isDragging: false,
-    isResizing: false,
     type: "SECTION_NODE",
     containerType: CONTAINER_TYPE.EDITOR_LAYOUT_SQUARE,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
+    version: 0,
     props: {
       currentViewIndex: 0,
       viewSortedKey: [childrenNode.displayName],
-      defaultViewKey: "View 1",
+      defaultViewKey: defaultSubPath,
       sectionViewConfigs: [
         {
           id: v4(),
           viewDisplayName: childrenNode.displayName,
-          key: "View 1",
-          path: "View1",
+          key: defaultSubPath,
+          path: defaultSubPath,
         },
       ],
     },
@@ -114,20 +148,16 @@ export const generateModalSectionConfig = (
     displayName: displayName,
     parentNode: parentNode,
     showName: showName,
-    isDragging: false,
-    isResizing: false,
     type: "MODAL_SECTION_NODE",
     containerType: CONTAINER_TYPE.EDITOR_LAYOUT_SQUARE,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
+    version: 0,
     props: {},
     childrenNode: [],
   }
@@ -153,11 +183,11 @@ export const defaultPageProps: PageNodeProps = {
   isFooterFixed: true,
   showLeftFoldIcon: false,
   showRightFoldIcon: false,
-  leftColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-  rightColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-  headerColumns: BASIC_BLOCK_COLUMNS,
-  footerColumns: BASIC_BLOCK_COLUMNS,
-  bodyColumns: BASIC_BLOCK_COLUMNS,
+  leftColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+  rightColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+  headerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+  footerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+  bodyColumns: DEFAULT_BODY_COLUMNS_NUMBER,
 }
 
 export const generatePageConfig = (): PageNode => {
@@ -166,26 +196,26 @@ export const generatePageConfig = (): PageNode => {
     "page",
   )
   const childrenNode = generateSectionConfig(displayName, "bodySection")
+  const modalSectionNode = generateModalSectionConfig(
+    displayName,
+    "modalSection",
+  )
   return {
     displayName: displayName,
     parentNode: "root",
     showName: "page",
-    isDragging: false,
-    isResizing: false,
     type: "PAGE_NODE",
     containerType: CONTAINER_TYPE.EDITOR_PAGE_SQUARE,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
+    version: 0,
     props: defaultPageProps,
-    childrenNode: [childrenNode],
+    childrenNode: [childrenNode, modalSectionNode],
   }
 }
 
@@ -201,20 +231,16 @@ export const generateDefaultLayoutConfig = (
     displayName: currentDisplayName,
     parentNode: "root",
     showName: "page",
-    isDragging: false,
-    isResizing: false,
     type: "PAGE_NODE",
     containerType: CONTAINER_TYPE.EDITOR_PAGE_SQUARE,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
+    version: 0,
     props: {
       canvasSize: "auto",
       canvasWidth: 100,
@@ -235,11 +261,11 @@ export const generateDefaultLayoutConfig = (
       isFooterFixed: true,
       showLeftFoldIcon: false,
       showRightFoldIcon: false,
-      leftColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      rightColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      headerColumns: BASIC_BLOCK_COLUMNS,
-      footerColumns: BASIC_BLOCK_COLUMNS,
-      bodyColumns: BASIC_BLOCK_COLUMNS,
+      leftColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      rightColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      headerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      footerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      bodyColumns: DEFAULT_BODY_COLUMNS_NUMBER,
     },
     childrenNode: [childrenNode, modalSectionNode],
   }
@@ -265,20 +291,16 @@ export const generatePresetALayoutConfig = (
     displayName: currentDisplayName,
     parentNode: "root",
     showName: "page",
-    isDragging: false,
-    isResizing: false,
     type: "PAGE_NODE",
     containerType: CONTAINER_TYPE.EDITOR_PAGE_SQUARE,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
+    version: 0,
     props: {
       canvasSize: "auto",
       canvasWidth: 100,
@@ -299,11 +321,11 @@ export const generatePresetALayoutConfig = (
       isFooterFixed: true,
       showLeftFoldIcon: false,
       showRightFoldIcon: false,
-      leftColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      rightColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      headerColumns: BASIC_BLOCK_COLUMNS,
-      footerColumns: BASIC_BLOCK_COLUMNS,
-      bodyColumns: BASIC_BLOCK_COLUMNS,
+      leftColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      rightColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      headerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      footerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      bodyColumns: DEFAULT_BODY_COLUMNS_NUMBER,
     },
     childrenNode: [leftSectionNode, bodySectionNode, modalSectionNode],
   }
@@ -333,20 +355,16 @@ export const generatePresetBLayoutConfig = (
     displayName: currentDisplayName,
     parentNode: "root",
     showName: "page",
-    isDragging: false,
-    isResizing: false,
     type: "PAGE_NODE",
     containerType: CONTAINER_TYPE.EDITOR_PAGE_SQUARE,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
+    version: 0,
     props: {
       canvasSize: "auto",
       canvasWidth: 100,
@@ -367,11 +385,11 @@ export const generatePresetBLayoutConfig = (
       isFooterFixed: true,
       showLeftFoldIcon: false,
       showRightFoldIcon: false,
-      leftColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      rightColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      headerColumns: BASIC_BLOCK_COLUMNS,
-      footerColumns: BASIC_BLOCK_COLUMNS,
-      bodyColumns: BASIC_BLOCK_COLUMNS,
+      leftColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      rightColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      headerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      footerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      bodyColumns: DEFAULT_BODY_COLUMNS_NUMBER,
     },
     childrenNode: [
       headerSectionNode,
@@ -410,20 +428,16 @@ export const generatePresetCLayoutConfig = (
     displayName: currentDisplayName,
     parentNode: "root",
     showName: "page",
-    isDragging: false,
-    isResizing: false,
     type: "PAGE_NODE",
     containerType: CONTAINER_TYPE.EDITOR_PAGE_SQUARE,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
+    version: 0,
     props: {
       canvasSize: "auto",
       canvasWidth: 100,
@@ -487,20 +501,16 @@ export const generatePresetDLayoutConfig = (
     displayName: currentDisplayName,
     parentNode: "root",
     showName: "page",
-    isDragging: false,
-    isResizing: false,
     type: "PAGE_NODE",
     containerType: CONTAINER_TYPE.EDITOR_PAGE_SQUARE,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
+    version: 0,
     props: {
       canvasSize: "auto",
       canvasWidth: 100,
@@ -521,11 +531,11 @@ export const generatePresetDLayoutConfig = (
       isFooterFixed: true,
       showLeftFoldIcon: false,
       showRightFoldIcon: false,
-      leftColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      rightColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      headerColumns: BASIC_BLOCK_COLUMNS,
-      footerColumns: BASIC_BLOCK_COLUMNS,
-      bodyColumns: BASIC_BLOCK_COLUMNS,
+      leftColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      rightColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      headerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      footerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      bodyColumns: DEFAULT_BODY_COLUMNS_NUMBER,
     },
     childrenNode: [
       headerSectionNode,
@@ -566,20 +576,16 @@ export const generatePresetELayoutConfig = (
     displayName: currentDisplayName,
     parentNode: "root",
     showName: "page",
-    isDragging: false,
-    isResizing: false,
     type: "PAGE_NODE",
     containerType: CONTAINER_TYPE.EDITOR_PAGE_SQUARE,
-    verticalResize: true,
     h: 0,
     w: 0,
     minH: 0,
     minW: 0,
-    unitW: 0,
-    unitH: 0,
     x: -1,
     y: -1,
     z: 0,
+    version: 0,
     props: {
       canvasSize: "auto",
       canvasWidth: 100,
@@ -600,11 +606,11 @@ export const generatePresetELayoutConfig = (
       isFooterFixed: true,
       showLeftFoldIcon: false,
       showRightFoldIcon: false,
-      leftColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      rightColumns: LEFT_OR_RIGHT_DEFAULT_COLUMNS,
-      headerColumns: BASIC_BLOCK_COLUMNS,
-      footerColumns: BASIC_BLOCK_COLUMNS,
-      bodyColumns: BASIC_BLOCK_COLUMNS,
+      leftColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      rightColumns: DEFAULT_ASIDE_COLUMNS_NUMBER,
+      headerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      footerColumns: DEFAULT_BODY_COLUMNS_NUMBER,
+      bodyColumns: DEFAULT_BODY_COLUMNS_NUMBER,
     },
     childrenNode: [
       headerSectionNode,
